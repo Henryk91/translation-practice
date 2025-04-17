@@ -155,7 +155,7 @@ const FeedBackTableCell = styled.td`
   text-align: center;
   display: flex;
   flex-wrap: wrap;
-
+  margin: 10px;
   @media (max-width: 600px) {
     width: 95vw;
     text-align: left;

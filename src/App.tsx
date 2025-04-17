@@ -166,7 +166,7 @@ const App: React.FC = () => {
           <TextInput
             placeholder="Enter English text..."
             value={text}
-            onChange={e => setText(e.target.value)}
+            onChange={(e: any) => setText(e.target.value)}
           />
           <Button onClick={handleTextSubmit}>
             <FontAwesomeIcon icon={faPaperPlane} />
@@ -183,8 +183,8 @@ const App: React.FC = () => {
                       <>
                         <TextInput
                           value={row.userInput}
-                          onChange={e => handleInputChange(e, idx)}
-                          onKeyPress={e => handleKeyPress(e, idx)}
+                          onChange={(e: any) => handleInputChange(e, idx)}
+                          onKeyPress={(e: any) => handleKeyPress(e, idx)}
                         />
                         <Button onClick={() => handleTranslate(idx)}>
                           <FontAwesomeIcon icon={faPaperPlane} />

@@ -21,12 +21,25 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 20px;
+
+  @media (max-width: 600px) {
+    padding: 0;
+  }
 `;
 
+// Level buttons now span the full screen width and arrange into 2 rows of 3
 const LevelButtons = styled.div`
-  margin-bottom: 15px;
-  & > * {
-    margin-right: 8px;
+  // display: grid;
+  // grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  // width: 100vw;
+  // margin: 0 10px 15px; /* negative side margin to neutralize Container padding */
+  padding: 0 10px ;
+
+  @media (max-width: 600px) {
+    display: grid;
+    margin: 5px;
+    grid-template-columns: repeat(3, 1fr);
   }
 `;
 
@@ -34,6 +47,11 @@ const Header = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 20px;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
 const Label = styled.label`
@@ -48,6 +66,11 @@ const Select = styled.select`
   border-radius: 4px;
   background-color: #1e1e1e;
   color: #e0e0e0;
+
+  @media (max-width: 600px) {
+    margin: 0 0 10px 0;
+    width: 100%;
+  }
 `;
 
 const TextInput = styled.input`
@@ -58,7 +81,13 @@ const TextInput = styled.input`
   color: #e0e0e0;
   width: 300px;
   margin-right: 10px;
+
+  @media (max-width: 600px) {
+    
+    // margin: 0 0 8px 0;
+  }
 `;
+// width: calc(100vw - 20px);
 
 const Button = styled.button`
   padding: 8px;
@@ -67,9 +96,14 @@ const Button = styled.button`
   background-color: #333;
   color: #e0e0e0;
   cursor: pointer;
-  margin-left: 8px;
+  width: fit-content;
   white-space: nowrap;
   &:hover { background-color: #444; }
+
+  @media (min-width: 600px) {
+    margin: 5px;
+    // width: calc(100vw - 20px);
+  }
 `;
 
 const Table = styled.table`
@@ -77,10 +111,28 @@ const Table = styled.table`
   max-width: 800px;
   border-collapse: collapse;
   table-layout: fixed;
+  margin: 0 auto;
+
+  @media (max-width: 600px) {
+    max-width: none;
+    width: 100vw;
+    margin: 0;
+  }
 `;
 
 const TableRow = styled.tr`
   border-bottom: 1px solid #333;
+  max-width: 100vw;
+
+  @media (max-width: 600px) {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    align-items: center;
+    width: 100vw;
+    overflow: hidden;
+    padding: 3px
+  }
 `;
 
 const TableCell = styled.td`
@@ -88,15 +140,39 @@ const TableCell = styled.td`
   vertical-align: middle;
   width: 33%;
   text-align: center;
+
+  @media (max-width: 600px) {
+    display: block;
+    width: 95vw;
+    text-align: left;
+    padding: 8px 10px;
+  }
+`;
+
+const FeedBackTableCell = styled.td`
+  padding: 10px;
+  vertical-align: middle;
+  text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+
+  @media (max-width: 600px) {
+    width: 95vw;
+    text-align: left;
+    padding: 8px 10px;
+  }
 `;
 
 const InputWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 600px) {
+    // flex-direction: column;
+    align-items: stretch;
+  }
 `;
-
-
 
 const FeedbackSpan = styled.span<{ correct: boolean }>`
   color: ${props => (props.correct ? '#00ff00' : '#ff4444')};
@@ -115,7 +191,6 @@ interface Row {
   feedback: FeedbackWord[] | null;
   isLoading?: boolean;
 }
-
 
 const App: React.FC = () => {
   const defaultText = levelSentences[Level.A2];
@@ -147,53 +222,45 @@ const App: React.FC = () => {
   };
 
   const handleTranslate = async (index: number): Promise<void> => {
-  setRows(current =>
-    current.map((r, i) => (i === index ? { ...r, isLoading: true } : r))
-  );
-
-  const row = rows[index];
-  if (!row.userInput) {
     setRows(current =>
-      current.map((r, i) => (i === index ? { ...r, isLoading: false } : r))
+      current.map((r, i) => (i === index ? { ...r, isLoading: true } : r))
     );
-    return;
-  }
 
-  const translated = await translateSentence(row.sentence);
-  const germanWords = translated.split(' ');
-  const userWords = row.userInput.split(' ');
-  const feedback = germanWords.map((gw, i) => {
-    const uw = userWords[i] || '';
-    const normalize = (s: string) => s.replace(/[.,!?:;"-]/g, '').toLowerCase();
-    const correct = mode === 'hard' ? uw === gw : normalize(uw) === normalize(gw);
-    return { word: gw, correct };
-  });
+    const row = rows[index];
+    if (!row.userInput) {
+      setRows(current =>
+        current.map((r, i) => (i === index ? { ...r, isLoading: false } : r))
+      );
+      return;
+    }
 
-  setRows(current =>
-    current.map((r, i) =>
-      i === index
-        ? { ...r, translation: translated, feedback, isLoading: false }
-        : r
-    )
-  );
-};
-    // });
+    const translated = await translateSentence(row.sentence);
+    const germanWords = translated.split(' ');
+    const userWords = row.userInput.split(' ');
+    const feedback = germanWords.map((gw, i) => {
+      const uw = userWords[i] || '';
+      const normalize = (s: string) => s.replace(/[.,!?:;"-]/g, '').toLowerCase();
+      const correct = mode === 'hard' ? uw === gw : normalize(uw) === normalize(gw);
+      return { word: gw, correct };
+    });
 
-  //   setRows(current =>
-  //     current.map((r, idx) =>
-  //       idx === index ? { ...r, translation: translated, feedback } : r
-  //     )
-  //   );
-  // };
+    setRows(current =>
+      current.map((r, i) =>
+        i === index
+          ? { ...r, translation: translated, feedback, isLoading: false }
+          : r
+      )
+    );
+  };
 
-  const handleKeyPress = (e: any, index: number): void => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleTranslate(index);
     }
   };
 
-  const handleInputChange = (e: any, index: number): void => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number): void => {
     const value = e.target.value;
     setRows(current =>
       current.map((r, idx) =>
@@ -232,11 +299,11 @@ const App: React.FC = () => {
         </Header>
         {rows.length > 0 && (
           <Table>
-    <colgroup>
-      <col style={{ width: '33%' }} />
-      <col style={{ width: '33%' }} />
-      <col style={{ width: '33%' }} />
-    </colgroup>
+            <colgroup>
+              <col style={{ width: '33%' }} />
+              <col style={{ width: '33%' }} />
+              <col style={{ width: '33%' }} />
+            </colgroup>
             <tbody>
               {rows.map((row, idx) => (
                 <TableRow key={idx}>
@@ -249,19 +316,18 @@ const App: React.FC = () => {
                         onKeyPress={(e: any) => handleKeyPress(e, idx)}
                       />
                       <Button onClick={() => handleTranslate(idx)} disabled={row.isLoading}>
-  <FontAwesomeIcon icon={row.isLoading ? faSpinner : faPaperPlane} spin={row.isLoading} />
-</Button>
+                        <FontAwesomeIcon icon={row.isLoading ? faSpinner : faPaperPlane} spin={row.isLoading} />
+                      </Button>
                     </InputWrapper>
                   </TableCell>
-                  <TableCell>
-                    {row.feedback
-                      ? row.feedback.map((fb, i) => (
-                          <FeedbackSpan key={i} correct={fb.correct}>
-                            {fb.word}
-                          </FeedbackSpan>
-                        ))
-                      : null}
-                  </TableCell>
+                  <FeedBackTableCell >
+                    {row.feedback &&
+                      row.feedback.map((fb, i) => (
+                        <FeedbackSpan key={i} correct={fb.correct}>
+                          {fb.word}
+                        </FeedbackSpan>
+                      ))}
+                  </FeedBackTableCell>
                 </TableRow>
               ))}
             </tbody>

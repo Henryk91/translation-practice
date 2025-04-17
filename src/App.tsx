@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent, KeyboardEvent } from 'react';
+import React, { useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
@@ -103,19 +103,17 @@ const App: React.FC = () => {
     setRows(initialRows);
   };
 
-  const translateSentence = async (sentence: string): Promise<string> => {
-    const response = await fetch('https://translate.argosopentech.com/translate', {
+  // Use local proxy server for translation
+  const translateSentence = async (
+    sentence: string
+  ): Promise<string> => {
+    const response = await fetch('http://localhost:5001/translate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        q: sentence,
-        source: 'en',
-        target: 'de',
-        format: 'text',
-      }),
+      body: JSON.stringify({ sentence }),
     });
     const data = await response.json();
-    return data.translatedText;
+    return data.translated;
   };
 
   const handleTranslate = async (index: number): Promise<void> => {
@@ -136,20 +134,14 @@ const App: React.FC = () => {
     });
   };
 
-  const handleKeyPress = (
-    e: KeyboardEvent<HTMLInputElement>,
-    index: number
-  ): void => {
+  const handleKeyPress = (e: any, index: number): void => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleTranslate(index);
     }
   };
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement>,
-    index: number
-  ): void => {
+  const handleInputChange = (e: any, index: number): void => {
     const value = e.target.value;
     setRows(prev => {
       const updated = [...prev];

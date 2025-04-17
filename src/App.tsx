@@ -19,21 +19,25 @@ const Container = styled.div`
   align-items: center;
   padding: 20px;
 `;
+
 const LevelButtons = styled.div`
   margin-bottom: 15px;
   & > * {
     margin-right: 8px;
   }
 `;
+
 const Header = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 20px;
 `;
+
 const Label = styled.label`
   margin-right: 10px;
   color: #e0e0e0;
 `;
+
 const Select = styled.select`
   margin-right: 20px;
   padding: 6px;
@@ -42,6 +46,7 @@ const Select = styled.select`
   background-color: #1e1e1e;
   color: #e0e0e0;
 `;
+
 const TextInput = styled.input`
   padding: 8px;
   border: none;
@@ -51,6 +56,7 @@ const TextInput = styled.input`
   width: 300px;
   margin-right: 10px;
 `;
+
 const Button = styled.button`
   padding: 8px;
   border: none;
@@ -58,114 +64,98 @@ const Button = styled.button`
   background-color: #333;
   color: #e0e0e0;
   cursor: pointer;
+  margin-left: 8px;
+  white-space: nowrap;
   &:hover { background-color: #444; }
 `;
+
 const Table = styled.table`
   width: 100%;
   max-width: 800px;
   border-collapse: collapse;
+  table-layout: fixed;
 `;
+
 const TableRow = styled.tr`
   border-bottom: 1px solid #333;
 `;
+
 const TableCell = styled.td`
   padding: 10px;
-  vertical-align: top;
+  vertical-align: middle;
+  width: 33%;
+  text-align: center;
 `;
+
+const InputWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+
+
 const FeedbackSpan = styled.span<{ correct: boolean }>`
   color: ${props => (props.correct ? '#00ff00' : '#ff4444')};
   margin-right: 4px;
 `;
 
-interface FeedbackWord { word: string; correct: boolean; }
-interface Row { sentence: string; userInput: string; translation: string; feedback: FeedbackWord[] | null; }
+interface FeedbackWord {
+  word: string;
+  correct: boolean;
+}
 
-enum Level { A1 = 'a1', A2 = 'a2', B1 = 'b1', B2 = 'b2', C1 = 'c1', C2 = 'c2' }
+interface Row {
+  sentence: string;
+  userInput: string;
+  translation: string;
+  feedback: FeedbackWord[] | null;
+}
 
-// Placeholder sentences for each level
+enum Level {
+  A1 = 'a1',
+  A2 = 'a2',
+  B1 = 'b1',
+  B2 = 'b2',
+  C1 = 'c1',
+  C2 = 'c2'
+}
+
 // Meaningful sentences for each CEFR level
 const levelSentences: Record<Level, string> = {
   a1: [
-    "Hello.",
-    "My name is John.",
-    "I live in a small town.",
-    "I have a cat.",
-    "This is my book.",
-    "I like coffee.",
-    "She is my friend.",
-    "He is a teacher.",
-    "This is a pen.",
-    "That is a table.",
-    "I am hungry.",
-    "I am happy.",
-    "I am tired.",
-    "I go to school.",
-    "I like dogs.",
-    "The sky is blue.",
-    "The sun is hot.",
-    "It is raining.",
-    "It is cold.",
-    "I eat an apple.",
-    "I drink water.",
-    "I write a letter.",
-    "I read a book.",
-    "I watch TV.",
-    "I play football.",
-    "She reads a newspaper.",
-    "He watches a movie.",
-    "We walk in the park.",
-    "They swim in the pool.",
-    "I listen to music.",
-    "I speak English.",
-    "I cook dinner.",
-    "I open the door.",
-    "I close the window.",
-    "I clean my room.",
-    "I fix my bike.",
-    "I buy groceries.",
-    "I sell my car.",
-    "I drive to work.",
-    "I work from home."
+    "Hello.", "My name is John.", "I live in a small town.", "I have a cat.",
+    "This is my book.", "I like coffee.", "She is my friend.", "He is a teacher.",
+    "This is a pen.", "That is a table.", "I am hungry.", "I am happy.",
+    "I am tired.", "I go to school.", "I like dogs.", "The sky is blue.",
+    "The sun is hot.", "It is raining.", "It is cold.", "I eat an apple.",
+    "I drink water.", "I write a letter.", "I read a book.", "I watch TV.",
+    "I play football.", "She reads a newspaper.", "He watches a movie.",
+    "We walk in the park.", "They swim in the pool.", "I listen to music.",
+    "I speak English.", "I cook dinner.", "I open the door.", "I close the window.",
+    "I clean my room.", "I fix my bike.", "I buy groceries.", "I sell my car.",
+    "I drive to work.", "I work from home."
   ].join(' '),
   a2: [
-    "Yesterday I went to the market.",
-    "I have been to Paris.",
-    "I usually drink tea in the morning.",
-    "She called me last night.",
-    "We will travel next week.",
-    "He helped me with my homework.",
-    "They lived here for a year.",
-    "I tried a new recipe yesterday.",
-    "She studied French at university.",
-    "I enjoyed the concert.",
-    "He asked me a question.",
-    "We booked a hotel room.",
-    "They visited their parents.",
-    "I waited for the bus.",
-    "She cleaned the kitchen.",
-    "I walked to the park.",
-    "He saw a beautiful bird.",
-    "We listened to the teacher.",
-    "They explained the rules.",
-    "I understood the problem.",
-    "She forgot her keys.",
-    "He remembered the address.",
-    "We discussed the plan.",
-    "They practiced speaking English.",
-    "I planned my trip.",
-    "She packed her suitcase.",
-    "He fixed the broken chair.",
-    "We painted the wall.",
-    "They organized the event.",
-    "I returned the book to the library.",
-    "She borrowed some money.",
-    "He washed the car.",
-    "We played chess.",
-    "They trained for the race.",
-    "I improved my English skills.",
-    "She joined a new club.",
-    "He opened a new account.",
-    "We started the project.",
+    "Yesterday I went to the market.", "I have been to Paris.",
+    "I usually drink tea in the morning.", "She called me last night.",
+    "We will travel next week.", "He helped me with my homework.",
+    "They lived here for a year.", "I tried a new recipe yesterday.",
+    "She studied French at university.", "I enjoyed the concert.",
+    "He asked me a question.", "We booked a hotel room.",
+    "They visited their parents.", "I waited for the bus.",
+    "She cleaned the kitchen.", "I walked to the park.",
+    "He saw a beautiful bird.", "We listened to the teacher.",
+    "They explained the rules.", "I understood the problem.",
+    "She forgot her keys.", "He remembered the address.",
+    "We discussed the plan.", "They practiced speaking English.",
+    "I planned my trip.", "She packed her suitcase.",
+    "He fixed the broken chair.", "We painted the wall.",
+    "They organized the event.", "I returned the book to the library.",
+    "She borrowed some money.", "He washed the car.",
+    "We played chess.", "They trained for the race.",
+    "I improved my English skills.", "She joined a new club.",
+    "He opened a new account.", "We started the project.",
     "They finished their homework."
   ].join(' '),
   b1: [
@@ -242,11 +232,6 @@ const levelSentences: Record<Level, string> = {
     "He consolidated all the feedback.",
     "We rectified the errors promptly.",
     "They facilitated the negotiations skillfully.",
-    "I embodied the company's values.",
-    "She interpreted the data accurately.",
-    "He conceptualized the new design.",
-    "We synthesized diverse viewpoints.",
-    "They championed the environmental cause.",
     "I revitalized the old tradition.",
     "She orchestrated the reunion flawlessly."
   ].join(' '),
@@ -340,7 +325,7 @@ const App: React.FC = () => {
   const splitSentences = (input: string): string[] =>
     input.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
 
-  const handleLevelClick = (lvl: Level) => {
+  const handleLevelClick = (lvl: Level): void => {
     setText(levelSentences[lvl]);
     setRows([]);
   };
@@ -351,13 +336,19 @@ const App: React.FC = () => {
   };
 
   const translateSentence = async (sentence: string): Promise<string> => {
-    const res = await fetch('http://localhost:5001/translate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sentence }) });
+    const res = await fetch('http://localhost:5001/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sentence }),
+    });
     const json = await res.json();
     return json.translated;
   };
 
   const handleTranslate = async (index: number): Promise<void> => {
-    const row = rows[index]; if (!row.userInput) return;
+    const row = rows[index];
+    if (!row.userInput) return;
+
     const translated = await translateSentence(row.sentence);
     const germanWords = translated.split(' ');
     const userWords = row.userInput.split(' ');
@@ -367,11 +358,29 @@ const App: React.FC = () => {
       const correct = mode === 'hard' ? uw === gw : normalize(uw) === normalize(gw);
       return { word: gw, correct };
     });
-    setRows(r => r.map((r, i) => i === index ? { ...r, translation: translated, feedback } : r));
+
+    setRows(current =>
+      current.map((r, idx) =>
+        idx === index ? { ...r, translation: translated, feedback } : r
+      )
+    );
   };
 
-  const handleKeyPress = (e: any, idx: number): void => { if (e.key === 'Enter') { e.preventDefault(); handleTranslate(idx); } };
-  const handleInputChange = (e: any, idx: number): void => { const v = e.target.value; setRows(r => r.map((r, i) => i === idx ? { ...r, userInput: v } : r)); };
+  const handleKeyPress = (e: any, index: number): void => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleTranslate(index);
+    }
+  };
+
+  const handleInputChange = (e: any, index: number): void => {
+    const value = e.target.value;
+    setRows(current =>
+      current.map((r, idx) =>
+        idx === index ? { ...r, userInput: value } : r
+      )
+    );
+  };
 
   return (
     <>
@@ -390,21 +399,48 @@ const App: React.FC = () => {
             <option value="easy">Easy</option>
             <option value="hard">Hard</option>
           </Select>
-          <TextInput placeholder="Enter English text..." value={text} onChange={(e: any) => setText(e.target.value)} />
-          <Button onClick={handleTextSubmit}><FontAwesomeIcon icon={faPaperPlane} /></Button>
+          <InputWrapper>
+            <TextInput
+              placeholder="Enter English text..."
+              value={text}
+              onChange={(e: any) => setText(e.target.value)}
+            />
+            <Button onClick={handleTextSubmit}>
+              <FontAwesomeIcon icon={faPaperPlane} />
+            </Button>
+          </InputWrapper>
         </Header>
         {rows.length > 0 && (
           <Table>
+    <colgroup>
+      <col style={{ width: '33%' }} />
+      <col style={{ width: '33%' }} />
+      <col style={{ width: '33%' }} />
+    </colgroup>
             <tbody>
               {rows.map((row, idx) => (
                 <TableRow key={idx}>
                   <TableCell>{row.sentence}</TableCell>
                   <TableCell>
-                    <TextInput value={row.userInput} onChange={(e: any) => handleInputChange(e, idx)} onKeyPress={(e: any) => handleKeyPress(e, idx)} />
-                    <Button onClick={() => handleTranslate(idx)}><FontAwesomeIcon icon={faPaperPlane} /></Button>
+                    <InputWrapper>
+                      <TextInput
+                        value={row.userInput}
+                        onChange={(e: any) => handleInputChange(e, idx)}
+                        onKeyPress={(e: any) => handleKeyPress(e, idx)}
+                      />
+                      <Button onClick={() => handleTranslate(idx)}>
+                        <FontAwesomeIcon icon={faPaperPlane} />
+                      </Button>
+                    </InputWrapper>
                   </TableCell>
                   <TableCell>
-                    {row.feedback ? row.feedback.map((fb, i) => (<FeedbackSpan key={i} correct={fb.correct}>{fb.word}</FeedbackSpan>)) : null}
+                    {row.feedback
+                      ? row.feedback.map((fb, i) => (
+                          <FeedbackSpan key={i} correct={fb.correct}>
+                            {fb.word}
+                          </FeedbackSpan>
+                        ))
+                      : null}
                   </TableCell>
                 </TableRow>
               ))}

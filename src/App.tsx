@@ -336,7 +336,7 @@ const App: React.FC = () => {
   };
 
   const translateSentence = async (sentence: string): Promise<string> => {
-    const res = await fetch('http://localhost:5001/translate', {
+    const res = await fetch('https://note.henryk.co.za/api/translate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sentence }),

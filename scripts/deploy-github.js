@@ -3,7 +3,7 @@ ghpages.publish(
   "build",
   {
     branch: "gh-pages",
-    repo: "https://github.com/Henryk91/MemorySpan.git",
+    repo: "https://github.com/Henryk91/translation-practice.git",
   },
   () => {
     console.log("Deploy Complete!");

@@ -1,7 +1,7 @@
-import React, { useState, ChangeEvent, KeyboardEvent } from "react";
-import styled, { createGlobalStyle } from "styled-components";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import React, { useState, ChangeEvent, KeyboardEvent } from 'react';
+import styled, { createGlobalStyle } from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -64,7 +64,7 @@ const TableCell = styled.td`
 
 const FeedbackSpan = styled.span<{ correct: boolean }>`
   margin-right: 4px;
-  color: ${(props) => (props.correct ? "#00ff00" : "#ff4444")};
+  color: ${props => (props.correct ? '#00ff00' : '#ff4444')};
 `;
 
 interface FeedbackWord {
@@ -81,37 +81,37 @@ interface Row {
 
 const App: React.FC = () => {
   const defaultText: string =
-    "I have two cats. She likes to read books. They go to the park every Sunday. We are learning English. He works in a bank.";
+    'I have two cats. She likes to read books. They go to the park every Sunday. We are learning English. He works in a bank.';
   const [text, setText] = useState<string>(defaultText);
   const [rows, setRows] = useState<Row[]>([]);
 
   const splitSentences = (str: string): string[] => {
     return str
       .split(/(?<=[.!?])\s+/)
-      .map((s) => s.trim())
+      .map(s => s.trim())
       .filter(Boolean);
   };
 
   const handleTextSubmit = (): void => {
     const sentences = splitSentences(text);
-    const initialRows: Row[] = sentences.map((sentence) => ({
+    const initialRows: Row[] = sentences.map(sentence => ({
       sentence,
-      userInput: "",
-      translation: "",
+      userInput: '',
+      translation: '',
       feedback: null,
     }));
     setRows(initialRows);
   };
 
   const translateSentence = async (sentence: string): Promise<string> => {
-    const response = await fetch("https://translate.argosopentech.com/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const response = await fetch('https://translate.argosopentech.com/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         q: sentence,
-        source: "en",
-        target: "de",
-        format: "text",
+        source: 'en',
+        target: 'de',
+        format: 'text',
       }),
     });
     const data = await response.json();
@@ -122,30 +122,36 @@ const App: React.FC = () => {
     const row = rows[index];
     if (!row.userInput) return;
     const translated = await translateSentence(row.sentence);
-    const correctWords = translated.split(" ");
-    const userWords = row.userInput.split(" ");
+    const correctWords = translated.split(' ');
+    const userWords = row.userInput.split(' ');
     const feedback: FeedbackWord[] = correctWords.map((word, i) => ({
-      word: userWords[i] || "",
-      correct: word === (userWords[i] || ""),
+      word: userWords[i] || '',
+      correct: word === (userWords[i] || ''),
     }));
 
-    setRows((prev) => {
+    setRows(prev => {
       const updated = [...prev];
       updated[index] = { ...row, translation: translated, feedback };
       return updated;
     });
   };
 
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>, index: number): void => {
-    if (e.key === "Enter") {
+  const handleKeyPress = (
+    e: KeyboardEvent<HTMLInputElement>,
+    index: number
+  ): void => {
+    if (e.key === 'Enter') {
       e.preventDefault();
       handleTranslate(index);
     }
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>, index: number): void => {
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    index: number
+  ): void => {
     const value = e.target.value;
-    setRows((prev) => {
+    setRows(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], userInput: value };
       return updated;
@@ -157,7 +163,11 @@ const App: React.FC = () => {
       <GlobalStyle />
       <Container>
         <Header>
-          <TextInput placeholder="Enter English text..." value={text} onChange={(e: any) => setText(e.target.value)} />
+          <TextInput
+            placeholder="Enter English text..."
+            value={text}
+            onChange={e => setText(e.target.value)}
+          />
           <Button onClick={handleTextSubmit}>
             <FontAwesomeIcon icon={faPaperPlane} />
           </Button>
@@ -173,8 +183,8 @@ const App: React.FC = () => {
                       <>
                         <TextInput
                           value={row.userInput}
-                          onChange={(e: any) => handleInputChange(e, idx)}
-                          onKeyPress={(e: any) => handleKeyPress(e, idx)}
+                          onChange={e => handleInputChange(e, idx)}
+                          onKeyPress={e => handleKeyPress(e, idx)}
                         />
                         <Button onClick={() => handleTranslate(idx)}>
                           <FontAwesomeIcon icon={faPaperPlane} />

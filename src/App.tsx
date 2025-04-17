@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -110,6 +110,7 @@ interface Row {
   userInput: string;
   translation: string;
   feedback: FeedbackWord[] | null;
+  isLoading?: boolean;
 }
 
 enum Level {
@@ -346,25 +347,44 @@ const App: React.FC = () => {
   };
 
   const handleTranslate = async (index: number): Promise<void> => {
-    const row = rows[index];
-    if (!row.userInput) return;
+  setRows(current =>
+    current.map((r, i) => (i === index ? { ...r, isLoading: true } : r))
+  );
 
-    const translated = await translateSentence(row.sentence);
-    const germanWords = translated.split(' ');
-    const userWords = row.userInput.split(' ');
-    const feedback = germanWords.map((gw, i) => {
-      const uw = userWords[i] || '';
-      const normalize = (s: string) => s.replace(/[.,!?:;"-]/g, '').toLowerCase();
-      const correct = mode === 'hard' ? uw === gw : normalize(uw) === normalize(gw);
-      return { word: gw, correct };
-    });
-
+  const row = rows[index];
+  if (!row.userInput) {
     setRows(current =>
-      current.map((r, idx) =>
-        idx === index ? { ...r, translation: translated, feedback } : r
-      )
+      current.map((r, i) => (i === index ? { ...r, isLoading: false } : r))
     );
-  };
+    return;
+  }
+
+  const translated = await translateSentence(row.sentence);
+  const germanWords = translated.split(' ');
+  const userWords = row.userInput.split(' ');
+  const feedback = germanWords.map((gw, i) => {
+    const uw = userWords[i] || '';
+    const normalize = (s: string) => s.replace(/[.,!?:;"-]/g, '').toLowerCase();
+    const correct = mode === 'hard' ? uw === gw : normalize(uw) === normalize(gw);
+    return { word: gw, correct };
+  });
+
+  setRows(current =>
+    current.map((r, i) =>
+      i === index
+        ? { ...r, translation: translated, feedback, isLoading: false }
+        : r
+    )
+  );
+};
+    // });
+
+  //   setRows(current =>
+  //     current.map((r, idx) =>
+  //       idx === index ? { ...r, translation: translated, feedback } : r
+  //     )
+  //   );
+  // };
 
   const handleKeyPress = (e: any, index: number): void => {
     if (e.key === 'Enter') {
@@ -428,9 +448,9 @@ const App: React.FC = () => {
                         onChange={(e: any) => handleInputChange(e, idx)}
                         onKeyPress={(e: any) => handleKeyPress(e, idx)}
                       />
-                      <Button onClick={() => handleTranslate(idx)}>
-                        <FontAwesomeIcon icon={faPaperPlane} />
-                      </Button>
+                      <Button onClick={() => handleTranslate(idx)} disabled={row.isLoading}>
+  <FontAwesomeIcon icon={row.isLoading ? faSpinner : faPaperPlane} spin={row.isLoading} />
+</Button>
                     </InputWrapper>
                   </TableCell>
                   <TableCell>

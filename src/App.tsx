@@ -77,6 +77,7 @@ const TextInput = styled.input`
   padding: 8px;
   border: none;
   border-radius: 4px;
+  font-size: 16px;
   background-color: #1e1e1e;
   color: #e0e0e0;
   width: 300px;

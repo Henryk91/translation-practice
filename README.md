@@ -1,70 +1,102 @@
-# Getting Started with Create React App
+# Translation Practice
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Translation Practice is a React-based web application designed to help users practice translating English sentences into another language. The app provides sentences categorized by language proficiency levels (A1 to C2) and offers feedback on translations.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Sentence Levels**: Practice sentences categorized by CEFR levels (A1, A2, B1, B2, C1, C2).
+- **Translation Feedback**: Get feedback on your translations, word by word.
+- **Modes**: Choose between "Easy" mode (ignores punctuation and capitalization) and "Hard" mode (strict matching).
+- **Responsive Design**: Fully responsive layout for desktop and mobile devices.
+- **Custom Input**: Enter your own English text for translation practice.
 
-### `npm start`
+## Live Demo
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Check out the live application here: [Translation Practice Live](https://henryk.co.za/translation-practice)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Installation
 
-### `npm test`
+1. Clone the repository:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+   ```bash
+   git clone https://github.com/Henryk91/translation-practice.git
+   cd translation-practice
+   ```
 
-### `npm run build`
+2. Install dependencies:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+   ```bash
+   npm install
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. Start the development server:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+   ```bash
+   npm start
+   ```
 
-### `npm run eject`
+   The app will be available at `http://localhost:3000`.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Deployment
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+To deploy the app to GitHub Pages:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+1. Build the project:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+   ```bash
+   npm run build
+   ```
 
-## Learn More
+2. Deploy to GitHub Pages:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+   ```bash
+   npm run deploy:github
+   ```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+   The app will be deployed to the `gh-pages` branch of your repository.
 
-### Code Splitting
+## Scripts
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+- `npm start`: Start the development server.
+- `npm run build`: Build the app for production.
+- `npm test`: Run tests.
+- `npm run eject`: Eject the Create React App configuration.
+- `npm run deploy:github`: Build and deploy the app to GitHub Pages.
 
-### Analyzing the Bundle Size
+## Technologies Used
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- **React**: Frontend framework.
+- **TypeScript**: Type-safe JavaScript.
+- **Styled Components**: CSS-in-JS for styling.
+- **FontAwesome**: Icons for buttons and UI elements.
+- **Web Vitals**: Performance monitoring.
 
-### Making a Progressive Web App
+## API Integration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+The app uses an API endpoint (`https://note.henryk.co.za/api/translate`) to translate sentences. Ensure the API is accessible for the app to function correctly.
 
-### Advanced Configuration
+## Testing
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+The project uses Jest and React Testing Library for testing. To run tests:
 
-### Deployment
+```bash
+npm test
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## License
 
-### `npm run build` fails to minify
+This project is licensed under the MIT License. See the LICENSE file for details.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Acknowledgments
+
+- [Create React App](https://create-react-app.dev/) for the project setup.
+- [FontAwesome](https://fontawesome.com/) for icons.
+- [Styled Components](https://styled-components.com/) for styling.
+
+## Contributing
+
+Contributions are welcome! Feel free to open issues or submit pull requests.
+
+## Contact
+
+For any questions or feedback, please contact [Henryk91](https://github.com/Henryk91).

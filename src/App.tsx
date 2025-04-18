@@ -70,6 +70,7 @@ const Select = styled.select`
   background-color: #1e1e1e;
   color: #e0e0e0;
   font-size: 18px;
+  text-align: center;
 
   @media (max-width: 600px) {
     margin: 0 0 10px 0;
@@ -84,7 +85,7 @@ const TextArea = styled.textarea`
   font-size: 16px;
   background-color: #1e1e1e;
   color: #e0e0e0;
-  width: 300px;
+  width: -webkit-fill-available;
 `;
 const TextInput = styled.input`
   padding: 8px;
@@ -217,6 +218,7 @@ const TextAreaWrapper = styled.div`
   justify-content: center;
   flex-direction: column;
   margin: 5px;
+  width: 100%;
   @media (min-width: 600px) {
     flex-direction: column;
   }
@@ -258,7 +260,7 @@ const App: React.FC = () => {
   const [text, setText] = useState<string>(defaultText);
   const [mode, setMode] = useState<"easy" | "hard">("easy");
   const [rows, setRows] = useState<Row[]>([]);
-  const [selectedLevel, setSelectedLevel] = useState<Level>(Level.A2);
+  const [selectedLevel, setSelectedLevel] = useState<Level | undefined>();
 
   const splitSentences = (input: string): string[] =>
     input
@@ -282,7 +284,7 @@ const App: React.FC = () => {
 
   const handleTextSubmit = (): void => {
     let textToSplit = text;
-    if (!text) {
+    if (!text && selectedLevel) {
       textToSplit = levelSentences[selectedLevel];
       setText(levelSentences[selectedLevel]);
     }
@@ -348,7 +350,10 @@ const App: React.FC = () => {
           </h1>
           <div>
             <Label>Level:</Label>
-            <Select value={selectedLevel} onChange={handleLevelChange}>
+            <Select placeholder="Select your Language Level" value={selectedLevel} onChange={handleLevelChange}>
+              <option value="" disabled selected hidden>
+                Select your Language Level
+              </option>
               {Object.values(Level).map((lvl) => (
                 <option key={lvl} value={lvl}>
                   {lvl.toUpperCase()}

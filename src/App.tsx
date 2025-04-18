@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperPlane, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faPaperPlane, faSpinner, faTrash } from '@fortawesome/free-solid-svg-icons';
 
 import { levelSentences } from './data/levelSentences';
 import { Level } from "./types";
@@ -47,6 +47,7 @@ const Header = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 20px;
+  flex-direction: column;
 
   @media (max-width: 600px) {
     flex-direction: column;
@@ -66,6 +67,7 @@ const Select = styled.select`
   border-radius: 4px;
   background-color: #1e1e1e;
   color: #e0e0e0;
+  font-size: 18px;
 
   @media (max-width: 600px) {
     margin: 0 0 10px 0;
@@ -73,6 +75,16 @@ const Select = styled.select`
   }
 `;
 
+const TextArea = styled.textarea`
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  width: 300px;
+  // margin-right: 10px;
+`;
 const TextInput = styled.input`
   padding: 8px;
   border: none;
@@ -82,13 +94,7 @@ const TextInput = styled.input`
   color: #e0e0e0;
   width: 300px;
   margin-right: 10px;
-
-  @media (max-width: 600px) {
-    
-    // margin: 0 0 8px 0;
-  }
 `;
-// width: calc(100vw - 20px);
 
 const Button = styled.button`
   padding: 8px;
@@ -164,6 +170,34 @@ const FeedBackTableCell = styled.td`
   }
 `;
 
+const TextAreaButtonWrapper = styled.div`
+margin: 5px;
+  Button {
+    margin: 5px;
+  @media (max-width: 600px) {
+    // margin-right: 10px;
+
+        // margin: 5px 0px 0px 0px;
+    }
+}
+`;
+
+const TextAreaWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 5px;
+  @media (min-width: 600px) {
+    flex-direction: column;
+  }
+  @media (max-width: 600px) {
+    // flex-direction: column;
+    align-items: stretch;
+    
+  }
+`;
+
 const InputWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -198,18 +232,29 @@ const App: React.FC = () => {
   const [text, setText] = useState<string>(defaultText);
   const [mode, setMode] = useState<'easy' | 'hard'>('easy');
   const [rows, setRows] = useState<Row[]>([]);
+  const [selectedLevel, setSelectedLevel] = useState<Level>(Level.A2);
 
   const splitSentences = (input: string): string[] =>
     input.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
 
-  const handleLevelClick = (lvl: Level): void => {
-    setText(levelSentences[lvl]);
+  const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const level = e.target.value as Level;
+    setSelectedLevel(level);
+    setText(levelSentences[level]);
     setRows([]);
-    handleTextSubmit();
+  };
+
+  const handleTextClear = (): void => {
+    setText('')
   };
 
   const handleTextSubmit = (): void => {
-    const sentences = splitSentences(text);
+    let textToSplit = text;
+    if (!text){
+      textToSplit = levelSentences[selectedLevel];
+      setText(levelSentences[selectedLevel]); 
+    }
+    const sentences = splitSentences(textToSplit);
     setRows(sentences.map(sentence => ({ sentence, userInput: '', translation: '', feedback: null })));
   };
 
@@ -275,29 +320,37 @@ const App: React.FC = () => {
     <>
       <GlobalStyle />
       <Container>
-        <LevelButtons>
-          {[Level.A1, Level.A2, Level.B1, Level.B2, Level.C1, Level.C2].map(lvl => (
-            <Button key={lvl} onClick={() => handleLevelClick(lvl)}>
-              {lvl.toUpperCase()}
-            </Button>
-          ))}
-        </LevelButtons>
         <Header>
-          <Label>Mode:</Label>
-          <Select value={mode} onChange={(e: any) => setMode(e.target.value)}>
-            <option value="easy">Easy</option>
-            <option value="hard">Hard</option>
-          </Select>
-          <InputWrapper>
-            <TextInput
+          <div>
+            <Label>Level:</Label>
+            <Select value={selectedLevel} onChange={handleLevelChange}>
+              {Object.values(Level).map(lvl => (
+                <option key={lvl} value={lvl}>
+                  {lvl.toUpperCase()}
+                </option>
+              ))}
+            </Select>
+            <Label>Mode:</Label>
+            <Select value={mode} onChange={(e: any) => setMode(e.target.value)}>
+              <option value="easy">Easy</option>
+              <option value="hard">Hard</option>
+            </Select>
+          </div>
+          <TextAreaWrapper>
+            <TextArea
               placeholder="Enter English text..."
               value={text}
               onChange={(e: any) => setText(e.target.value)}
             />
-            <Button onClick={handleTextSubmit}>
-              <FontAwesomeIcon icon={faPaperPlane} />
-            </Button>
-          </InputWrapper>
+            <TextAreaButtonWrapper>
+              <Button onClick={handleTextClear}>
+                <FontAwesomeIcon icon={faTrash} />
+              </Button>
+              <Button onClick={handleTextSubmit}>
+                <FontAwesomeIcon icon={faPaperPlane} />
+              </Button>
+            </TextAreaButtonWrapper>
+          </TextAreaWrapper>
         </Header>
         {rows.length > 0 && (
           <Table>
@@ -322,7 +375,7 @@ const App: React.FC = () => {
                       </Button>
                     </InputWrapper>
                   </TableCell>
-                  <FeedBackTableCell >
+                  <FeedBackTableCell>
                     {row.feedback &&
                       row.feedback.map((fb, i) => (
                         <FeedbackSpan key={i} correct={fb.correct}>

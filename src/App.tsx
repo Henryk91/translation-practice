@@ -20,7 +20,10 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  // padding: 20px;
+  padding: 0;
+  width: 100vw;
+  overflow: hidden;
 
   @media (max-width: 600px) {
     padding: 0;
@@ -113,12 +116,12 @@ const Button = styled.button`
 `;
 
 const Table = styled.table`
-  width: 100%;
-  max-width: 800px;
+  // width: 100%;
+  // max-width: 800px;
   border-collapse: collapse;
   table-layout: fixed;
   margin: 0 auto;
-
+  max-width: 80%;
   @media (max-width: 600px) {
     max-width: none;
     width: 100vw;
@@ -129,24 +132,47 @@ const Table = styled.table`
 const TableRow = styled.tr`
   border-bottom: 1px solid #333;
   max-width: 100vw;
+  width: 100%;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  // gap: 20px;
+  // width: max-content;
+  align-content: center;
 
   @media (max-width: 600px) {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     align-items: center;
-    width: 100vw;
+    // width: 100vw;
     overflow: hidden;
     padding: 3px;
+  }
+`;
+
+const TableColGroup = styled.colgroup`
+  display: flex;
+  col {
+    width: 33%;
+    flex: 1; /* each .col takes equal share of available space */
+    /* optional spacing */
+    padding: 0 10px;
   }
 `;
 
 const TableCell = styled.td`
   padding: 10px;
   vertical-align: middle;
-  width: 33%;
+  // width: 33%;
   text-align: center;
+  flex: 1;
 
+  @media (min-width: 600px) {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+  }
   @media (max-width: 600px) {
     display: block;
     width: 95vw;
@@ -162,10 +188,19 @@ const FeedBackTableCell = styled.td`
   display: flex;
   flex-wrap: wrap;
   margin: 10px;
+  flex: 1;
+
+  @media (min-width: 600px) {
+    align-items: center;
+    justify-content: center;
+    display: flex;
+  }
+
   @media (max-width: 600px) {
     width: 95vw;
     text-align: left;
     padding: 8px 10px;
+    margin: unset;
   }
 `;
 
@@ -340,11 +375,11 @@ const App: React.FC = () => {
         </Header>
         {rows.length > 0 && (
           <Table>
-            <colgroup>
-              <col style={{ width: "33%" }} />
-              <col style={{ width: "33%" }} />
-              <col style={{ width: "33%" }} />
-            </colgroup>
+            <TableColGroup>
+              <col />
+              <col />
+              <col />
+            </TableColGroup>
             <tbody>
               {rows.map((row, idx) => (
                 <TableRow key={idx}>

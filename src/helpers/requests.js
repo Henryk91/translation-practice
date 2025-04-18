@@ -204,3 +204,17 @@ export function saveNewNote(newNote) {
     body: JSON.stringify(newNote)
   }).then(response => console.log(response));
 }
+
+export function logUse() {
+  const currentURL = window.location.href;
+  if (currentURL.includes("localhost")) return;
+
+  fetch("https://note.henryk.co.za/api/log")
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data);
+    })
+    .catch((error) => {
+      console.log("Error:", error);
+    });
+}

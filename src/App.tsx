@@ -5,6 +5,9 @@ import { faPaperPlane, faSpinner, faTrash } from "@fortawesome/free-solid-svg-ic
 
 import { levelSentences } from "./data/levelSentences";
 import { Level } from "./types";
+import { logUse } from "./helpers/requests";
+
+logUse();
 
 const GlobalStyle = createGlobalStyle`
   body {

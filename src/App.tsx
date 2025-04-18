@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperPlane, faSpinner, faTrash } from '@fortawesome/free-solid-svg-icons';
+import React, { useState } from "react";
+import styled, { createGlobalStyle } from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPaperPlane, faSpinner, faTrash } from "@fortawesome/free-solid-svg-icons";
 
-import { levelSentences } from './data/levelSentences';
+import { levelSentences } from "./data/levelSentences";
 import { Level } from "./types";
 
 const GlobalStyle = createGlobalStyle`
@@ -29,12 +29,8 @@ const Container = styled.div`
 
 // Level buttons now span the full screen width and arrange into 2 rows of 3
 const LevelButtons = styled.div`
-  // display: grid;
-  // grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  // width: 100vw;
-  // margin: 0 10px 15px; /* negative side margin to neutralize Container padding */
-  padding: 0 10px ;
+  padding: 0 10px;
 
   @media (max-width: 600px) {
     display: grid;
@@ -43,6 +39,9 @@ const LevelButtons = styled.div`
   }
 `;
 
+const Image = styled.img`
+  border-radius: 5px;
+`;
 const Header = styled.div`
   display: flex;
   align-items: center;
@@ -83,7 +82,6 @@ const TextArea = styled.textarea`
   background-color: #1e1e1e;
   color: #e0e0e0;
   width: 300px;
-  // margin-right: 10px;
 `;
 const TextInput = styled.input`
   padding: 8px;
@@ -105,11 +103,12 @@ const Button = styled.button`
   cursor: pointer;
   width: fit-content;
   white-space: nowrap;
-  &:hover { background-color: #444; }
+  &:hover {
+    background-color: #444;
+  }
 
   @media (min-width: 600px) {
     margin: 5px;
-    // width: calc(100vw - 20px);
   }
 `;
 
@@ -138,7 +137,7 @@ const TableRow = styled.tr`
     align-items: center;
     width: 100vw;
     overflow: hidden;
-    padding: 3px
+    padding: 3px;
   }
 `;
 
@@ -171,15 +170,10 @@ const FeedBackTableCell = styled.td`
 `;
 
 const TextAreaButtonWrapper = styled.div`
-margin: 5px;
+  margin: 5px;
   Button {
     margin: 5px;
-  @media (max-width: 600px) {
-    // margin-right: 10px;
-
-        // margin: 5px 0px 0px 0px;
-    }
-}
+  }
 `;
 
 const TextAreaWrapper = styled.div`
@@ -192,9 +186,7 @@ const TextAreaWrapper = styled.div`
     flex-direction: column;
   }
   @media (max-width: 600px) {
-    // flex-direction: column;
     align-items: stretch;
-    
   }
 `;
 
@@ -204,13 +196,12 @@ const InputWrapper = styled.div`
   justify-content: center;
 
   @media (max-width: 600px) {
-    // flex-direction: column;
     align-items: stretch;
   }
 `;
 
 const FeedbackSpan = styled.span<{ correct: boolean }>`
-  color: ${props => (props.correct ? '#00ff00' : '#ff4444')};
+  color: ${(props) => (props.correct ? "#00ff00" : "#ff4444")};
   margin-right: 4px;
 `;
 
@@ -230,12 +221,15 @@ interface Row {
 const App: React.FC = () => {
   const defaultText = levelSentences[Level.A2];
   const [text, setText] = useState<string>(defaultText);
-  const [mode, setMode] = useState<'easy' | 'hard'>('easy');
+  const [mode, setMode] = useState<"easy" | "hard">("easy");
   const [rows, setRows] = useState<Row[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<Level>(Level.A2);
 
   const splitSentences = (input: string): string[] =>
-    input.split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
+    input
+      .split(/(?<=[.!?])\s+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
 
   const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const level = e.target.value as Level;
@@ -245,23 +239,23 @@ const App: React.FC = () => {
   };
 
   const handleTextClear = (): void => {
-    setText('')
+    setText("");
   };
 
   const handleTextSubmit = (): void => {
     let textToSplit = text;
-    if (!text){
+    if (!text) {
       textToSplit = levelSentences[selectedLevel];
-      setText(levelSentences[selectedLevel]); 
+      setText(levelSentences[selectedLevel]);
     }
     const sentences = splitSentences(textToSplit);
-    setRows(sentences.map(sentence => ({ sentence, userInput: '', translation: '', feedback: null })));
+    setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
   };
 
   const translateSentence = async (sentence: string): Promise<string> => {
-    const res = await fetch('https://note.henryk.co.za/api/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const res = await fetch("https://note.henryk.co.za/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sentence }),
     });
     const json = await res.json();
@@ -269,39 +263,31 @@ const App: React.FC = () => {
   };
 
   const handleTranslate = async (index: number): Promise<void> => {
-    setRows(current =>
-      current.map((r, i) => (i === index ? { ...r, isLoading: true } : r))
-    );
+    setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
 
     const row = rows[index];
     if (!row.userInput) {
-      setRows(current =>
-        current.map((r, i) => (i === index ? { ...r, isLoading: false } : r))
-      );
+      setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
       return;
     }
 
     const translated = await translateSentence(row.sentence);
-    const germanWords = translated.split(' ');
-    const userWords = row.userInput.split(' ');
+    const germanWords = translated.split(" ");
+    const userWords = row.userInput.split(" ");
     const feedback = germanWords.map((gw, i) => {
-      const uw = userWords[i] || '';
-      const normalize = (s: string) => s.replace(/[.,!?:;"-]/g, '').toLowerCase();
-      const correct = mode === 'hard' ? uw === gw : normalize(uw) === normalize(gw);
+      const uw = userWords[i] || "";
+      const normalize = (s: string) => s.replace(/[.,!?:;"-]/g, "").toLowerCase();
+      const correct = mode === "hard" ? uw === gw : normalize(uw) === normalize(gw);
       return { word: gw, correct };
     });
 
-    setRows(current =>
-      current.map((r, i) =>
-        i === index
-          ? { ...r, translation: translated, feedback, isLoading: false }
-          : r
-      )
+    setRows((current) =>
+      current.map((r, i) => (i === index ? { ...r, translation: translated, feedback, isLoading: false } : r))
     );
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       handleTranslate(index);
     }
@@ -309,11 +295,7 @@ const App: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number): void => {
     const value = e.target.value;
-    setRows(current =>
-      current.map((r, idx) =>
-        idx === index ? { ...r, userInput: value } : r
-      )
-    );
+    setRows((current) => current.map((r, idx) => (idx === index ? { ...r, userInput: value } : r)));
   };
 
   return (
@@ -321,10 +303,15 @@ const App: React.FC = () => {
       <GlobalStyle />
       <Container>
         <Header>
+          <h1>
+            <Image src={process.env.PUBLIC_URL + "/logo192.png"} alt="App Logo" width="70" height="70" /> <br />
+            <FeedbackSpan correct={false}>Translate</FeedbackSpan> to{" "}
+            <FeedbackSpan correct={true}> German </FeedbackSpan>
+          </h1>
           <div>
             <Label>Level:</Label>
             <Select value={selectedLevel} onChange={handleLevelChange}>
-              {Object.values(Level).map(lvl => (
+              {Object.values(Level).map((lvl) => (
                 <option key={lvl} value={lvl}>
                   {lvl.toUpperCase()}
                 </option>
@@ -337,11 +324,7 @@ const App: React.FC = () => {
             </Select>
           </div>
           <TextAreaWrapper>
-            <TextArea
-              placeholder="Enter English text..."
-              value={text}
-              onChange={(e: any) => setText(e.target.value)}
-            />
+            <TextArea placeholder="Enter English text..." value={text} onChange={(e: any) => setText(e.target.value)} />
             <TextAreaButtonWrapper>
               <Button onClick={handleTextClear}>
                 <FontAwesomeIcon icon={faTrash} />
@@ -355,9 +338,9 @@ const App: React.FC = () => {
         {rows.length > 0 && (
           <Table>
             <colgroup>
-              <col style={{ width: '33%' }} />
-              <col style={{ width: '33%' }} />
-              <col style={{ width: '33%' }} />
+              <col style={{ width: "33%" }} />
+              <col style={{ width: "33%" }} />
+              <col style={{ width: "33%" }} />
             </colgroup>
             <tbody>
               {rows.map((row, idx) => (

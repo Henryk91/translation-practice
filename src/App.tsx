@@ -233,9 +233,12 @@ const App: React.FC = () => {
 
   const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const level = e.target.value as Level;
+    const text = levelSentences[level];
+    const sentences = splitSentences(text);
+
     setSelectedLevel(level);
-    setText(levelSentences[level]);
-    setRows([]);
+    setText(text);
+    setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
   };
 
   const handleTextClear = (): void => {

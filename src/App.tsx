@@ -256,7 +256,7 @@ interface Row {
 }
 
 const App: React.FC = () => {
-  const defaultText = levelSentences[Level.A2];
+  const defaultText = levelSentences[Level.A21];
   const [text, setText] = useState<string>(defaultText);
   const [mode, setMode] = useState<"easy" | "hard">("easy");
   const [rows, setRows] = useState<Row[]>([]);

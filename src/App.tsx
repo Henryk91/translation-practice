@@ -271,11 +271,28 @@ const App: React.FC = () => {
   const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const level = e.target.value as Level;
     const text = levelSentences[level];
-    const sentences = splitSentences(text);
+    const sentences = splitAndShuffle(text);
 
     setSelectedLevel(level);
     setText(text);
     setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+  };
+
+  const splitAndShuffle = (input: string): string[] => {
+    const sentences = splitSentences(input);
+    return shuffleStrings(sentences);
+  };
+
+  const shuffleStrings = (input: string[]): string[] => {
+    // Make a shallow copy to avoid mutating the original array
+    const array = [...input];
+    for (let i = array.length - 1; i > 0; i--) {
+      // Pick a random index from 0 to i
+      const j = Math.floor(Math.random() * (i + 1));
+      // Swap elements at i and j
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   };
 
   const handleTextClear = (): void => {
@@ -288,7 +305,7 @@ const App: React.FC = () => {
       textToSplit = levelSentences[selectedLevel];
       setText(levelSentences[selectedLevel]);
     }
-    const sentences = splitSentences(textToSplit);
+    const sentences = splitAndShuffle(textToSplit);
     setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
   };
 
@@ -350,10 +367,12 @@ const App: React.FC = () => {
           </h1>
           <div>
             <Label>Level:</Label>
-            <Select placeholder="Select your Language Level" value={selectedLevel} onChange={handleLevelChange}>
-              <option value="" disabled selected hidden>
-                Select your Language Level
-              </option>
+            <Select
+              placeholder="Select your Language Level"
+              value={selectedLevel || "Select your Language Level"}
+              onChange={handleLevelChange}
+            >
+              <option disabled>Select your Language Level</option>
               {Object.values(Level).map((lvl) => (
                 <option key={lvl} value={lvl}>
                   {lvl.toUpperCase()}
@@ -404,7 +423,7 @@ const App: React.FC = () => {
                   <FeedBackTableCell>
                     {row.feedback &&
                       row.feedback.map((fb, i) => (
-                        <FeedbackSpan key={i} correct={fb.correct}>
+                        <FeedbackSpan key={i} correct={fb ? fb.correct : true}>
                           {fb.word}
                         </FeedbackSpan>
                       ))}

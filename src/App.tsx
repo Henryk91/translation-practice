@@ -205,6 +205,7 @@ const App: React.FC = () => {
   const handleLevelClick = (lvl: Level): void => {
     setText(levelSentences[lvl]);
     setRows([]);
+    handleTextSubmit();
   };
 
   const handleTextSubmit = (): void => {

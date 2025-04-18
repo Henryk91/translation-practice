@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane, faSpinner, faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -33,17 +33,6 @@ const Container = styled.div`
   }
 `;
 
-// Level buttons now span the full screen width and arrange into 2 rows of 3
-const LevelButtons = styled.div`
-  gap: 8px;
-  padding: 0 10px;
-
-  @media (max-width: 600px) {
-    display: grid;
-    margin: 5px;
-    grid-template-columns: repeat(3, 1fr);
-  }
-`;
 
 const Image = styled.img`
   border-radius: 5px;
@@ -240,8 +229,8 @@ const InputWrapper = styled.div`
   }
 `;
 
-const FeedbackSpan = styled.span<{ correct: boolean }>`
-  color: ${(props) => (props.correct ? "#00ff00" : "#ff4444")};
+const FeedbackSpan = styled.span<{ $correct: boolean }>`
+  color: ${(props) => (props.$correct ? "#00ff00" : "#ff4444")};
   margin-right: 4px;
 `;
 
@@ -264,6 +253,11 @@ const App: React.FC = () => {
   const [mode, setMode] = useState<"easy" | "hard">("easy");
   const [rows, setRows] = useState<Row[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<Level | undefined>();
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const focusNext = (index: number) => {
+    inputRefs.current[index + 1]?.focus();
+  };
 
   const splitSentences = (input: string): string[] =>
     input
@@ -313,13 +307,23 @@ const App: React.FC = () => {
   };
 
   const translateSentence = async (sentence: string): Promise<string> => {
-    const res = await fetch("https://note.henryk.co.za/api/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sentence }),
-    });
-    const json = await res.json();
-    return json.translated;
+    try {
+      const res = await fetch("https://note.henryk.co.za/api/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sentence }),
+      });
+  
+      if (!res.ok) {
+        return "Error loading. Try again.";
+      }
+  
+      const { translated } = await res.json();
+      return translated;
+    } catch (error) {
+      console.error("Error:", error);
+      return "Error loading. Try again.";
+    }
   };
 
   const handleTranslate = async (index: number): Promise<void> => {
@@ -330,6 +334,8 @@ const App: React.FC = () => {
       setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
       return;
     }
+
+    focusNext(index);
 
     const translated = await translateSentence(row.sentence);
     const germanWords = translated.split(" ");
@@ -365,8 +371,8 @@ const App: React.FC = () => {
         <Header>
           <h1>
             <Image src={process.env.PUBLIC_URL + "/logo192.png"} alt="App Logo" width="70" height="70" /> <br />
-            <FeedbackSpan correct={false}>Translate</FeedbackSpan> to{" "}
-            <FeedbackSpan correct={true}> German </FeedbackSpan>
+            <FeedbackSpan $correct={false}>Translate</FeedbackSpan> to{" "}
+            <FeedbackSpan $correct={true}> German </FeedbackSpan>
           </h1>
           <div>
             <Label>Level:</Label>
@@ -414,6 +420,7 @@ const App: React.FC = () => {
                   <TableCell>
                     <InputWrapper>
                       <TextInput
+                        ref={(el: any) => (inputRefs.current[idx] = el)}
                         value={row.userInput}
                         onChange={(e: any) => handleInputChange(e, idx)}
                         onKeyPress={(e: any) => handleKeyPress(e, idx)}
@@ -426,7 +433,7 @@ const App: React.FC = () => {
                   <FeedBackTableCell>
                     {row.feedback &&
                       row.feedback.map((fb, i) => (
-                        <FeedbackSpan key={i} correct={fb ? fb.correct : true}>
+                        <FeedbackSpan key={i} $correct={fb.correct}>
                           {fb.word}
                         </FeedbackSpan>
                       ))}

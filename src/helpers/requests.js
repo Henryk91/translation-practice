@@ -209,7 +209,7 @@ export function logUse() {
   const currentURL = window.location.href;
   if (currentURL.includes("localhost")) return;
 
-  fetch("https://note.henryk.co.za/api/log")
+  fetch("https://note.henryk.co.za/api/log?site=translation-practice")
     .then((res) => res.json())
     .then((data) => {
       console.log(data);

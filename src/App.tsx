@@ -1,13 +1,11 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane, faSpinner, faTrash } from "@fortawesome/free-solid-svg-icons";
 
-import { levelSentences } from "./data/levelSentences";
-import { Level } from "./types";
+import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
+import { Level as defaultLevels } from "./types";
 import { logUse } from "./helpers/requests";
-
-logUse();
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -32,7 +30,6 @@ const Container = styled.div`
     padding: 0;
   }
 `;
-
 
 const Image = styled.img`
   border-radius: 5px;
@@ -248,11 +245,15 @@ interface Row {
 }
 
 const App: React.FC = () => {
-  const defaultText = levelSentences[Level.A21];
+  const [levelSentences, setLevelSentences] = useState<Record<defaultLevels, string>>(defaultLevelSentences);
+  const [levels, setLevels] = useState<any>(defaultLevels);
+  const hasInit = useRef(false);
+  const defaultText = defaultLevelSentences[defaultLevels.A21];
+
   const [text, setText] = useState<string>(defaultText);
   const [mode, setMode] = useState<"easy" | "hard">("easy");
   const [rows, setRows] = useState<Row[]>([]);
-  const [selectedLevel, setSelectedLevel] = useState<Level | undefined>();
+  const [selectedLevel, setSelectedLevel] = useState<defaultLevels | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const focusNext = (index: number) => {
@@ -266,7 +267,7 @@ const App: React.FC = () => {
       .filter(Boolean);
 
   const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const level = e.target.value as Level;
+    const level = e.target.value as defaultLevels;
     const text = levelSentences[level];
     const sentences = splitAndShuffle(text);
 
@@ -306,6 +307,27 @@ const App: React.FC = () => {
     setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
   };
 
+  const getTranslateSentence = async () => {
+    fetch("https://note.henryk.co.za/api/translate-practice")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          const newLevelSentences = { ...defaultLevelSentences, ...data };
+          setLevelSentences(newLevelSentences);
+
+          const newLevelsKeys = Object.keys(data).reduce((acc: any, key: string) => {
+            acc[key] = key;
+            return acc;
+          }, {});
+
+          setLevels({ ...levels, ...newLevelsKeys });
+        }
+      })
+      .catch((error) => {
+        console.log("Error:", error);
+      });
+  };
+
   const translateSentence = async (sentence: string): Promise<string> => {
     try {
       const res = await fetch("https://note.henryk.co.za/api/translate", {
@@ -313,11 +335,11 @@ const App: React.FC = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sentence }),
       });
-  
+
       if (!res.ok) {
         return "Error loading. Try again.";
       }
-  
+
       const { translated } = await res.json();
       return translated;
     } catch (error) {
@@ -364,6 +386,14 @@ const App: React.FC = () => {
     setRows((current) => current.map((r, idx) => (idx === index ? { ...r, userInput: value } : r)));
   };
 
+  useEffect(() => {
+    console.log("App initialized");
+    if (hasInit.current) return; // skip second call in development
+    hasInit.current = true;
+    getTranslateSentence();
+    logUse();
+  }, []);
+
   return (
     <>
       <GlobalStyle />
@@ -382,7 +412,7 @@ const App: React.FC = () => {
               onChange={handleLevelChange}
             >
               <option disabled>Select your Language Level</option>
-              {Object.values(Level).map((lvl) => (
+              {Object.values(levels as defaultLevels).map((lvl) => (
                 <option key={lvl} value={lvl}>
                   {lvl.toUpperCase()}
                 </option>

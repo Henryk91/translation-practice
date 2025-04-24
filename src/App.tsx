@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane, faSpinner, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faPaperPlane, faSpinner, faTrash, faLanguage, faSyncAlt } from "@fortawesome/free-solid-svg-icons";
 
 import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
 import { Level as defaultLevels } from "./types";
@@ -248,6 +248,7 @@ const App: React.FC = () => {
   const [levelSentences, setLevelSentences] = useState<Record<defaultLevels, string>>(defaultLevelSentences);
   const [levels, setLevels] = useState<any>(defaultLevels);
   const hasInit = useRef(false);
+  const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
   const defaultText = defaultLevelSentences[defaultLevels.A21];
 
   const [text, setText] = useState<string>(defaultText);
@@ -274,6 +275,20 @@ const App: React.FC = () => {
     setSelectedLevel(level);
     setText(text);
     setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+  };
+
+  const initTranslatedSentences = async () => {
+    setLoadingTranslation(true);
+    const originalSentences = rows.map((row) => row.sentence).join(" ");
+    const response = await translateSentence(originalSentences);
+    const translatedSentences = splitSentences(response);
+    const updated = rows.map((row, i) => {
+      row.translation = translatedSentences[i];
+      return row;
+    });
+
+    setRows(updated);
+    setLoadingTranslation(false);
   };
 
   const splitAndShuffle = (input: string): string[] => {
@@ -359,7 +374,7 @@ const App: React.FC = () => {
 
     focusNext(index);
 
-    const translated = await translateSentence(row.sentence);
+    const translated = row.translation ? row.translation : await translateSentence(row.sentence);
     const germanWords = translated.split(" ");
     const userWords = row.userInput.split(" ");
     const feedback = germanWords.map((gw, i) => {
@@ -432,6 +447,10 @@ const App: React.FC = () => {
               </Button>
               <Button onClick={handleTextSubmit}>
                 <FontAwesomeIcon icon={faPaperPlane} />
+              </Button>
+              <Button onClick={initTranslatedSentences} disabled={loadingTranslation || rows.length === 0}>
+                <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
+                <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
               </Button>
             </TextAreaButtonWrapper>
           </TextAreaWrapper>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane, faSpinner, faTrash, faLanguage, faSyncAlt } from "@fortawesome/free-solid-svg-icons";
@@ -6,6 +6,7 @@ import { faPaperPlane, faSpinner, faTrash, faLanguage, faSyncAlt } from "@fortaw
 import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
 import { Level as defaultLevels } from "./types";
 import { logUse } from "./helpers/requests";
+import { Dict } from "styled-components/dist/types";
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -245,8 +246,9 @@ interface Row {
 }
 
 const App: React.FC = () => {
-  const [levelSentences, setLevelSentences] = useState<Record<defaultLevels, string>>(defaultLevelSentences);
+  const [levelSentences, setLevelSentences] = useState<Record<defaultLevels, string | Dict>>(defaultLevelSentences);
   const [levels, setLevels] = useState<any>(defaultLevels);
+  const [subLevels, setSubLevels] = useState<any>();
   const hasInit = useRef(false);
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
   const defaultText = defaultLevelSentences[defaultLevels.A21];
@@ -255,6 +257,7 @@ const App: React.FC = () => {
   const [mode, setMode] = useState<"easy" | "hard">("easy");
   const [rows, setRows] = useState<Row[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<defaultLevels | undefined>();
+  const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const focusNext = (index: number) => {
@@ -270,11 +273,35 @@ const App: React.FC = () => {
   const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const level = e.target.value as defaultLevels;
     const text = levelSentences[level];
-    const sentences = splitAndShuffle(text);
+    if (typeof text === "string") {
+      const sentences = splitAndShuffle(text);
+      setSubLevels(null);
+      setSelectedLevel(level);
+      setText(text);
+      setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+    } else if (typeof text === "object") {
+      const subLevels = Object.keys(text);
+      setText("");
+      setRows([]);
+      setSelectedLevel(level);
+      setSubLevels(subLevels);
+      setSelectedSubLevel(undefined);
+    }
+  };
 
-    setSelectedLevel(level);
-    setText(text);
-    setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+  const handleSubLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const subLevel = e.target.value as any;
+
+    setSelectedSubLevel(subLevel);
+    if (!selectedLevel) return;
+    const obj = levelSentences[selectedLevel];
+    const text = typeof obj === "object" ? obj[subLevel] : "";
+
+    if (typeof text === "string") {
+      const sentences = splitAndShuffle(text);
+      setText(text);
+      setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+    }
   };
 
   const initTranslatedSentences = async () => {
@@ -315,15 +342,17 @@ const App: React.FC = () => {
   const handleTextSubmit = (): void => {
     let textToSplit = text;
     if (!text && selectedLevel) {
-      textToSplit = levelSentences[selectedLevel];
-      setText(levelSentences[selectedLevel]);
+      textToSplit = levelSentences[selectedLevel] as string;
+      setText(textToSplit);
     }
     const sentences = splitAndShuffle(textToSplit);
     setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
   };
 
-  const getTranslateSentence = async () => {
-    fetch("https://note.henryk.co.za/api/translate-practice")
+  const getTranslateSentence = useCallback(() => {
+    // fetch("https://note.henryk.co.za/api/translate-practice")
+    // fetch("http://localhost:8080/api/translate-practice")
+    fetch("http://localhost:8080/api/full-translate-practice")
       .then((res) => res.json())
       .then((data) => {
         if (data) {
@@ -335,13 +364,13 @@ const App: React.FC = () => {
             return acc;
           }, {});
 
-          setLevels({ ...levels, ...newLevelsKeys });
+          setLevels({ ...defaultLevels, ...newLevelsKeys });
         }
       })
       .catch((error) => {
         console.log("Error:", error);
       });
-  };
+  }, []);
 
   const translateSentence = async (sentence: string): Promise<string> => {
     try {
@@ -407,7 +436,7 @@ const App: React.FC = () => {
     hasInit.current = true;
     getTranslateSentence();
     logUse();
-  }, []);
+  }, [getTranslateSentence]);
 
   return (
     <>
@@ -433,6 +462,18 @@ const App: React.FC = () => {
                 </option>
               ))}
             </Select>
+            {subLevels && (
+              <>
+                <Select value={selectedSubLevel || "Select Sub Level"} onChange={handleSubLevelChange}>
+                  <option disabled>Select Sub Level</option>
+                  {Object.values(subLevels as defaultLevels).map((lvl) => (
+                    <option key={lvl} value={lvl}>
+                      {lvl.toUpperCase()}
+                    </option>
+                  ))}
+                </Select>
+              </>
+            )}
             <Label>Mode:</Label>
             <Select value={mode} onChange={(e: any) => setMode(e.target.value)}>
               <option value="easy">Easy</option>

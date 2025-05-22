@@ -350,9 +350,7 @@ const App: React.FC = () => {
   };
 
   const getTranslateSentence = useCallback(() => {
-    // fetch("https://note.henryk.co.za/api/translate-practice")
-    // fetch("http://localhost:8080/api/translate-practice")
-    fetch("http://localhost:8080/api/full-translate-practice")
+    fetch("https://note.henryk.co.za/api/full-translate-practice")
       .then((res) => res.json())
       .then((data) => {
         if (data) {

@@ -301,9 +301,9 @@ const App: React.FC = () => {
     const text = typeof obj === "object" ? obj[subLevel] : "";
 
     if (typeof text === "string") {
-      const sentences = splitAndShuffle(text);
+      //   const sentences = splitAndShuffle(text);
       setText(text);
-      setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+      //   setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
     }
   };
 
@@ -336,6 +336,15 @@ const App: React.FC = () => {
       [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+  };
+
+  const shuffleRow = (rows: Row[]): Row[] => {
+    const shuffled = [...rows];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   };
 
   const handleTextClear = (): void => {
@@ -372,6 +381,26 @@ const App: React.FC = () => {
         console.log("Error:", error);
       });
   }, [initialLevelDict]);
+
+  const getSentenceWithTranslation = useCallback(() => {
+    fetch(`https://note.henryk.co.za/api/saved-translation?level=${selectedLevel}&sublevel=${selectedSubLevel}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          const rows = data.map((item: Row) => {
+            item.feedback = null;
+            item.userInput = "";
+            item.isLoading = false;
+            return item;
+          });
+          const sentences = shuffleRow(rows);
+          setRows(sentences);
+        }
+      })
+      .catch((error) => {
+        console.log("Error:", error);
+      });
+  }, [selectedLevel, selectedSubLevel]);
 
   const translateSentence = async (sentence: string): Promise<string> => {
     try {
@@ -430,6 +459,12 @@ const App: React.FC = () => {
     const value = e.target.value;
     setRows((current) => current.map((r, idx) => (idx === index ? { ...r, userInput: value } : r)));
   };
+
+  useEffect(() => {
+    if (selectedLevel && selectedSubLevel) {
+      getSentenceWithTranslation();
+    }
+  }, [selectedLevel, selectedSubLevel, getSentenceWithTranslation]);
 
   useEffect(() => {
     console.log("App initialized");

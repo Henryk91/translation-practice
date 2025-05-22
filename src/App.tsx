@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane, faSpinner, faTrash, faLanguage, faSyncAlt } from "@fortawesome/free-solid-svg-icons";
@@ -246,8 +246,11 @@ interface Row {
 }
 
 const App: React.FC = () => {
-  const [levelSentences, setLevelSentences] = useState<Record<defaultLevels, string | Dict>>(defaultLevelSentences);
-  const [levels, setLevels] = useState<any>(defaultLevels);
+  const initialLevelDict = useMemo(() => {
+    return { "By Level": defaultLevelSentences };
+  }, []);
+  const [levelSentences, setLevelSentences] = useState<Dict>(initialLevelDict);
+  const [levels, setLevels] = useState<any>(["By Level"]);
   const [subLevels, setSubLevels] = useState<any>();
   const hasInit = useRef(false);
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
@@ -354,21 +357,21 @@ const App: React.FC = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data) {
-          const newLevelSentences = { ...defaultLevelSentences, ...data };
+          const newLevelSentences = { ...initialLevelDict, ...data };
           setLevelSentences(newLevelSentences);
 
-          const newLevelsKeys = Object.keys(data).reduce((acc: any, key: string) => {
+          const newLevelsKeys = Object.keys(newLevelSentences).reduce((acc: any, key: string) => {
             acc[key] = key;
             return acc;
           }, {});
 
-          setLevels({ ...defaultLevels, ...newLevelsKeys });
+          setLevels(newLevelsKeys);
         }
       })
       .catch((error) => {
         console.log("Error:", error);
       });
-  }, []);
+  }, [initialLevelDict]);
 
   const translateSentence = async (sentence: string): Promise<string> => {
     try {

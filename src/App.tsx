@@ -383,7 +383,7 @@ const App: React.FC = () => {
   }, [initialLevelDict]);
 
   const getSentenceWithTranslation = useCallback(() => {
-    fetch(`https://note.henryk.co.za/api/saved-translation?level=${selectedLevel}&sublevel=${selectedSubLevel}`)
+    fetch(`https://note.henryk.co.za/api/saved-translation?level=${selectedLevel}&subLevel=${selectedSubLevel}`)
       .then((res) => res.json())
       .then((data) => {
         if (data) {

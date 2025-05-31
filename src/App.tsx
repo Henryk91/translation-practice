@@ -276,19 +276,22 @@ const App: React.FC = () => {
   const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const level = e.target.value as defaultLevels;
     const text = levelSentences[level];
+    setSelectedLevel(level);
+    localStorage.setItem("selectedLevel", level);
+
     if (typeof text === "string") {
       const sentences = splitAndShuffle(text);
       setSubLevels(null);
-      setSelectedLevel(level);
+
       setText(text);
       setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
     } else if (typeof text === "object") {
       const subLevels = Object.keys(text);
       setText("");
       setRows([]);
-      setSelectedLevel(level);
       setSubLevels(subLevels);
       setSelectedSubLevel(undefined);
+      localStorage.removeItem("selectedSubLevel");
     }
   };
 
@@ -296,6 +299,7 @@ const App: React.FC = () => {
     const subLevel = e.target.value as any;
 
     setSelectedSubLevel(subLevel);
+    localStorage.setItem("selectedSubLevel", subLevel);
     if (!selectedLevel) return;
     const obj = levelSentences[selectedLevel];
     const text = typeof obj === "object" ? obj[subLevel] : "";
@@ -465,6 +469,22 @@ const App: React.FC = () => {
       getSentenceWithTranslation();
     }
   }, [selectedLevel, selectedSubLevel, getSentenceWithTranslation]);
+
+  useEffect(() => {
+    const storedLevel = localStorage.getItem("selectedLevel") as defaultLevels | null;
+    const storedSubLevel = localStorage.getItem("selectedSubLevel") || null;
+    if (storedLevel) {
+      setSelectedLevel(storedLevel);
+      const text = levelSentences[storedLevel];
+      if (typeof text === "object") {
+        const subLevels = Object.keys(text);
+        setSubLevels(subLevels);
+      }
+    }
+    if (storedSubLevel) {
+      setSelectedSubLevel(storedSubLevel);
+    }
+  }, [levels, levelSentences]);
 
   useEffect(() => {
     console.log("App initialized");

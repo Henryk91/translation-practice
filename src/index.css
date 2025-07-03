@@ -178,3 +178,10 @@ button:disabled {
 .smartButton > p {
   margin: inherit;
 }
+
+.default {
+  color: default;
+}
+.red {
+  color: red;
+}

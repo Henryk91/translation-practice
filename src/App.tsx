@@ -244,6 +244,7 @@ interface Row {
   feedback: FeedbackWord[] | null;
   isLoading?: boolean;
   isCorrect?: boolean;
+  aiCorrect?: boolean;
 }
 
 function SubLevelOption({ selectedLevel, subLevel }: { selectedLevel: string | undefined; subLevel: string }) {
@@ -263,7 +264,12 @@ function SubLevelOption({ selectedLevel, subLevel }: { selectedLevel: string | u
   );
 }
 
-const updateRowFeedback = (mode: "easy" | "hard", row: Row, translated: string): Row => {
+const updateRowFeedback = (
+  mode: "easy" | "hard",
+  row: Row,
+  translated: string,
+  aiCorrect: boolean | undefined
+): Row => {
   const germanWords = translated.split(" ");
   const userWords = row.userInput.split(" ");
 
@@ -277,8 +283,8 @@ const updateRowFeedback = (mode: "easy" | "hard", row: Row, translated: string):
     }
     return { word: gw, correct };
   });
-
-  return { ...row, translation: translated, feedback, isLoading: false, isCorrect };
+  console.log("aiCorrect", aiCorrect);
+  return { ...row, translation: translated, feedback, isLoading: false, isCorrect, aiCorrect };
 };
 
 const App: React.FC = () => {
@@ -466,6 +472,7 @@ const App: React.FC = () => {
     if (!english || !german) return false;
     try {
       const res = await fetch("https://note.henryk.co.za/api/confirm-translation", {
+        // const res = await fetch("http://localhost:8080/api/confirm-translation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ english, german }),
@@ -476,6 +483,7 @@ const App: React.FC = () => {
       }
 
       const { isCorrect } = await res.json();
+      console.log("isCorrect", isCorrect);
       return isCorrect;
     } catch (error) {
       console.error("Error:", error);
@@ -495,8 +503,13 @@ const App: React.FC = () => {
 
     const userWords = row.userInput;
     const promptWords = row.sentence;
-    const isTranslationCorrect = await confirmTranslationCheck(userWords, promptWords);
-    const updatedRow = updateRowFeedback(mode, row, isTranslationCorrect ? userWords : row.translation);
+    const isTranslationCorrect = await confirmTranslationCheck(promptWords, userWords);
+    const updatedRow = updateRowFeedback(
+      mode,
+      row,
+      isTranslationCorrect ? userWords : row.translation,
+      isTranslationCorrect
+    );
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
     setRows(newRows);
     updateScore(newRows);
@@ -529,7 +542,7 @@ const App: React.FC = () => {
     focusNext(index);
     const translated = row.translation ? row.translation : await translateSentence(row.sentence);
 
-    const updatedRow = updateRowFeedback(mode, row, translated);
+    const updatedRow = updateRowFeedback(mode, row, translated, row.aiCorrect);
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
     updateScore(newRows);
     setRows(newRows);
@@ -658,8 +671,9 @@ const App: React.FC = () => {
                       <Button
                         onClick={() => handleAiCheck(idx)}
                         disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
+                        style={{ color: row.aiCorrect === false ? "red" : "gray" }}
                       >
-                        <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />
+                        <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />{" "}
                       </Button>
                     </InputWrapper>
                   </TableCell>

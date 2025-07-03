@@ -113,6 +113,13 @@ button {
 button:active {
   background-color: rgba(255, 226, 197, 0.5);
 }
+button:disabled {
+  opacity: 0.3;
+  &:hover {
+    background-color: #333;
+    cursor: not-allowed;
+  }
+}
 
 #multiply {
   grid-column: 3/5;

@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane, faSpinner, faTrash, faLanguage, faSyncAlt } from "@fortawesome/free-solid-svg-icons";
+import { faPaperPlane, faSpinner, faTrash, faLanguage, faSyncAlt, faBrain } from "@fortawesome/free-solid-svg-icons";
 
 import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
 import { Level as defaultLevels } from "./types";
@@ -263,6 +263,24 @@ function SubLevelOption({ selectedLevel, subLevel }: { selectedLevel: string | u
   );
 }
 
+const updateRowFeedback = (mode: "easy" | "hard", row: Row, translated: string): Row => {
+  const germanWords = translated.split(" ");
+  const userWords = row.userInput.split(" ");
+
+  let isCorrect = true;
+  const feedback = germanWords.map((gw, i) => {
+    const uw = userWords[i] || "";
+    const normalize = (s: string) => s.replace(/[.,!?:;"-]/g, "").toLowerCase();
+    const correct = mode === "hard" ? uw === gw : normalize(uw) === normalize(gw);
+    if (!correct) {
+      isCorrect = false;
+    }
+    return { word: gw, correct };
+  });
+
+  return { ...row, translation: translated, feedback, isLoading: false, isCorrect };
+};
+
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
     return { "By Level": defaultLevelSentences };
@@ -444,37 +462,44 @@ const App: React.FC = () => {
     }
   };
 
-  const handleTranslate = async (index: number): Promise<void> => {
+  const confirmTranslationCheck = async (english: string, german: string): Promise<boolean> => {
+    if (!english || !german) return false;
+    try {
+      const res = await fetch("https://note.henryk.co.za/api/confirm-translation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ english, german }),
+      });
+
+      if (!res.ok) {
+        return false;
+      }
+
+      const { isCorrect } = await res.json();
+      return isCorrect;
+    } catch (error) {
+      console.error("Error:", error);
+      return false;
+    }
+  };
+
+  const handleAiCheck = async (index: number): Promise<void> => {
     setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
 
     const row = rows[index];
-    if (!row.userInput) {
+    const isCorrect = row.isCorrect;
+    if (!row.userInput || isCorrect === undefined || isCorrect === true) {
       setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
       return;
     }
 
-    focusNext(index);
-
-    const translated = row.translation ? row.translation : await translateSentence(row.sentence);
-    const germanWords = translated.split(" ");
-    const userWords = row.userInput.split(" ");
-
-    let isCorrect = true;
-    const feedback = germanWords.map((gw, i) => {
-      const uw = userWords[i] || "";
-      const normalize = (s: string) => s.replace(/[.,!?:;"-]/g, "").toLowerCase();
-      const correct = mode === "hard" ? uw === gw : normalize(uw) === normalize(gw);
-      if (!correct) {
-        isCorrect = false;
-      }
-      return { word: gw, correct };
-    });
-
-    const newRows = rows.map((r, i) =>
-      i === index ? { ...r, translation: translated, feedback, isLoading: false, isCorrect } : r
-    );
-    updateScore(newRows);
+    const userWords = row.userInput;
+    const promptWords = row.sentence;
+    const isTranslationCorrect = await confirmTranslationCheck(userWords, promptWords);
+    const updatedRow = updateRowFeedback(mode, row, isTranslationCorrect ? userWords : row.translation);
+    const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
     setRows(newRows);
+    updateScore(newRows);
   };
 
   const updateScore = (rows: Row[]): void => {
@@ -490,6 +515,24 @@ const App: React.FC = () => {
     });
     const score = totalCount > 0 ? ((correctCount / totalCount) * 100).toFixed(0) : "0";
     localStorage.setItem(`${selectedLevel}-${selectedSubLevel}`, score);
+  };
+
+  const handleTranslate = async (index: number): Promise<void> => {
+    setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
+
+    const row = rows[index];
+    if (!row.userInput) {
+      setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
+      return;
+    }
+
+    focusNext(index);
+    const translated = row.translation ? row.translation : await translateSentence(row.sentence);
+
+    const updatedRow = updateRowFeedback(mode, row, translated);
+    const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
+    updateScore(newRows);
+    setRows(newRows);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
@@ -609,8 +652,14 @@ const App: React.FC = () => {
                         onChange={(e: any) => handleInputChange(e, idx)}
                         onKeyPress={(e: any) => handleKeyPress(e, idx)}
                       />
-                      <Button onClick={() => handleTranslate(idx)} disabled={row.isLoading}>
+                      <Button onClick={() => handleTranslate(idx)} disabled={row.isLoading || !row.userInput}>
                         <FontAwesomeIcon icon={row.isLoading ? faSpinner : faPaperPlane} spin={row.isLoading} />
+                      </Button>
+                      <Button
+                        onClick={() => handleAiCheck(idx)}
+                        disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
+                      >
+                        <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />
                       </Button>
                     </InputWrapper>
                   </TableCell>

@@ -633,6 +633,10 @@ const App: React.FC = () => {
     setRows((current) => current.map((r, idx) => (idx === index ? { ...r, userInput: value } : r)));
   };
 
+  const shouldShowCheck = (row: Row) => {
+    return row.isCorrect === undefined || row.isCorrect === true;
+  };
+
   useEffect(() => {
     if (selectedLevel && selectedSubLevel) {
       setSentenceWithTranslation();
@@ -655,13 +659,13 @@ const App: React.FC = () => {
     }
   }, [levels, levelSentences]);
 
-  useEffect(() => {
-    if (aiCheckIndex !== undefined) {
-      console.log("handleAiCheck called with index:", aiCheckIndex);
-      handleAiCheckCB(aiCheckIndex);
-      setAiCheckIndex(undefined); // reset after handling
-    }
-  }, [aiCheckIndex, handleAiCheckCB]);
+  // useEffect(() => {
+  //   if (aiCheckIndex !== undefined) {
+  //     console.log("handleAiCheck called with index:", aiCheckIndex);
+  //     handleAiCheckCB(aiCheckIndex);
+  //     setAiCheckIndex(undefined); // reset after handling
+  //   }
+  // }, [aiCheckIndex, handleAiCheckCB]);
 
   useEffect(() => {
     console.log("App initialized");
@@ -749,16 +753,21 @@ const App: React.FC = () => {
                         onChange={(e: any) => handleInputChange(e, idx)}
                         onKeyPress={(e: any) => handleKeyPress(e, idx)}
                       />
-                      <Button onClick={() => handleTranslate(idx)} disabled={row.isLoading || !row.userInput}>
-                        <FontAwesomeIcon icon={row.isLoading ? faSpinner : faPaperPlane} spin={row.isLoading} />
-                      </Button>
-                      <Button
-                        onClick={() => handleAiCheck(idx)}
-                        disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
-                        style={{ color: row.aiCorrect === false ? "red" : "gray" }}
-                      >
-                        <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />{" "}
-                      </Button>
+                      <>
+                        {shouldShowCheck(row) ? (
+                          <Button onClick={() => handleTranslate(idx)} disabled={row.isLoading || !row.userInput}>
+                            <FontAwesomeIcon icon={row.isLoading ? faSpinner : faPaperPlane} spin={row.isLoading} />
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => handleAiCheck(idx)}
+                            disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
+                            style={{ color: row.aiCorrect === false ? "red" : "gray" }}
+                          >
+                            <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />{" "}
+                          </Button>
+                        )}
+                      </>
                     </InputWrapper>
                   </TableCell>
                   <FeedBackTableCell>

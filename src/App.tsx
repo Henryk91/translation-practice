@@ -407,15 +407,16 @@ const App: React.FC = () => {
     setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
   };
 
-  const setUnShuffledText = (): void => {
-    let textToSplit = text;
-    if (selectedLevel && selectedSubLevel) {
-      textToSplit = levelSentences[selectedLevel][selectedSubLevel] as string;
-      setText(textToSplit);
-    }
+  const setUnShuffledText = async () => {
+    const translatedSentences = await getSentenceWithTranslation();
 
-    const sentences = splitSentences(textToSplit);
-    setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+    const rows = translatedSentences.map((item: Row) => {
+      item.feedback = null;
+      item.userInput = "";
+      item.isLoading = false;
+      return item;
+    });
+    setRows(rows);
   };
 
   const getTranslateSentence = useCallback(() => {
@@ -439,13 +440,31 @@ const App: React.FC = () => {
       });
   }, [initialLevelDict]);
 
-  const getSentenceWithTranslation = useCallback(() => {
+  const getSentenceWithTranslation = useCallback(async (): Promise<any> => {
     const encodedSelectedLevel = encodeURIComponent(`${selectedLevel}`);
     const encodedSelectedSubLevel = encodeURIComponent(`${selectedSubLevel}`);
-    fetch(
-      `https://note.henryk.co.za/api/saved-translation?level=${encodedSelectedLevel}&subLevel=${encodedSelectedSubLevel}`
-    )
-      .then((res) => res.json())
+
+    try {
+      const res = await fetch(
+        `https://note.henryk.co.za/api/saved-translation?level=${encodedSelectedLevel}&subLevel=${encodedSelectedSubLevel}`
+      );
+
+      if (!res.ok) {
+        return "Error loading. Try again.";
+      }
+
+      const response = await res.json();
+      return response;
+    } catch (error) {
+      console.error("Error:", error);
+      return "Error loading. Try again.";
+    }
+  }, [selectedLevel, selectedSubLevel]);
+
+  const setSentenceWithTranslation = useCallback(() => {
+    const translatedSentences = getSentenceWithTranslation();
+
+    translatedSentences
       .then((data) => {
         if (data) {
           const rows = data.map((item: Row) => {
@@ -461,7 +480,7 @@ const App: React.FC = () => {
       .catch((error) => {
         console.log("Error:", error);
       });
-  }, [selectedLevel, selectedSubLevel]);
+  }, [getSentenceWithTranslation]);
 
   const translateSentence = async (sentence: string): Promise<string> => {
     try {
@@ -577,9 +596,9 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (selectedLevel && selectedSubLevel) {
-      getSentenceWithTranslation();
+      setSentenceWithTranslation();
     }
-  }, [selectedLevel, selectedSubLevel, getSentenceWithTranslation]);
+  }, [selectedLevel, selectedSubLevel, setSentenceWithTranslation]);
 
   useEffect(() => {
     const storedLevel = localStorage.getItem("selectedLevel") as defaultLevels | null;

@@ -407,6 +407,17 @@ const App: React.FC = () => {
     setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
   };
 
+  const setUnShuffledText = (): void => {
+    let textToSplit = text;
+    if (selectedLevel && selectedSubLevel) {
+      textToSplit = levelSentences[selectedLevel][selectedSubLevel] as string;
+      setText(textToSplit);
+    }
+
+    const sentences = splitSentences(textToSplit);
+    setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+  };
+
   const getTranslateSentence = useCallback(() => {
     fetch("https://note.henryk.co.za/api/full-translate-practice")
       .then((res) => res.json())
@@ -637,6 +648,9 @@ const App: React.FC = () => {
           <TextAreaWrapper>
             <TextArea placeholder="Enter English text..." value={text} onChange={(e: any) => setText(e.target.value)} />
             <TextAreaButtonWrapper>
+              <Button onClick={setUnShuffledText}>
+                <FontAwesomeIcon icon={faSyncAlt} />
+              </Button>
               <Button onClick={handleTextClear}>
                 <FontAwesomeIcon icon={faTrash} />
               </Button>

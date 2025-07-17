@@ -290,7 +290,10 @@ const updateRowFeedback = (
   aiCorrect: boolean | undefined
 ): Row => {
   const germanWords = translated.split(" ");
-  const userWords = row.userInput.split(" ");
+  const userWords = row.userInput
+    .trim()
+    .split(" ")
+    .filter((word) => word !== "");
 
   let isCorrect = true;
   const feedback = germanWords.map((gw, i) => {

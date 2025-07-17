@@ -675,7 +675,11 @@ const App: React.FC = () => {
     if (hasInit.current) return; // skip second call in development
     hasInit.current = true;
     getTranslateSentence();
-    logUse();
+    const hasLoggedUse = sessionStorage.getItem("hasLoggedUse");
+    if (!hasLoggedUse) {
+      sessionStorage.setItem("hasLoggedUse", "true");
+      logUse();
+    }
   }, [getTranslateSentence]);
 
   return (

@@ -247,6 +247,25 @@ interface Row {
   aiCorrect?: boolean;
 }
 
+const updateScore = (
+  rows: Row[],
+  selectedLevel: defaultLevels | undefined,
+  selectedSubLevel: string | undefined
+): void => {
+  let totalCount = 0;
+  let correctCount = 0;
+  rows.forEach((row) => {
+    if (row.hasOwnProperty("isCorrect")) {
+      totalCount++;
+      if (row.isCorrect) {
+        correctCount++;
+      }
+    }
+  });
+  const score = totalCount > 0 ? ((correctCount / totalCount) * 100).toFixed(0) : "0";
+  localStorage.setItem(`${selectedLevel}-${selectedSubLevel}`, score);
+};
+
 function SubLevelOption({ selectedLevel, subLevel }: { selectedLevel: string | undefined; subLevel: string }) {
   const getLevelScore = (level: string, subLevel: string): string | null => {
     return localStorage.getItem(`${level}-${subLevel}`) || null;
@@ -303,6 +322,7 @@ const App: React.FC = () => {
   const [rows, setRows] = useState<Row[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<defaultLevels | undefined>();
   const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
+  const [aiCheckIndex, setAiCheckIndex] = useState<number | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const focusNext = (index: number) => {
@@ -502,11 +522,11 @@ const App: React.FC = () => {
     }
   };
 
-  const confirmTranslationCheck = async (english: string, german: string): Promise<boolean> => {
+  const confirmTranslationCheck = useCallback(async (english: string, german: string): Promise<boolean> => {
     if (!english || !german) return false;
+
     try {
       const res = await fetch("https://note.henryk.co.za/api/confirm-translation", {
-        // const res = await fetch("http://localhost:8080/api/confirm-translation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ english, german }),
@@ -523,7 +543,7 @@ const App: React.FC = () => {
       console.error("Error:", error);
       return false;
     }
-  };
+  }, []);
 
   const handleAiCheck = async (index: number): Promise<void> => {
     setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
@@ -546,23 +566,38 @@ const App: React.FC = () => {
     );
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
     setRows(newRows);
-    updateScore(newRows);
+    updateScore(newRows, selectedLevel, selectedSubLevel);
   };
 
-  const updateScore = (rows: Row[]): void => {
-    let totalCount = 0;
-    let correctCount = 0;
-    rows.forEach((row) => {
-      if (row.hasOwnProperty("isCorrect")) {
-        totalCount++;
-        if (row.isCorrect) {
-          correctCount++;
-        }
+  const handleAiCheckCB = useCallback(
+    async (index: number): Promise<void> => {
+      setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
+
+      const row = rows[index];
+      const isCorrect = row.isCorrect;
+
+      if (!row.userInput || isCorrect === undefined || isCorrect === true) {
+        setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
+        return;
       }
-    });
-    const score = totalCount > 0 ? ((correctCount / totalCount) * 100).toFixed(0) : "0";
-    localStorage.setItem(`${selectedLevel}-${selectedSubLevel}`, score);
-  };
+
+      const userWords = row.userInput;
+      const promptWords = row.sentence;
+      const isTranslationCorrect = await confirmTranslationCheck(promptWords, userWords);
+
+      const updatedRow = updateRowFeedback(
+        mode,
+        row,
+        isTranslationCorrect ? userWords : row.translation,
+        isTranslationCorrect
+      );
+
+      const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
+      setRows(newRows);
+      updateScore(newRows, selectedLevel, selectedSubLevel);
+    },
+    [rows, setRows, mode, confirmTranslationCheck, selectedLevel, selectedSubLevel]
+  );
 
   const handleTranslate = async (index: number): Promise<void> => {
     setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
@@ -578,8 +613,12 @@ const App: React.FC = () => {
 
     const updatedRow = updateRowFeedback(mode, row, translated, row.aiCorrect);
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
-    updateScore(newRows);
+    updateScore(newRows, selectedLevel, selectedSubLevel);
     setRows(newRows);
+
+    if (newRows[index].isCorrect === false) {
+      setAiCheckIndex(index);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
@@ -615,6 +654,14 @@ const App: React.FC = () => {
       setSelectedSubLevel(storedSubLevel);
     }
   }, [levels, levelSentences]);
+
+  useEffect(() => {
+    if (aiCheckIndex !== undefined) {
+      console.log("handleAiCheck called with index:", aiCheckIndex);
+      handleAiCheckCB(aiCheckIndex);
+      setAiCheckIndex(undefined); // reset after handling
+    }
+  }, [aiCheckIndex, handleAiCheckCB]);
 
   useEffect(() => {
     console.log("App initialized");

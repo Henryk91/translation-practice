@@ -34,83 +34,9 @@ import {
   FeedBackTableCell,
   Image,
 } from "./style";
-
-interface FeedbackWord {
-  word: string;
-  correct: boolean;
-}
-
-interface Row {
-  sentence: string;
-  userInput: string;
-  translation: string;
-  feedback: FeedbackWord[] | null;
-  isLoading?: boolean;
-  isCorrect?: boolean;
-  aiCorrect?: boolean;
-}
-
-const updateScore = (
-  rows: Row[],
-  selectedLevel: defaultLevels | undefined,
-  selectedSubLevel: string | undefined
-): void => {
-  let totalCount = 0;
-  let correctCount = 0;
-  rows.forEach((row) => {
-    if (row.hasOwnProperty("isCorrect")) {
-      totalCount++;
-      if (row.isCorrect) {
-        correctCount++;
-      }
-    }
-  });
-  const score = totalCount > 0 ? ((correctCount / totalCount) * 100).toFixed(0) : "0";
-  localStorage.setItem(`${selectedLevel}-${selectedSubLevel}`, score);
-};
-
-function SubLevelOption({ selectedLevel, subLevel }: { selectedLevel: string | undefined; subLevel: string }) {
-  const getLevelScore = (level: string, subLevel: string): string | null => {
-    return localStorage.getItem(`${level}-${subLevel}`) || null;
-  };
-
-  const levelScoreElements = (selectedLevel: string | undefined, subLevel: string) => {
-    const score = getLevelScore(selectedLevel || "", subLevel);
-    return score ? `(${score}%)` : "";
-  };
-
-  return (
-    <option key={subLevel} value={subLevel}>
-      {levelScoreElements(selectedLevel, subLevel)} {subLevel.toUpperCase()}
-    </option>
-  );
-}
-
-const updateRowFeedback = (
-  mode: "easy" | "hard",
-  row: Row,
-  translated: string,
-  aiCorrect: boolean | undefined
-): Row => {
-  const germanWords = translated.split(" ");
-  const userWords = row.userInput
-    .trim()
-    .split(" ")
-    .filter((word) => word !== "");
-
-  let isCorrect = true;
-  const feedback = germanWords.map((gw, i) => {
-    const uw = userWords[i] || "";
-    const normalize = (s: string) => s.replace(/[.,!?:;"-]/g, "").toLowerCase();
-    const correct = mode === "hard" ? uw === gw : normalize(uw) === normalize(gw);
-    if (!correct) {
-      isCorrect = false;
-    }
-    return { word: gw, correct };
-  });
-  console.log("aiCorrect", aiCorrect);
-  return { ...row, translation: translated, feedback, isLoading: false, isCorrect, aiCorrect };
-};
+import { Row } from "./types";
+import { updateRowFeedback, updateScore } from "./utils";
+import { SubLevelOption } from "./subLevel";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {

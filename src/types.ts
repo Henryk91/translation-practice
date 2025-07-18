@@ -12,3 +12,18 @@ export enum Level {
   C1 = "c1",
   C2 = "c2",
 }
+
+export interface FeedbackWord {
+  word: string;
+  correct: boolean;
+}
+
+export interface Row {
+  sentence: string;
+  userInput: string;
+  translation: string;
+  feedback: FeedbackWord[] | null;
+  isLoading?: boolean;
+  isCorrect?: boolean;
+  aiCorrect?: boolean;
+}

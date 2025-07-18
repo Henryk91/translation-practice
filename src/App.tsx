@@ -1,7 +1,15 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
 import styled, { createGlobalStyle } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane, faSpinner, faTrash, faLanguage, faSyncAlt, faBrain } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPaperPlane,
+  faSpinner,
+  faTrash,
+  faLanguage,
+  faSyncAlt,
+  faBrain,
+  faSave,
+} from "@fortawesome/free-solid-svg-icons";
 
 import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
 import { Level as defaultLevels } from "./types";
@@ -317,6 +325,7 @@ const App: React.FC = () => {
   const [levels, setLevels] = useState<any>(["By Level"]);
   const [subLevels, setSubLevels] = useState<any>();
   const hasInit = useRef(false);
+  const [shouldSave, setShouldSave] = useState<boolean>(true);
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
   const defaultText = defaultLevelSentences[defaultLevels.A21];
 
@@ -569,7 +578,7 @@ const App: React.FC = () => {
     );
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
     setRows(newRows);
-    updateScore(newRows, selectedLevel, selectedSubLevel);
+    if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
   };
 
   const handleAiCheckCB = useCallback(
@@ -597,9 +606,9 @@ const App: React.FC = () => {
 
       const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
       setRows(newRows);
-      updateScore(newRows, selectedLevel, selectedSubLevel);
+      if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
     },
-    [rows, setRows, mode, confirmTranslationCheck, selectedLevel, selectedSubLevel]
+    [rows, setRows, mode, confirmTranslationCheck, selectedLevel, selectedSubLevel, shouldSave]
   );
 
   const handleTranslate = async (index: number): Promise<void> => {
@@ -616,7 +625,7 @@ const App: React.FC = () => {
 
     const updatedRow = updateRowFeedback(mode, row, translated, row.aiCorrect);
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
-    updateScore(newRows, selectedLevel, selectedSubLevel);
+    if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
     setRows(newRows);
 
     if (newRows[index].isCorrect === false) {
@@ -727,6 +736,9 @@ const App: React.FC = () => {
             <TextAreaButtonWrapper>
               <Button onClick={setUnShuffledText}>
                 <FontAwesomeIcon icon={faSyncAlt} />
+              </Button>
+              <Button onClick={() => setShouldSave(!shouldSave)} style={{ color: shouldSave ? "green" : "red" }}>
+                <FontAwesomeIcon icon={faSave} />
               </Button>
               <Button onClick={handleTextClear}>
                 <FontAwesomeIcon icon={faTrash} />

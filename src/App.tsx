@@ -8,6 +8,8 @@ import {
   faSyncAlt,
   faBrain,
   faSave,
+  faHighlighter,
+  faEdit,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
@@ -48,7 +50,9 @@ const App: React.FC = () => {
   const hasInit = useRef(false);
   const [shouldSave, setShouldSave] = useState<boolean>(true);
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
+  const [useGapFill, setUseGapFill] = useState<boolean>(false);
   const [shuffleSentences, setShuffleSentences] = useState<boolean>(true);
+  const [hasGapFill, setHasGapFill] = useState<boolean>(false);
   const defaultText = defaultLevelSentences[defaultLevels.A21];
 
   const [text, setText] = useState<string>(defaultText);
@@ -206,8 +210,14 @@ const App: React.FC = () => {
   const setSentenceWithTranslation = useCallback(
     async (shuffleSentence: Boolean): Promise<void> => {
       const translatedSentences = await getSentenceWithTranslation();
-
+      let hasGapFill = false;
       const rows = translatedSentences.map((item: Row) => {
+        if (!hasGapFill && item.translation.includes("{") && item.translation.includes("}")) {
+          hasGapFill = true;
+        }
+        if (!useGapFill) {
+          item.translation = item.translation.replace(/\{(.+?)\}/g, ""); // Remove gap fill markers
+        }
         item.feedback = null;
         item.userInput = "";
         item.isLoading = false;
@@ -216,8 +226,9 @@ const App: React.FC = () => {
 
       const sentences = shuffleSentence ? shuffleRow(rows) : rows;
       setRows(sentences);
+      setHasGapFill(hasGapFill);
     },
-    [getSentenceWithTranslation]
+    [getSentenceWithTranslation, useGapFill]
   );
 
   const translateSentence = async (sentence: string): Promise<string> => {
@@ -355,6 +366,11 @@ const App: React.FC = () => {
     return row.isCorrect === undefined || row.isCorrect === true;
   };
 
+  const configUseGapFill = () => {
+    setUseGapFill(!useGapFill);
+    localStorage.setItem("useGapFill", JSON.stringify(!useGapFill));
+  };
+
   useEffect(() => {
     if (selectedLevel && selectedSubLevel) {
       setSentenceWithTranslation(shuffleSentences);
@@ -371,11 +387,16 @@ const App: React.FC = () => {
         const subLevels = Object.keys(text);
         setSubLevels(subLevels);
       }
+
+      const useGapFill = localStorage.getItem("useGapFill");
+      if (useGapFill !== null) {
+        setUseGapFill(JSON.parse(useGapFill));
+      }
     }
     if (storedSubLevel) {
       setSelectedSubLevel(storedSubLevel);
     }
-  }, [levels, levelSentences]);
+  }, [levels, levelSentences, setUseGapFill]);
 
   // useEffect(() => {
   //   if (aiCheckIndex !== undefined) {
@@ -448,6 +469,13 @@ const App: React.FC = () => {
               </Button>
               <Button onClick={() => setShouldSave(!shouldSave)} style={{ color: shouldSave ? "green" : "red" }}>
                 <FontAwesomeIcon icon={faSave} />
+              </Button>
+              <Button
+                disabled={!hasGapFill}
+                onClick={() => configUseGapFill()}
+                style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
+              >
+                <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
               </Button>
               <Button onClick={handleTextClear}>
                 <FontAwesomeIcon icon={faTrash} />

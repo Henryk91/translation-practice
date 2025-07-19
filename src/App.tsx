@@ -30,7 +30,6 @@ import {
   TableRow,
   TableCell,
   InputWrapper,
-  TextInput,
   FeedBackTableCell,
   Image,
 } from "./style";
@@ -49,6 +48,7 @@ const App: React.FC = () => {
   const hasInit = useRef(false);
   const [shouldSave, setShouldSave] = useState<boolean>(true);
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
+  const [shuffleSentences, setShuffleSentences] = useState<boolean>(true);
   const defaultText = defaultLevelSentences[defaultLevels.A21];
 
   const [text, setText] = useState<string>(defaultText);
@@ -161,18 +161,6 @@ const App: React.FC = () => {
     setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
   };
 
-  const setUnShuffledText = async () => {
-    const translatedSentences = await getSentenceWithTranslation();
-
-    const rows = translatedSentences.map((item: Row) => {
-      item.feedback = null;
-      item.userInput = "";
-      item.isLoading = false;
-      return item;
-    });
-    setRows(rows);
-  };
-
   const getTranslateSentence = useCallback(() => {
     fetch("https://note.henryk.co.za/api/full-translate-practice")
       .then((res) => res.json())
@@ -215,26 +203,22 @@ const App: React.FC = () => {
     }
   }, [selectedLevel, selectedSubLevel]);
 
-  const setSentenceWithTranslation = useCallback(() => {
-    const translatedSentences = getSentenceWithTranslation();
+  const setSentenceWithTranslation = useCallback(
+    async (shuffleSentence: Boolean): Promise<void> => {
+      const translatedSentences = await getSentenceWithTranslation();
 
-    translatedSentences
-      .then((data) => {
-        if (data) {
-          const rows = data.map((item: Row) => {
-            item.feedback = null;
-            item.userInput = "";
-            item.isLoading = false;
-            return item;
-          });
-          const sentences = shuffleRow(rows);
-          setRows(sentences);
-        }
-      })
-      .catch((error) => {
-        console.log("Error:", error);
+      const rows = translatedSentences.map((item: Row) => {
+        item.feedback = null;
+        item.userInput = "";
+        item.isLoading = false;
+        return item;
       });
-  }, [getSentenceWithTranslation]);
+
+      const sentences = shuffleSentence ? shuffleRow(rows) : rows;
+      setRows(sentences);
+    },
+    [getSentenceWithTranslation]
+  );
 
   const translateSentence = async (sentence: string): Promise<string> => {
     try {
@@ -373,9 +357,9 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (selectedLevel && selectedSubLevel) {
-      setSentenceWithTranslation();
+      setSentenceWithTranslation(shuffleSentences);
     }
-  }, [selectedLevel, selectedSubLevel, setSentenceWithTranslation]);
+  }, [selectedLevel, selectedSubLevel, setSentenceWithTranslation, shuffleSentences]);
 
   useEffect(() => {
     const storedLevel = localStorage.getItem("selectedLevel") as defaultLevels | null;
@@ -456,7 +440,10 @@ const App: React.FC = () => {
           <TextAreaWrapper>
             <TextArea placeholder="Enter English text..." value={text} onChange={(e: any) => setText(e.target.value)} />
             <TextAreaButtonWrapper>
-              <Button onClick={setUnShuffledText}>
+              <Button
+                onClick={() => setShuffleSentences(!shuffleSentences)}
+                style={{ color: shuffleSentences ? "green" : "red" }}
+              >
                 <FontAwesomeIcon icon={faSyncAlt} />
               </Button>
               <Button onClick={() => setShouldSave(!shouldSave)} style={{ color: shouldSave ? "green" : "red" }}>

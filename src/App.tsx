@@ -60,7 +60,6 @@ const App: React.FC = () => {
   const [rows, setRows] = useState<Row[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<defaultLevels | undefined>();
   const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
-  const [aiCheckIndex, setAiCheckIndex] = useState<number | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const focusNext = (index: number) => {
@@ -105,9 +104,7 @@ const App: React.FC = () => {
     const text = typeof obj === "object" ? obj[subLevel] : "";
 
     if (typeof text === "string") {
-      //   const sentences = splitAndShuffle(text);
       setText(text);
-      //   setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
     }
   };
 
@@ -131,12 +128,9 @@ const App: React.FC = () => {
   };
 
   const shuffleStrings = (input: string[]): string[] => {
-    // Make a shallow copy to avoid mutating the original array
     const array = [...input];
     for (let i = array.length - 1; i > 0; i--) {
-      // Pick a random index from 0 to i
       const j = Math.floor(Math.random() * (i + 1));
-      // Swap elements at i and j
       [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
@@ -298,36 +292,6 @@ const App: React.FC = () => {
     if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
   };
 
-  const handleAiCheckCB = useCallback(
-    async (index: number): Promise<void> => {
-      setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
-
-      const row = rows[index];
-      const isCorrect = row.isCorrect;
-
-      if (!row.userInput || isCorrect === undefined || isCorrect === true) {
-        setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
-        return;
-      }
-
-      const userWords = row.userInput;
-      const promptWords = row.sentence;
-      const isTranslationCorrect = await confirmTranslationCheck(promptWords, userWords);
-
-      const updatedRow = updateRowFeedback(
-        mode,
-        row,
-        isTranslationCorrect ? userWords : row.translation,
-        isTranslationCorrect
-      );
-
-      const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
-      setRows(newRows);
-      if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
-    },
-    [rows, setRows, mode, confirmTranslationCheck, selectedLevel, selectedSubLevel, shouldSave]
-  );
-
   const handleTranslate = async (index: number): Promise<void> => {
     setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
 
@@ -344,10 +308,6 @@ const App: React.FC = () => {
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
     if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
     setRows(newRows);
-
-    if (newRows[index].isCorrect === false) {
-      setAiCheckIndex(index);
-    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
@@ -397,14 +357,6 @@ const App: React.FC = () => {
       setSelectedSubLevel(storedSubLevel);
     }
   }, [levels, levelSentences, setUseGapFill]);
-
-  // useEffect(() => {
-  //   if (aiCheckIndex !== undefined) {
-  //     console.log("handleAiCheck called with index:", aiCheckIndex);
-  //     handleAiCheckCB(aiCheckIndex);
-  //     setAiCheckIndex(undefined); // reset after handling
-  //   }
-  // }, [aiCheckIndex, handleAiCheckCB]);
 
   useEffect(() => {
     console.log("App initialized");

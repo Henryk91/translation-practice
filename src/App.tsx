@@ -37,6 +37,7 @@ import {
 import { Row } from "./types";
 import { updateRowFeedback, updateScore } from "./utils";
 import { SubLevelOption } from "./subLevel";
+import InputSwitcher from "./InputSwitcher";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
@@ -487,11 +488,12 @@ const App: React.FC = () => {
                   <TableCell>{row.sentence}</TableCell>
                   <TableCell>
                     <InputWrapper>
-                      <TextInput
-                        ref={(el: any) => (inputRefs.current[idx] = el)}
-                        value={row.userInput}
+                      <InputSwitcher
+                        template={row.translation}
+                        userInput={row.userInput}
                         onChange={(e: any) => handleInputChange(e, idx)}
                         onKeyPress={(e: any) => handleKeyPress(e, idx)}
+                        inputRef={(el: any) => (inputRefs.current[idx] = el)}
                       />
                       <>
                         {shouldShowCheck(row) ? (

@@ -53,3 +53,16 @@ export const updateRowFeedback = (
     aiCorrect,
   };
 };
+
+export const focusNextInput = (currentInput: HTMLInputElement | undefined): void => {
+  if (!currentInput) return;
+  const inputs = Array.from(document.querySelectorAll("input")).filter(
+    (el) => !el.disabled && el.offsetParent !== null
+  );
+
+  const currentIndex = inputs.indexOf(currentInput);
+
+  if (currentIndex > -1 && currentIndex < inputs.length - 1) {
+    inputs[currentIndex + 1].focus();
+  }
+};

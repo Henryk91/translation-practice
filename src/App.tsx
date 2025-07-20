@@ -36,7 +36,7 @@ import {
   Image,
 } from "./style";
 import { Row } from "./types";
-import { updateRowFeedback, updateScore } from "./utils";
+import { focusNextInput, updateRowFeedback, updateScore } from "./utils";
 import { SubLevelOption } from "./subLevel";
 import InputSwitcher from "./InputSwitcher";
 
@@ -60,11 +60,8 @@ const App: React.FC = () => {
   const [rows, setRows] = useState<Row[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<defaultLevels | undefined>();
   const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
+  const [lastEdited, setLastEdited] = useState<HTMLInputElement | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  const focusNext = (index: number) => {
-    inputRefs.current[index + 1]?.focus();
-  };
 
   const splitSentences = (input: string): string[] =>
     input
@@ -302,7 +299,7 @@ const App: React.FC = () => {
       return;
     }
 
-    focusNext(index);
+    focusNextInput(lastEdited);
     const translated = row.translation ? row.translation : await translateSentence(row.sentence);
 
     const updatedRow = updateRowFeedback(mode, row, translated, row.aiCorrect);
@@ -312,6 +309,7 @@ const App: React.FC = () => {
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
+    setLastEdited(e.target as HTMLInputElement);
     if (e.key === "Enter") {
       e.preventDefault();
       handleTranslate(index);

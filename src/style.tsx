@@ -207,6 +207,7 @@ export const InputWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  width: -webkit-fill-available;
 
   @media (max-width: 600px) {
     justify-content: space-between;

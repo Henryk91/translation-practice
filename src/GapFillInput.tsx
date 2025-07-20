@@ -15,7 +15,7 @@ const GapFillInput: React.FC<GapFillInputProps> = ({ template, userInput, onChan
   const before = template.split(match[0])[0];
   const after = template.split(match[0])[1];
   return (
-    <span>
+    <span style={{ width: "-webkit-fill-available" }}>
       {before}
       <TextInput
         ref={inputRef}

@@ -52,7 +52,7 @@ const App: React.FC = () => {
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
   const [useGapFill, setUseGapFill] = useState<boolean>(false);
   const [shuffleSentences, setShuffleSentences] = useState<boolean>(true);
-  const [hasGapFill, setHasGapFill] = useState<boolean>(false);
+  const [hasGapFill, setHasGapFill] = useState<boolean>(true);
   const defaultText = defaultLevelSentences[defaultLevels.A21];
 
   const [text, setText] = useState<string>(defaultText);

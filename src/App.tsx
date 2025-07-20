@@ -278,17 +278,9 @@ const App: React.FC = () => {
       return;
     }
     const rowIsGapFill = row.translation.includes("{") && row.translation.includes("}");
-    let userWords = row.userInput;
-    if (rowIsGapFill) {
-      userWords = row.translation.replace(/\{(.+?)\}/g, userWords).trim();
-    }
 
     const promptWords = row.sentence;
-    const isTranslationCorrect = await confirmTranslationCheck(promptWords, userWords);
-
-    if (rowIsGapFill) {
-      row.translation = row.translation.replace(/\{(.+?)\}/g, `{${row.userInput}}`).trim();
-    }
+    const isTranslationCorrect = await confirmTranslationCheck(promptWords, row.userInput);
 
     const updatedRow = updateRowFeedback(
       mode,

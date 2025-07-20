@@ -3,36 +3,52 @@ import { TextInput } from "./style";
 
 interface GapFillInputProps {
   template: string;
-  userInput: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  userInputs: string[];
+  onChange: (index: number, e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  inputRef?: (el: HTMLInputElement | null) => void;
+  inputRefs?: ((el: HTMLInputElement | null) => void)[];
 }
 
-const GapFillInput: React.FC<GapFillInputProps> = ({ template, userInput, onChange, onKeyPress, inputRef }) => {
-  const match = template.match(/\{(.+?)\}/);
-  if (!match) return <>{template}</>;
-  const before = template.split(match[0])[0];
-  const after = template.split(match[0])[1];
-  return (
-    <span style={{ width: "-webkit-fill-available" }}>
-      {before}
+const GapFillInput: React.FC<GapFillInputProps> = ({ template, userInputs, onChange, onKeyPress, inputRefs = [] }) => {
+  const parts: React.ReactNode[] = [];
+  const regex = /\{(.*?)\}/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  let inputIndex = 0;
+
+  while ((match = regex.exec(template)) !== null) {
+    const beforeText = template.slice(lastIndex, match.index);
+    parts.push(<span key={`text-${inputIndex}`}>{beforeText}</span>);
+    const currentIndex = inputIndex;
+
+    const width = `${(match[1]?.length || 4) + 1}ch`;
+    parts.push(
       <TextInput
-        ref={inputRef}
-        value={userInput}
-        onChange={onChange}
+        key={`input-${currentIndex}`}
+        ref={inputRefs[currentIndex]}
+        value={userInputs[currentIndex] || ""}
+        onChange={(e: any) => onChange(currentIndex, e)}
         onKeyPress={onKeyPress}
         style={{
-          width: `${match[1].length + 1}ch`,
+          width,
           padding: "1px 8px",
           marginRight: "1px",
           textAlign: "center",
           margin: "2px",
         }}
       />
-      {after}
-    </span>
-  );
+    );
+
+    lastIndex = regex.lastIndex;
+    inputIndex++;
+  }
+
+  // Add any remaining static text after the last match
+  if (lastIndex < template.length) {
+    parts.push(<span key="text-end">{template.slice(lastIndex)}</span>);
+  }
+
+  return <span style={{ width: "100%" }}>{parts}</span>;
 };
 
 export default GapFillInput;

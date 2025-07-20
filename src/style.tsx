@@ -77,6 +77,7 @@ export const TextInput = styled.input`
   color: #e0e0e0;
   width: 300px;
   margin-right: 10px;
+  outline: 0.5px solid #333;
 `;
 
 export const Button = styled.button`

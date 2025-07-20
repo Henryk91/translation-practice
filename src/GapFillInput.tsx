@@ -22,7 +22,7 @@ const GapFillInput: React.FC<GapFillInputProps> = ({ template, userInput, onChan
         value={userInput}
         onChange={onChange}
         onKeyPress={onKeyPress}
-        style={{ width: `${match[1].length + 2}ch`, padding: "1px 8px", marginRight: "1px" }}
+        style={{ width: `${match[1].length + 1}ch`, padding: "1px 8px", marginRight: "1px", textAlign: "center" }}
       />
       {after}
     </span>

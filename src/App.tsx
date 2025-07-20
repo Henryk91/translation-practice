@@ -461,7 +461,10 @@ const App: React.FC = () => {
             <tbody>
               {rows.map((row, idx) => (
                 <TableRow key={idx}>
-                  <TableCell>{row.sentence}</TableCell>
+                  <TableCell style={{ justifyContent: "space-between" }}>
+                    <span>{idx + 1}. </span>
+                    <span style={{ width: "-webkit-fill-available" }}>{row.sentence}</span>
+                  </TableCell>
                   <TableCell>
                     <InputWrapper>
                       <InputSwitcher

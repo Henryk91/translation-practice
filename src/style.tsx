@@ -209,7 +209,7 @@ export const InputWrapper = styled.div`
   justify-content: center;
 
   @media (max-width: 600px) {
-    align-items: stretch;
+    justify-content: space-between;
   }
 `;
 

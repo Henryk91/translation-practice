@@ -210,7 +210,7 @@ const App: React.FC = () => {
           hasGapFill = true;
         }
         if (!useGapFill) {
-          item.translation = item.translation.replace(/\{(.+?)\}/g, ""); // Remove gap fill markers
+          item.translation = item.translation.replaceAll("{", "").replaceAll("}", "");
         }
         item.feedback = null;
         item.userInput = "";
@@ -277,14 +277,23 @@ const App: React.FC = () => {
       setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
       return;
     }
+    const rowIsGapFill = row.translation.includes("{") && row.translation.includes("}");
+    let userWords = row.userInput;
+    if (rowIsGapFill) {
+      userWords = row.translation.replace(/\{(.+?)\}/g, userWords).trim();
+    }
 
-    const userWords = row.userInput;
     const promptWords = row.sentence;
     const isTranslationCorrect = await confirmTranslationCheck(promptWords, userWords);
+
+    if (rowIsGapFill) {
+      row.translation = row.translation.replace(/\{(.+?)\}/g, `{${row.userInput}}`).trim();
+    }
+
     const updatedRow = updateRowFeedback(
       mode,
       row,
-      isTranslationCorrect ? userWords : row.translation,
+      isTranslationCorrect && !rowIsGapFill ? row.userInput : row.translation,
       isTranslationCorrect
     );
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));

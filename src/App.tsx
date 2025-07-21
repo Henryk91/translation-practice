@@ -290,7 +290,7 @@ const App: React.FC = () => {
     if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
   };
 
-  const handleTranslate = async (index: number): Promise<void> => {
+  const handleTranslate = async (index: number, event: HTMLInputElement | undefined): Promise<void> => {
     setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
 
     const row = rows[index];
@@ -299,7 +299,7 @@ const App: React.FC = () => {
       return;
     }
 
-    focusNextInput(lastEdited);
+    if (event) focusNextInput(event);
     const translated = row.translation ? row.translation : await translateSentence(row.sentence);
 
     const updatedRow = updateRowFeedback(mode, row, translated, row.aiCorrect);
@@ -312,7 +312,7 @@ const App: React.FC = () => {
     setLastEdited(e.target as HTMLInputElement);
     if (e.key === "Enter") {
       e.preventDefault();
-      handleTranslate(index);
+      handleTranslate(index, e.target as HTMLInputElement);
     }
   };
 
@@ -468,7 +468,10 @@ const App: React.FC = () => {
                       />
                       <>
                         {shouldShowCheck(row) ? (
-                          <Button onClick={() => handleTranslate(idx)} disabled={row.isLoading || !row.userInput}>
+                          <Button
+                            onClick={() => handleTranslate(idx, lastEdited)}
+                            disabled={row.isLoading || !row.userInput}
+                          >
                             <FontAwesomeIcon icon={row.isLoading ? faSpinner : faPaperPlane} spin={row.isLoading} />
                           </Button>
                         ) : (

@@ -265,6 +265,30 @@ const App: React.FC = () => {
     }
   }, []);
 
+  const getNonMatchingWords = (template: string, userInput: string): string[] => {
+    const templateWords = template.split(" ");
+    const userInputWords = userInput.split(" ");
+    const mismatchedWords: string[] = [];
+    templateWords.forEach((word, index) => {
+      if (userInputWords[index] !== word) {
+        mismatchedWords.push(word);
+      }
+    });
+    return mismatchedWords;
+  };
+
+  const getUpdatedTranslationSentence = (row: Row): string => {
+    const gapMatches = row.translation.match(/\{.*?\}/g) || [];
+
+    const differentWords = getNonMatchingWords(row.userInput, row.translation);
+
+    let updatedMatch = `${row.translation}`;
+    gapMatches.forEach((match, i) => {
+      updatedMatch = updatedMatch.replace(match, `{${differentWords[i]}}` || match);
+    });
+    return updatedMatch;
+  };
+
   const handleAiCheck = async (index: number): Promise<void> => {
     setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
 
@@ -274,7 +298,6 @@ const App: React.FC = () => {
       setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
       return;
     }
-    const rowIsGapFill = row.translation.includes("{") && row.translation.includes("}");
 
     const promptWords = row.sentence;
     const isTranslationCorrect = await confirmTranslationCheck(promptWords, row.userInput);
@@ -282,7 +305,7 @@ const App: React.FC = () => {
     const updatedRow = updateRowFeedback(
       mode,
       row,
-      isTranslationCorrect && !rowIsGapFill ? row.userInput : row.translation,
+      isTranslationCorrect ? getUpdatedTranslationSentence(row) : row.translation,
       isTranslationCorrect
     );
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));

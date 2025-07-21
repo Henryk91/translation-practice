@@ -462,6 +462,8 @@ const App: React.FC = () => {
                         userInput={row.userInput}
                         onChange={(e: any) => handleInputChange(e, idx)}
                         onKeyPress={(e: any) => handleKeyPress(e, idx)}
+                        triggerNext={focusNextInput}
+                        setLastEdited={setLastEdited}
                         inputRef={(el: any) => (inputRefs.current[idx] = el)}
                       />
                       <>

@@ -36,7 +36,7 @@ export const updateRowFeedback = (
     .split(" ")
     .filter((word) => word !== "");
   feedback = germanWords.map((gw, i) => {
-    const uw = userWords[i] || "";
+    const uw = userWords[i]?.replaceAll("{", "")?.replaceAll("}", "") || "";
     const correct = mode === "hard" ? uw === gw : normalize(uw) === normalize(gw);
     if (!correct) {
       isCorrect = false;

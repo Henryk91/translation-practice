@@ -41,7 +41,7 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
 
     let newSentence = template;
     gapMatches.forEach((match, i) => {
-      newSentence = newSentence.replace(match, `{${updated[i]}}` || "");
+      newSentence = newSentence.replace(match, `{${updated[i].trim()}}` || "");
     });
     const syntheticEvent = {
       ...e,

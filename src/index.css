@@ -185,3 +185,9 @@ button:disabled {
 .red {
   color: red;
 }
+.punctuation {
+  margin-right: 0px !important;
+}
+.feedbackWrapper {
+  display: inline !important;
+}

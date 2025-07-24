@@ -486,12 +486,15 @@ const App: React.FC = () => {
                       </>
                     </InputWrapper>
                   </TableCell>
-                  <FeedBackTableCell>
+                  <FeedBackTableCell className="feedbackWrapper">
                     {row.feedback &&
                       row.feedback.map((fb, i) => (
-                        <FeedbackSpan key={i} $correct={fb.correct}>
-                          {fb.word}
-                        </FeedbackSpan>
+                        <>
+                          <FeedbackSpan className="punctuation" key={i} $correct={fb.correct}>
+                            {fb.word}
+                          </FeedbackSpan>{" "}
+                          <></>
+                        </>
                       ))}
                   </FeedBackTableCell>
                 </TableRow>

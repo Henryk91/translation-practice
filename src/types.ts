@@ -14,6 +14,7 @@ export enum Level {
 }
 
 export enum CustomLevel {
+  ByLevel = "By Level",
   OwnSentences = "Own Sentences",
 }
 

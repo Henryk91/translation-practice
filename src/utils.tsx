@@ -66,3 +66,25 @@ export const focusNextInput = (currentInput: HTMLInputElement | undefined): void
     inputs[currentIndex + 1].focus();
   }
 };
+
+export const splitSentences = (input: string): string[] => {
+  if (!input) return [];
+  return input
+    ?.split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+};
+
+export const splitAndShuffle = (input: string): string[] => {
+  const sentences = splitSentences(input);
+  return shuffleStrings(sentences);
+};
+
+const shuffleStrings = (input: string[]): string[] => {
+  const array = [...input];
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};

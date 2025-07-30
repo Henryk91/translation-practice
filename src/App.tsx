@@ -36,7 +36,7 @@ import {
   Image,
 } from "./style";
 import { Row } from "./types";
-import { focusNextInput, updateRowFeedback, updateScore } from "./utils";
+import { focusNextInput, splitAndShuffle, splitSentences, updateRowFeedback, updateScore } from "./utils";
 import { SubLevelOption } from "./subLevel";
 import InputSwitcher from "./InputSwitcher";
 
@@ -62,12 +62,6 @@ const App: React.FC = () => {
   const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
   const [lastEdited, setLastEdited] = useState<HTMLInputElement | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  const splitSentences = (input: string): string[] =>
-    input
-      ?.split(/(?<=[.!?])\s+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
 
   const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const level = e.target.value as defaultLevels;
@@ -117,20 +111,6 @@ const App: React.FC = () => {
 
     setRows(updated);
     setLoadingTranslation(false);
-  };
-
-  const splitAndShuffle = (input: string): string[] => {
-    const sentences = splitSentences(input);
-    return shuffleStrings(sentences);
-  };
-
-  const shuffleStrings = (input: string[]): string[] => {
-    const array = [...input];
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
   };
 
   const shuffleRow = (rows: Row[]): Row[] => {
@@ -183,7 +163,7 @@ const App: React.FC = () => {
 
     try {
       const res = await fetch(
-        `https://note.henryk.co.za/api/saved-translation?level=${encodedSelectedLevel}&subLevel=${encodedSelectedSubLevel}`
+        `http://localhost:8080/api/saved-translation?level=${encodedSelectedLevel}&subLevel=${encodedSelectedSubLevel}`
       );
 
       if (!res.ok) {
@@ -201,9 +181,7 @@ const App: React.FC = () => {
   const setSentenceWithTranslation = useCallback(
     async (shuffleSentence: Boolean): Promise<void> => {
       const translatedSentences = await getSentenceWithTranslation();
-      if (!translatedSentences || translatedSentences.length === 0) {
-        return;
-      }
+      if (!translatedSentences || translatedSentences.length === 0) return;
 
       let hasGapFill = false;
       const rows = translatedSentences.map((item: Row) => {
@@ -334,11 +312,20 @@ const App: React.FC = () => {
     localStorage.setItem("useGapFill", JSON.stringify(!useGapFill));
   };
 
+  const loadText = useCallback(() => {
+    const sentences = splitAndShuffle(text);
+    setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+  }, [text, setRows]);
+
   useEffect(() => {
     if (selectedLevel && selectedSubLevel) {
-      setSentenceWithTranslation(shuffleSentences);
+      if (selectedLevel !== "By Level") {
+        setSentenceWithTranslation(shuffleSentences);
+      } else {
+        loadText();
+      }
     }
-  }, [selectedLevel, selectedSubLevel, setSentenceWithTranslation, shuffleSentences]);
+  }, [selectedLevel, selectedSubLevel, shuffleSentences, loadText, setSentenceWithTranslation]);
 
   useEffect(() => {
     const storedLevel = localStorage.getItem("selectedLevel") as defaultLevels | null;
@@ -355,7 +342,7 @@ const App: React.FC = () => {
       if (useGapFill !== null) {
         setUseGapFill(JSON.parse(useGapFill));
       }
-      setText(text as string);
+      if (typeof text === "string") setText(text);
     }
     if (storedSubLevel) {
       setSelectedSubLevel(storedSubLevel);
@@ -449,11 +436,12 @@ const App: React.FC = () => {
                   </Button>
                 </>
               )}
-              <Button onClick={handleTextSubmit}>
-                <FontAwesomeIcon icon={faPaperPlane} />
-              </Button>
+
               {selectedLevel === "Own Sentences" && (
                 <>
+                  <Button onClick={handleTextSubmit}>
+                    <FontAwesomeIcon icon={faPaperPlane} />
+                  </Button>
                   <Button onClick={handleTextClear}>
                     <FontAwesomeIcon icon={faTrash} />
                   </Button>

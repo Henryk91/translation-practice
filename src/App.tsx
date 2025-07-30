@@ -65,7 +65,7 @@ const App: React.FC = () => {
 
   const splitSentences = (input: string): string[] =>
     input
-      .split(/(?<=[.!?])\s+/)
+      ?.split(/(?<=[.!?])\s+/)
       .map((s) => s.trim())
       .filter(Boolean);
 
@@ -480,7 +480,7 @@ const App: React.FC = () => {
                     <span>{idx + 1}. </span>
                     <span style={{ width: "-webkit-fill-available" }}>{row.sentence}</span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell key={`${idx}-input`}>
                     <InputWrapper>
                       <InputSwitcher
                         template={row.translation}

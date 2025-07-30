@@ -13,6 +13,12 @@ export enum Level {
   C2 = "c2",
 }
 
+export enum CustomLevel {
+  OwnSentences = "Own Sentences",
+}
+
+export type SelectedLevelType = Level | CustomLevel | undefined;
+
 export interface FeedbackWord {
   word: string;
   correct: boolean;

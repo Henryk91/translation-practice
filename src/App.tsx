@@ -13,7 +13,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
-import { Level as defaultLevels } from "./types";
+import { Level as defaultLevels, SelectedLevelType } from "./types";
 import { logUse } from "./helpers/requests";
 import { Dict } from "styled-components/dist/types";
 import {
@@ -42,7 +42,7 @@ import InputSwitcher from "./InputSwitcher";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
-    return { "By Level": defaultLevelSentences };
+    return { "Own Sentences": "", "By Level": defaultLevelSentences };
   }, []);
   const [levelSentences, setLevelSentences] = useState<Dict>(initialLevelDict);
   const [levels, setLevels] = useState<any>(["By Level"]);
@@ -58,7 +58,7 @@ const App: React.FC = () => {
   const [text, setText] = useState<string>(defaultText);
   const [mode, setMode] = useState<"easy" | "hard">("easy");
   const [rows, setRows] = useState<Row[]>([]);
-  const [selectedLevel, setSelectedLevel] = useState<defaultLevels | undefined>();
+  const [selectedLevel, setSelectedLevel] = useState<SelectedLevelType>();
   const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
   const [lastEdited, setLastEdited] = useState<HTMLInputElement | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -201,6 +201,10 @@ const App: React.FC = () => {
   const setSentenceWithTranslation = useCallback(
     async (shuffleSentence: Boolean): Promise<void> => {
       const translatedSentences = await getSentenceWithTranslation();
+      if (!translatedSentences || translatedSentences.length === 0) {
+        return;
+      }
+
       let hasGapFill = false;
       const rows = translatedSentences.map((item: Row) => {
         if (!hasGapFill && item.translation.includes("{") && item.translation.includes("}")) {
@@ -351,6 +355,7 @@ const App: React.FC = () => {
       if (useGapFill !== null) {
         setUseGapFill(JSON.parse(useGapFill));
       }
+      setText(text as string);
     }
     if (storedSubLevel) {
       setSelectedSubLevel(storedSubLevel);
@@ -403,41 +408,61 @@ const App: React.FC = () => {
                 </Select>
               </>
             )}
-            <Label>Mode:</Label>
-            <Select value={mode} onChange={(e: any) => setMode(e.target.value)}>
-              <option value="easy">Easy</option>
-              <option value="hard">Hard</option>
-            </Select>
+            {selectedLevel !== "Own Sentences" && (
+              <>
+                <Label>Mode:</Label>
+                <Select value={mode} onChange={(e: any) => setMode(e.target.value)}>
+                  <option value="easy">Easy</option>
+                  <option value="hard">Hard</option>
+                </Select>
+              </>
+            )}
           </div>
           <TextAreaWrapper>
-            <TextArea placeholder="Enter English text..." value={text} onChange={(e: any) => setText(e.target.value)} />
+            {selectedLevel === "Own Sentences" && (
+              <TextArea
+                placeholder="Enter English text..."
+                value={text}
+                onChange={(e: any) => setText(e.target.value)}
+              />
+            )}
+
             <TextAreaButtonWrapper>
-              <Button
-                onClick={() => setShuffleSentences(!shuffleSentences)}
-                style={{ color: shuffleSentences ? "green" : "red" }}
-              >
-                <FontAwesomeIcon icon={faSyncAlt} />
-              </Button>
-              <Button onClick={() => setShouldSave(!shouldSave)} style={{ color: shouldSave ? "green" : "red" }}>
-                <FontAwesomeIcon icon={faSave} />
-              </Button>
-              <Button
-                disabled={!hasGapFill}
-                onClick={() => configUseGapFill()}
-                style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
-              >
-                <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
-              </Button>
-              <Button onClick={handleTextClear}>
-                <FontAwesomeIcon icon={faTrash} />
-              </Button>
+              {selectedLevel !== "Own Sentences" && (
+                <>
+                  <Button
+                    onClick={() => setShuffleSentences(!shuffleSentences)}
+                    style={{ color: shuffleSentences ? "green" : "red" }}
+                  >
+                    <FontAwesomeIcon icon={faSyncAlt} />
+                  </Button>
+                  <Button onClick={() => setShouldSave(!shouldSave)} style={{ color: shouldSave ? "green" : "red" }}>
+                    <FontAwesomeIcon icon={faSave} />
+                  </Button>
+
+                  <Button
+                    disabled={!hasGapFill}
+                    onClick={() => configUseGapFill()}
+                    style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
+                  >
+                    <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
+                  </Button>
+                </>
+              )}
               <Button onClick={handleTextSubmit}>
                 <FontAwesomeIcon icon={faPaperPlane} />
               </Button>
-              <Button onClick={initTranslatedSentences} disabled={loadingTranslation || rows.length === 0}>
-                <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
-                <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
-              </Button>
+              {selectedLevel === "Own Sentences" && (
+                <>
+                  <Button onClick={handleTextClear}>
+                    <FontAwesomeIcon icon={faTrash} />
+                  </Button>
+                  <Button onClick={initTranslatedSentences} disabled={loadingTranslation || rows.length === 0}>
+                    <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
+                    <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
+                  </Button>
+                </>
+              )}
             </TextAreaButtonWrapper>
           </TextAreaWrapper>
         </Header>

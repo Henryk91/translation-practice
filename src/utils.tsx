@@ -1,8 +1,8 @@
-import { Row, Level as defaultLevels } from "./types";
+import { Row, SelectedLevelType } from "./types";
 
 export const updateScore = (
   rows: Row[],
-  selectedLevel: defaultLevels | undefined,
+  selectedLevel: SelectedLevelType,
   selectedSubLevel: string | undefined
 ): void => {
   let totalCount = 0;

@@ -163,7 +163,7 @@ const App: React.FC = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:8080/api/saved-translation?level=${encodedSelectedLevel}&subLevel=${encodedSelectedSubLevel}`
+        `https://note.henryk.co.za/api/saved-translation?level=${encodedSelectedLevel}&subLevel=${encodedSelectedSubLevel}`
       );
 
       if (!res.ok) {

@@ -132,7 +132,7 @@ const App: React.FC = () => {
       textToSplit = levelSentences[selectedLevel] as string;
       setText(textToSplit);
     }
-    const sentences = splitAndShuffle(textToSplit);
+    const sentences = selectedLevel === "Own Sentences" ? splitSentences(textToSplit) : splitAndShuffle(textToSplit);
     setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
   };
 

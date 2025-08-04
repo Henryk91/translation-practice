@@ -54,16 +54,16 @@ export const updateRowFeedback = (
   };
 };
 
-export const focusNextInput = (currentInput: HTMLInputElement | undefined): void => {
+export const focusNextInput = (currentInput: HTMLInputElement | undefined, back: Boolean = false): void => {
   if (!currentInput) return;
   const inputs = Array.from(document.querySelectorAll("input")).filter(
     (el) => !el.disabled && el.offsetParent !== null
   );
 
   const currentIndex = inputs.indexOf(currentInput);
-
-  if (currentIndex > -1 && currentIndex < inputs.length - 1) {
-    inputs[currentIndex + 1].focus();
+  const newIndex = back ? currentIndex - 1 : currentIndex + 1;
+  if (newIndex > -1 && currentIndex < inputs.length - 1) {
+    inputs[newIndex].focus();
   }
 };
 

@@ -6,10 +6,18 @@ interface GapFillInputProps {
   userInputs: string[];
   onChange: (index: number, e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   inputRefs?: ((el: HTMLInputElement | null) => void)[];
 }
 
-const GapFillInput: React.FC<GapFillInputProps> = ({ template, userInputs, onChange, onKeyPress, inputRefs = [] }) => {
+const GapFillInput: React.FC<GapFillInputProps> = ({
+  template,
+  userInputs,
+  onChange,
+  onKeyPress,
+  onKeyDown,
+  inputRefs = [],
+}) => {
   const parts: React.ReactNode[] = [];
   const regex = /\{(.*?)\}/g;
   let lastIndex = 0;
@@ -28,6 +36,7 @@ const GapFillInput: React.FC<GapFillInputProps> = ({ template, userInputs, onCha
         ref={inputRefs[currentIndex]}
         value={userInputs[currentIndex] || ""}
         onChange={(e: any) => onChange(currentIndex, e)}
+        onKeyDown={onKeyDown}
         onKeyPress={onKeyPress}
         style={{
           width,

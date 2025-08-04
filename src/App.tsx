@@ -26,9 +26,9 @@ import {
   updateRowFeedback,
   updateScore,
 } from "./utils";
-import InputSwitcher from "./InputSwitcher";
-import SideBar from "./SideBar";
-import Header from "./Header";
+import InputSwitcher from "./components/InputSwitcher";
+import SideBar from "./components/SideBar";
+import Header from "./components/Header";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {

@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import { LevelOptions, LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "./style";
-import { Level as defaultLevels } from "./types";
+import { LevelOptions, LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../style";
+import { Level as defaultLevels } from "../types";
 
 interface SideBarProps {
   selectedLevel: string | undefined;

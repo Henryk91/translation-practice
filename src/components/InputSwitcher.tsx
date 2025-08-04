@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import GapFillInput from "./GapFillInput";
-import { TextInput } from "./style";
+import { TextInput } from "../style";
 interface InputSwitcherProps {
   template: string;
   userInput: string;

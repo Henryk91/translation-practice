@@ -1,5 +1,5 @@
 import React from "react";
-import { TextInput } from "./style";
+import { TextInput } from "../style";
 
 interface GapFillInputProps {
   template: string;

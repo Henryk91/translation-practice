@@ -43,7 +43,7 @@ import {
 import { Row } from "./types";
 import {
   focusNextInput,
-  getLevelScore,
+  getLevelScoreAverage,
   splitAndShuffle,
   splitSentences,
   updateRowFeedback,
@@ -54,7 +54,7 @@ import InputSwitcher from "./InputSwitcher";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
-    return { "Own Sentences": "", "By Level": defaultLevelSentences };
+    return { "Own Sentences": 0, "By Level": defaultLevelSentences };
   }, []);
   const [levelSentences, setLevelSentences] = useState<Dict>(initialLevelDict);
   const [levels, setLevels] = useState<any>(["By Level"]);
@@ -77,7 +77,6 @@ const App: React.FC = () => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleLevelChange = (level: defaultLevels): void => {
-    // const level = e.target.value as defaultLevels;
     const text = levelSentences[level];
     setSelectedLevel(level);
     localStorage.setItem("selectedLevel", level);
@@ -395,10 +394,11 @@ const App: React.FC = () => {
 
   const levelScoreText = useMemo(
     () => (lvl: string) => {
-      const score = getLevelScore(lvl + "-") || null;
+      const subItems = Object.keys(levelSentences[lvl] || {}).length;
+      const score = getLevelScoreAverage(lvl, subItems) || null;
       return score ? `(${score}%)` : "";
     },
-    []
+    [levelSentences]
   );
 
   return (

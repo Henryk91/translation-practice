@@ -65,7 +65,7 @@ const App: React.FC = () => {
   const [useGapFill, setUseGapFill] = useState<boolean>(true);
   const [shuffleSentences, setShuffleSentences] = useState<boolean>(true);
   const [hasGapFill, setHasGapFill] = useState<boolean>(true);
-  const [showLevels, setShowLevels] = useState<boolean>(false);
+  const [showLevels, setShowLevels] = useState<boolean>(true);
   const defaultText = defaultLevelSentences[defaultLevels.A21];
 
   const [text, setText] = useState<string>(defaultText);

@@ -34,7 +34,7 @@ const GapFillInput: React.FC<GapFillInputProps> = ({ template, userInputs, onCha
           padding: "1px 8px",
           marginRight: "1px",
           textAlign: "center",
-          margin: "2px",
+          fontSize: "1.0em",
         }}
       />
     );

@@ -4,9 +4,9 @@ export const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;
     padding: 0;
-    background-color: #121212;
+    background-color: rgba(10,12,19,255);
     color: #e0e0e0;
-    font-family: sans-serif;
+    font-family: Roboto, sans-serif;
   }
 `;
 
@@ -28,14 +28,9 @@ export const Image = styled.img`
 `;
 export const Header = styled.div`
   display: flex;
-  align-items: center;
   margin-bottom: 20px;
   flex-direction: column;
-
-  @media (max-width: 600px) {
-    flex-direction: column;
-    align-items: stretch;
-  }
+  align-items: stretch;
 `;
 
 export const Label = styled.label`
@@ -44,19 +39,15 @@ export const Label = styled.label`
 `;
 
 export const Select = styled.select`
-  margin-right: 20px;
   padding: 6px;
   border: none;
   border-radius: 4px;
-  background-color: #1e1e1e;
+  background-color: rgba(20, 23, 34, 255);
   color: #e0e0e0;
   font-size: 18px;
   text-align: center;
-
-  @media (max-width: 600px) {
-    margin: 0 0 10px 0;
-    width: 100%;
-  }
+  margin: 0 0 10px 0;
+  width: 100%;
 `;
 
 export const TextArea = styled.textarea`
@@ -64,7 +55,7 @@ export const TextArea = styled.textarea`
   border: none;
   border-radius: 4px;
   font-size: 16px;
-  background-color: #1e1e1e;
+  background-color: rgba(10, 12, 20, 255);
   color: #e0e0e0;
   width: -webkit-fill-available;
 `;
@@ -73,14 +64,33 @@ export const TextInput = styled.input`
   border: none;
   border-radius: 4px;
   font-size: 16px;
-  background-color: #1e1e1e;
+  background-color: rgba(10, 12, 20, 255);
   color: #e0e0e0;
-  width: 300px;
-  margin-right: 10px;
+  width: -webkit-fill-available;
   outline: 0.5px solid #333;
 `;
 
 export const Button = styled.button`
+  border: none;
+  background-color: #333;
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover {
+    background-color: #444;
+  }
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+
+  font-size: 30px;
+  border-radius: 100%;
+  padding: 10px;
+  color: black;
+  -webkit-text-fill-color: black;
+`;
+
+export const MenuButton = styled.button`
   padding: 8px;
   border: none;
   border-radius: 4px;
@@ -89,96 +99,55 @@ export const Button = styled.button`
   cursor: pointer;
   width: fit-content;
   white-space: nowrap;
+  font-size: 30px;
   &:hover {
     background-color: #444;
   }
 
-  @media (min-width: 600px) {
-    margin: 5px;
-  }
+  margin: 5px;
 `;
 
-export const Table = styled.table`
+export const Table = styled.div`
   border-collapse: collapse;
   table-layout: fixed;
-  margin: 0 auto;
-  max-width: 80%;
-  @media (max-width: 600px) {
-    max-width: none;
-    width: 100vw;
-    margin: 0;
-  }
+  max-width: none;
+  width: 100vw;
+  margin: 0;
 `;
 
-export const TableRow = styled.tr`
-  border-bottom: 1px solid #333;
+export const TableRow = styled.div`
   max-width: 100vw;
   width: 100%;
-
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
   align-content: center;
-
-  @media (max-width: 600px) {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    align-items: center;
-    overflow: hidden;
-    padding: 3px;
-  }
-`;
-
-export const TableColGroup = styled.colgroup`
-  display: flex;
-  col {
-    width: 33%;
-    flex: 1; /* each .col takes equal share of available space */
-    /* optional spacing */
-    padding: 0 10px;
-  }
-`;
-
-export const TableCell = styled.td`
-  padding: 10px;
-  vertical-align: middle;
-  text-align: center;
-  flex: 1;
-
   @media (min-width: 600px) {
-    align-items: center;
-    justify-content: center;
-    display: flex;
+    margin: 15px;
   }
-  @media (max-width: 600px) {
-    display: block;
-    width: 95vw;
-    text-align: left;
-    padding: 8px 10px;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+  padding-top: 3px;
+  padding-bottom: 3px;
 `;
 
-export const FeedBackTableCell = styled.td`
-  padding: 10px;
+export const TableCell = styled.div`
   vertical-align: middle;
-  text-align: center;
-  display: flex;
-  flex-wrap: wrap;
-  margin: 10px;
   flex: 1;
+  margin-top: 10px;
 
-  @media (min-width: 600px) {
-    align-items: center;
-    justify-content: center;
-    display: flex;
-  }
+  align-items: center;
+  justify-content: center;
+  display: block;
+`;
 
-  @media (max-width: 600px) {
-    width: 95vw;
-    text-align: left;
-    padding: 8px 10px;
-    margin: unset;
-  }
+export const FeedBackTableCell = styled.div`
+  vertical-align: middle;
+  display: flex;
+  flex: 1;
+  min-height: 1.2em;
+  align-items: center;
+  margin-top: 10px;
+  justify-content: flex-end;
 `;
 
 export const TextAreaButtonWrapper = styled.div`
@@ -195,12 +164,6 @@ export const TextAreaWrapper = styled.div`
   flex-direction: column;
   margin: 5px;
   width: 100%;
-  @media (min-width: 600px) {
-    flex-direction: column;
-  }
-  @media (max-width: 600px) {
-    align-items: stretch;
-  }
 `;
 
 export const InputWrapper = styled.div`
@@ -208,13 +171,10 @@ export const InputWrapper = styled.div`
   align-items: center;
   justify-content: center;
   width: -webkit-fill-available;
-
-  @media (max-width: 600px) {
-    justify-content: space-between;
-  }
+  justify-content: space-between;
 `;
 
 export const FeedbackSpan = styled.span<{ $correct: boolean }>`
-  color: ${(props) => (props.$correct ? "#00ff00" : "#ff4444")};
-  margin-right: 4px;
+  color: ${(props) => (props.$correct ? "#4a9c78" : "#ec3d4c")};
+  margin-right: 0px;
 `;

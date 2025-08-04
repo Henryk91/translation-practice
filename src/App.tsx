@@ -28,12 +28,12 @@ import {
   TextAreaButtonWrapper,
   Button,
   Table,
-  TableColGroup,
   TableRow,
   TableCell,
   InputWrapper,
   FeedBackTableCell,
   Image,
+  MenuButton,
 } from "./style";
 import { Row } from "./types";
 import { focusNextInput, splitAndShuffle, splitSentences, updateRowFeedback, updateScore } from "./utils";
@@ -50,7 +50,7 @@ const App: React.FC = () => {
   const hasInit = useRef(false);
   const [shouldSave, setShouldSave] = useState<boolean>(true);
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
-  const [useGapFill, setUseGapFill] = useState<boolean>(false);
+  const [useGapFill, setUseGapFill] = useState<boolean>(true);
   const [shuffleSentences, setShuffleSentences] = useState<boolean>(true);
   const [hasGapFill, setHasGapFill] = useState<boolean>(true);
   const defaultText = defaultLevelSentences[defaultLevels.A21];
@@ -373,11 +373,7 @@ const App: React.FC = () => {
           </h1>
           <div>
             <Label>Level:</Label>
-            <Select
-              placeholder="Select your Language Level"
-              value={selectedLevel || "Select your Language Level"}
-              onChange={handleLevelChange}
-            >
+            <Select value={selectedLevel || "Select your Language Level"} onChange={handleLevelChange}>
               <option disabled>Select your Language Level</option>
               {Object.values(levels as defaultLevels).map((lvl) => (
                 <option key={lvl} value={lvl}>
@@ -417,38 +413,41 @@ const App: React.FC = () => {
             <TextAreaButtonWrapper>
               {selectedLevel !== "Own Sentences" && (
                 <>
-                  <Button
+                  <MenuButton
                     onClick={() => setShuffleSentences(!shuffleSentences)}
                     style={{ color: shuffleSentences ? "green" : "red" }}
                   >
                     <FontAwesomeIcon icon={faSyncAlt} />
-                  </Button>
-                  <Button onClick={() => setShouldSave(!shouldSave)} style={{ color: shouldSave ? "green" : "red" }}>
+                  </MenuButton>
+                  <MenuButton
+                    onClick={() => setShouldSave(!shouldSave)}
+                    style={{ color: shouldSave ? "green" : "red" }}
+                  >
                     <FontAwesomeIcon icon={faSave} />
-                  </Button>
+                  </MenuButton>
 
-                  <Button
+                  <MenuButton
                     disabled={!hasGapFill}
                     onClick={() => configUseGapFill()}
                     style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
                   >
                     <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
-                  </Button>
+                  </MenuButton>
                 </>
               )}
 
               {selectedLevel === "Own Sentences" && (
                 <>
-                  <Button onClick={handleTextSubmit}>
+                  <MenuButton onClick={handleTextSubmit}>
                     <FontAwesomeIcon icon={faPaperPlane} />
-                  </Button>
-                  <Button onClick={handleTextClear}>
+                  </MenuButton>
+                  <MenuButton onClick={handleTextClear}>
                     <FontAwesomeIcon icon={faTrash} />
-                  </Button>
-                  <Button onClick={initTranslatedSentences} disabled={loadingTranslation || rows.length === 0}>
+                  </MenuButton>
+                  <MenuButton onClick={initTranslatedSentences} disabled={loadingTranslation || rows.length === 0}>
                     <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
                     <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
-                  </Button>
+                  </MenuButton>
                 </>
               )}
             </TextAreaButtonWrapper>
@@ -456,36 +455,50 @@ const App: React.FC = () => {
         </Header>
         {rows.length > 0 && (
           <Table>
-            <TableColGroup>
-              <col />
-              <col />
-              <col />
-            </TableColGroup>
-            <tbody>
+            <div>
               {rows.map((row, idx) => (
                 <TableRow key={idx}>
-                  <TableCell style={{ justifyContent: "space-between" }}>
-                    <span>{idx + 1}. </span>
-                    <span style={{ width: "-webkit-fill-available" }}>{row.sentence}</span>
-                  </TableCell>
-                  <TableCell key={`${idx}-input`}>
-                    <InputWrapper>
-                      <InputSwitcher
-                        template={row.translation}
-                        userInput={row.userInput}
-                        onChange={(e: any) => handleInputChange(e, idx)}
-                        onKeyPress={(e: any) => handleKeyPress(e, idx)}
-                        triggerNext={focusNextInput}
-                        setLastEdited={setLastEdited}
-                        inputRef={(el: any) => (inputRefs.current[idx] = el)}
-                      />
-                      <>
+                  <div className="translation-area">
+                    <TableCell style={{ justifyContent: "space-between" }}>
+                      <span>{idx + 1}. </span>
+                      <span style={{ width: "-webkit-fill-available" }}>{row.sentence}</span>
+                    </TableCell>
+                    <TableCell key={`${idx}-input`}>
+                      <InputWrapper>
+                        <InputSwitcher
+                          template={row.translation}
+                          userInput={row.userInput}
+                          onChange={(e: any) => handleInputChange(e, idx)}
+                          onKeyPress={(e: any) => handleKeyPress(e, idx)}
+                          triggerNext={focusNextInput}
+                          setLastEdited={setLastEdited}
+                          inputRef={(el: any) => (inputRefs.current[idx] = el)}
+                        />
+                      </InputWrapper>
+                    </TableCell>
+                    <FeedBackTableCell key={`feedbackTableCell-${idx}`}>
+                      <div className="feedbackWrapper">
+                        {row.feedback &&
+                          row.feedback.map((fb, i) => (
+                            <>
+                              <FeedbackSpan key={i} $correct={fb.correct}>
+                                {fb.word}
+                              </FeedbackSpan>{" "}
+                              <></>
+                            </>
+                          ))}
+                      </div>
+                      <div>
                         {shouldShowCheck(row) ? (
                           <Button
                             onClick={() => handleTranslate(idx, lastEdited)}
                             disabled={row.isLoading || !row.userInput}
                           >
-                            <FontAwesomeIcon icon={row.isLoading ? faSpinner : faPaperPlane} spin={row.isLoading} />
+                            <FontAwesomeIcon
+                              color="#398f6a"
+                              icon={row.isLoading ? faSpinner : faPaperPlane}
+                              spin={row.isLoading}
+                            />
                           </Button>
                         ) : (
                           <Button
@@ -496,23 +509,12 @@ const App: React.FC = () => {
                             <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />{" "}
                           </Button>
                         )}
-                      </>
-                    </InputWrapper>
-                  </TableCell>
-                  <FeedBackTableCell className="feedbackWrapper">
-                    {row.feedback &&
-                      row.feedback.map((fb, i) => (
-                        <>
-                          <FeedbackSpan className="punctuation" key={i} $correct={fb.correct}>
-                            {fb.word}
-                          </FeedbackSpan>{" "}
-                          <></>
-                        </>
-                      ))}
-                  </FeedBackTableCell>
+                      </div>
+                    </FeedBackTableCell>
+                  </div>
                 </TableRow>
               ))}
-            </tbody>
+            </div>
           </Table>
         )}
       </Container>

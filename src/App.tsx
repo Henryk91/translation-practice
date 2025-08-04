@@ -34,11 +34,7 @@ import {
   FeedBackTableCell,
   Image,
   MenuButton,
-  SideMenu,
-  LevelOptions,
   MobileMenu,
-  SubLevelOptionItem,
-  LevelSelect,
 } from "./style";
 import { Row } from "./types";
 import {
@@ -51,6 +47,7 @@ import {
 } from "./utils";
 import { SubLevelOption } from "./subLevel";
 import InputSwitcher from "./InputSwitcher";
+import SideBar from "./SideBar";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
@@ -383,15 +380,6 @@ const App: React.FC = () => {
     }
   }, [getTranslateSentence]);
 
-  const subLevelScoreText = useMemo(
-    () => (lvl: string) => {
-      if (!selectedLevel) return "";
-      const score = localStorage.getItem(`${selectedLevel}-${lvl}`) || null;
-      return score ? `(${score}%)` : "";
-    },
-    [selectedLevel]
-  );
-
   const levelScoreText = useMemo(
     () => (lvl: string) => {
       const subItems = Object.keys(levelSentences[lvl] || {}).length;
@@ -405,59 +393,17 @@ const App: React.FC = () => {
     <>
       <GlobalStyle />
       <section style={{ display: "flex" }}>
-        <SideMenu>
-          <LevelSelect>
-            <p style={{ borderBottom: "1px solid #333", paddingBottom: "10px", width: "100%", fontSize: "20px" }}>
-              Levels Selected: <br />
-              <span style={{ color: "green" }}>
-                {selectedLevel ? `${selectedLevel} ${levelScoreText(selectedLevel)}` : ""} {}
-              </span>
-            </p>
-            <MenuButton
-              style={{ fontSize: "15px" }}
-              onClick={() => {
-                setShowLevels(!showLevels);
-              }}
-            >
-              {showLevels ? "Hide Options" : "Show Level Options"}
-            </MenuButton>
-            {showLevels && (
-              <LevelOptions>
-                {Object.values(levels as defaultLevels).map((lvl) => (
-                  <SubLevelOptionItem
-                    onClick={() => {
-                      setShowLevels(false);
-                      handleLevelChange(lvl as any);
-                    }}
-                    key={lvl}
-                    style={{ margin: "0 10px", color: selectedLevel === lvl ? "green" : "white" }}
-                  >
-                    <span style={{ textAlign: "left" }}>{lvl}</span> <span>{levelScoreText(lvl)}</span>
-                  </SubLevelOptionItem>
-                ))}
-              </LevelOptions>
-            )}
-          </LevelSelect>
-
-          {subLevels && !showLevels && (
-            <div>
-              <p style={{ borderTop: "1px solid #333", paddingTop: "10px", minWidth: "300px", fontSize: "20px" }}>
-                Sub Levels: <br />
-              </p>
-              {Object.values(subLevels as defaultLevels).map((lvl) => (
-                <SubLevelOptionItem
-                  onClick={() => handleSubLevelChange(lvl as any)}
-                  key={lvl}
-                  style={{
-                    color: selectedSubLevel === lvl ? "green" : "white",
-                  }}
-                >
-                  <span style={{ textAlign: "left" }}>{lvl}</span> <span>{subLevelScoreText(lvl)}</span>
-                </SubLevelOptionItem>
-              ))}
-            </div>
-          )}
-        </SideMenu>
+        <SideBar
+          selectedLevel={selectedLevel}
+          levels={levels}
+          levelScoreText={levelScoreText}
+          subLevels={subLevels}
+          selectedSubLevel={selectedSubLevel}
+          handleLevelChange={handleLevelChange}
+          handleSubLevelChange={handleSubLevelChange}
+          showLevels={showLevels}
+          setShowLevels={setShowLevels}
+        />
         <Container style={{ width: "-webkit-fill-available" }}>
           <Header>
             <h1 style={{ marginBottom: "unset" }}>

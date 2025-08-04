@@ -384,9 +384,22 @@ const App: React.FC = () => {
     }
   }, [getTranslateSentence]);
 
-  const getSubLevelScore = (level: string, subLevel: string): string | null => {
-    return localStorage.getItem(`${level}-${subLevel}`) || null;
-  };
+  const subLevelScoreText = useMemo(
+    () => (lvl: string) => {
+      if (!selectedLevel) return "";
+      const score = localStorage.getItem(`${selectedLevel}-${lvl}`) || null;
+      return score ? `(${score}%)` : "";
+    },
+    [selectedLevel]
+  );
+
+  const levelScoreText = useMemo(
+    () => (lvl: string) => {
+      const score = getLevelScore(lvl + "-") || null;
+      return score ? `(${score}%)` : "";
+    },
+    []
+  );
 
   return (
     <>
@@ -397,7 +410,7 @@ const App: React.FC = () => {
             <p style={{ borderBottom: "1px solid #333", paddingBottom: "10px", width: "100%", fontSize: "20px" }}>
               Levels Selected: <br />
               <span style={{ color: "green" }}>
-                {selectedLevel ? `${selectedLevel} (${getLevelScore(selectedLevel + "-") ?? 0}%)` : ""} {}
+                {selectedLevel ? `${selectedLevel} ${levelScoreText(selectedLevel)}` : ""} {}
               </span>
             </p>
             <MenuButton
@@ -419,8 +432,7 @@ const App: React.FC = () => {
                     key={lvl}
                     style={{ margin: "0 10px", color: selectedLevel === lvl ? "green" : "white" }}
                   >
-                    <span style={{ textAlign: "left" }}>{lvl}</span>{" "}
-                    <span>{`(${getLevelScore(lvl + "-") ?? 0}%)`}</span>
+                    <span style={{ textAlign: "left" }}>{lvl}</span> <span>{levelScoreText(lvl)}</span>
                   </SubLevelOptionItem>
                 ))}
               </LevelOptions>
@@ -440,8 +452,7 @@ const App: React.FC = () => {
                     color: selectedSubLevel === lvl ? "green" : "white",
                   }}
                 >
-                  <span style={{ textAlign: "left" }}>{lvl}</span>{" "}
-                  <span>{`(${getSubLevelScore(selectedLevel || "", lvl) ?? 0}%)`}</span>
+                  <span style={{ textAlign: "left" }}>{lvl}</span> <span>{subLevelScoreText(lvl)}</span>
                 </SubLevelOptionItem>
               ))}
             </div>

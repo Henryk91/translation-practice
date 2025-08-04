@@ -54,7 +54,7 @@ import InputSwitcher from "./InputSwitcher";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
-    return { "Own Sentences": 0, "By Level": defaultLevelSentences };
+    return { "Own Sentences": "", "By Level": defaultLevelSentences };
   }, []);
   const [levelSentences, setLevelSentences] = useState<Dict>(initialLevelDict);
   const [levels, setLevels] = useState<any>(["By Level"]);
@@ -498,7 +498,7 @@ const App: React.FC = () => {
             <TextAreaWrapper>
               {selectedLevel === "Own Sentences" && (
                 <TextArea
-                  placeholder="Enter English text..."
+                  placeholder="Enter English sentences here (make sure they end on a full stop or question mark) then click the paper plane to create the translation rows."
                   value={text}
                   onChange={(e: any) => setText(e.target.value)}
                 />

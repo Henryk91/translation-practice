@@ -86,9 +86,10 @@ export const TextArea = styled.textarea`
   border: none;
   border-radius: 4px;
   font-size: 16px;
-  background-color: rgba(10, 12, 20, 255);
+  background-color: rgba(20, 23, 34, 255);
   color: #e0e0e0;
-  width: -webkit-fill-available;
+  width: 400px;
+  height: 200px;
 `;
 export const TextInput = styled.input`
   padding: 8px;

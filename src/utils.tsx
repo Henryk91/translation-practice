@@ -90,6 +90,7 @@ const shuffleStrings = (input: string[]): string[] => {
 };
 
 export const getLevelScoreAverage = (prefix: string, subItems: number): string | null => {
+  if (subItems <= 0) return null;
   let matchCount: number = 0;
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);

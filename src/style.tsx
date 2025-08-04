@@ -54,7 +54,7 @@ export const SideMenu = styled.div`
 export const Image = styled.img`
   border-radius: 5px;
 `;
-export const Header = styled.div`
+export const HeaderStyle = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;

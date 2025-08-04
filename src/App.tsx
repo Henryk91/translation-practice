@@ -1,16 +1,6 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faPaperPlane,
-  faSpinner,
-  faTrash,
-  faLanguage,
-  faSyncAlt,
-  faBrain,
-  faSave,
-  faHighlighter,
-  faEdit,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPaperPlane, faSpinner, faBrain } from "@fortawesome/free-solid-svg-icons";
 
 import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
 import { Level as defaultLevels, SelectedLevelType } from "./types";
@@ -19,35 +9,26 @@ import { Dict } from "styled-components/dist/types";
 import {
   GlobalStyle,
   Container,
-  Header,
   FeedbackSpan,
-  Label,
-  Select,
-  TextAreaWrapper,
-  TextArea,
-  TextAreaButtonWrapper,
   Button,
   Table,
   TableRow,
   TableCell,
   InputWrapper,
   FeedBackTableCell,
-  Image,
-  MenuButton,
-  MobileMenu,
 } from "./style";
 import { Row } from "./types";
 import {
   focusNextInput,
   getLevelScoreAverage,
   splitAndShuffle,
-  splitSentences,
+  translateSentence,
   updateRowFeedback,
   updateScore,
 } from "./utils";
-import { SubLevelOption } from "./subLevel";
 import InputSwitcher from "./InputSwitcher";
 import SideBar from "./SideBar";
+import Header from "./Header";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
@@ -58,7 +39,6 @@ const App: React.FC = () => {
   const [subLevels, setSubLevels] = useState<any>();
   const hasInit = useRef(false);
   const [shouldSave, setShouldSave] = useState<boolean>(true);
-  const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
   const [useGapFill, setUseGapFill] = useState<boolean>(true);
   const [shuffleSentences, setShuffleSentences] = useState<boolean>(true);
   const [hasGapFill, setHasGapFill] = useState<boolean>(true);
@@ -94,12 +74,6 @@ const App: React.FC = () => {
     }
   };
 
-  const eventHandleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const level = e.target.value as defaultLevels;
-
-    handleLevelChange(level);
-  };
-
   const handleSubLevelChange = (subLevel: string): void => {
     setSelectedSubLevel(subLevel);
     localStorage.setItem("selectedSubLevel", subLevel);
@@ -112,26 +86,6 @@ const App: React.FC = () => {
     }
   };
 
-  const eventHandleSubLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const level = e.target.value;
-
-    handleSubLevelChange(level);
-  };
-
-  const initTranslatedSentences = async () => {
-    setLoadingTranslation(true);
-    const originalSentences = rows.map((row) => row.sentence).join(" ");
-    const response = await translateSentence(originalSentences);
-    const translatedSentences = splitSentences(response);
-    const updated = rows.map((row, i) => {
-      row.translation = translatedSentences[i];
-      return row;
-    });
-
-    setRows(updated);
-    setLoadingTranslation(false);
-  };
-
   const shuffleRow = (rows: Row[]): Row[] => {
     const shuffled = [...rows];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -139,20 +93,6 @@ const App: React.FC = () => {
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
-  };
-
-  const handleTextClear = (): void => {
-    setText("");
-  };
-
-  const handleTextSubmit = (): void => {
-    let textToSplit = text;
-    if (!text && selectedLevel) {
-      textToSplit = levelSentences[selectedLevel] as string;
-      setText(textToSplit);
-    }
-    const sentences = selectedLevel === "Own Sentences" ? splitSentences(textToSplit) : splitAndShuffle(textToSplit);
-    setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
   };
 
   const getTranslateSentence = useCallback(() => {
@@ -222,26 +162,6 @@ const App: React.FC = () => {
     },
     [getSentenceWithTranslation, useGapFill]
   );
-
-  const translateSentence = async (sentence: string): Promise<string> => {
-    try {
-      const res = await fetch("https://note.henryk.co.za/api/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sentence }),
-      });
-
-      if (!res.ok) {
-        return "Error loading. Try again.";
-      }
-
-      const { translated } = await res.json();
-      return translated;
-    } catch (error) {
-      console.error("Error:", error);
-      return "Error loading. Try again.";
-    }
-  };
 
   const confirmTranslationCheck = useCallback(async (english: string, german: string): Promise<boolean> => {
     if (!english || !german) return false;
@@ -405,94 +325,28 @@ const App: React.FC = () => {
           setShowLevels={setShowLevels}
         />
         <Container style={{ width: "-webkit-fill-available" }}>
-          <Header>
-            <h1 style={{ marginBottom: "unset" }}>
-              <Image src={process.env.PUBLIC_URL + "/logo192.png"} alt="App Logo" width="70" height="70" /> <br />
-              <FeedbackSpan $correct={false}>Translate</FeedbackSpan> to{" "}
-              <FeedbackSpan $correct={true}> German </FeedbackSpan>
-            </h1>
-            <MobileMenu>
-              <Label>Level:</Label>
-              <Select value={selectedLevel || "Select your Language Level"} onChange={eventHandleLevelChange}>
-                <option disabled>Select your Language Level</option>
-                {Object.values(levels as defaultLevels).map((lvl) => (
-                  <option key={lvl} value={lvl}>
-                    {lvl.toUpperCase()}
-                  </option>
-                ))}
-              </Select>
-              {subLevels && (
-                <>
-                  <Select value={selectedSubLevel || "Select Sub Level"} onChange={eventHandleSubLevelChange}>
-                    <option disabled>Select Sub Level</option>
-                    {Object.values(subLevels as defaultLevels).map((lvl) => (
-                      <SubLevelOption key={lvl} selectedLevel={selectedLevel} subLevel={lvl} />
-                    ))}
-                  </Select>
-                </>
-              )}
-              {selectedLevel !== "Own Sentences" && (
-                <>
-                  <Label>Mode:</Label>
-                  <Select value={mode} onChange={(e: any) => setMode(e.target.value)}>
-                    <option value="easy">Easy</option>
-                    <option value="hard">Hard</option>
-                  </Select>
-                </>
-              )}
-            </MobileMenu>
-            <TextAreaWrapper>
-              {selectedLevel === "Own Sentences" && (
-                <TextArea
-                  placeholder="Enter English sentences here (make sure they end on a full stop or question mark) then click the paper plane to create the translation rows."
-                  value={text}
-                  onChange={(e: any) => setText(e.target.value)}
-                />
-              )}
-
-              <TextAreaButtonWrapper>
-                {selectedLevel !== "Own Sentences" && (
-                  <>
-                    <MenuButton
-                      onClick={() => setShuffleSentences(!shuffleSentences)}
-                      style={{ color: shuffleSentences ? "green" : "red" }}
-                    >
-                      <FontAwesomeIcon icon={faSyncAlt} />
-                    </MenuButton>
-                    <MenuButton
-                      onClick={() => setShouldSave(!shouldSave)}
-                      style={{ color: shouldSave ? "green" : "red" }}
-                    >
-                      <FontAwesomeIcon icon={faSave} />
-                    </MenuButton>
-
-                    <MenuButton
-                      disabled={!hasGapFill}
-                      onClick={() => configUseGapFill()}
-                      style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
-                    >
-                      <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
-                    </MenuButton>
-                  </>
-                )}
-
-                {selectedLevel === "Own Sentences" && (
-                  <>
-                    <MenuButton onClick={handleTextSubmit}>
-                      <FontAwesomeIcon icon={faPaperPlane} />
-                    </MenuButton>
-                    <MenuButton onClick={handleTextClear}>
-                      <FontAwesomeIcon icon={faTrash} />
-                    </MenuButton>
-                    <MenuButton onClick={initTranslatedSentences} disabled={loadingTranslation || rows.length === 0}>
-                      <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
-                      <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
-                    </MenuButton>
-                  </>
-                )}
-              </TextAreaButtonWrapper>
-            </TextAreaWrapper>
-          </Header>
+          <Header
+            handleLevelChange={handleLevelChange}
+            handleSubLevelChange={handleSubLevelChange}
+            selectedLevel={selectedLevel}
+            levels={levels}
+            subLevels={subLevels}
+            selectedSubLevel={selectedSubLevel}
+            mode={mode}
+            setMode={setMode}
+            setText={setText}
+            text={text}
+            setShuffleSentences={setShuffleSentences}
+            shuffleSentences={shuffleSentences}
+            setShouldSave={setShouldSave}
+            shouldSave={shouldSave}
+            hasGapFill={hasGapFill}
+            useGapFill={useGapFill}
+            configUseGapFill={configUseGapFill}
+            setRows={setRows}
+            rows={rows}
+            levelSentences={levelSentences}
+          />
           {rows.length > 0 && (
             <Table>
               <div>

@@ -1,0 +1,203 @@
+import React, { useState } from "react";
+import {
+  FeedbackSpan,
+  HeaderStyle,
+  Label,
+  MenuButton,
+  MobileMenu,
+  Select,
+  TextArea,
+  TextAreaButtonWrapper,
+  TextAreaWrapper,
+  Image,
+} from "./style";
+import { Level as defaultLevels, Row } from "./types";
+import {
+  faSyncAlt,
+  faSave,
+  faEdit,
+  faHighlighter,
+  faPaperPlane,
+  faTrash,
+  faLanguage,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { SubLevelOption } from "./subLevel";
+import { splitAndShuffle, splitSentences, translateSentence } from "./utils";
+import { Dict } from "styled-components/dist/types";
+
+interface HeaderProps {
+  handleLevelChange: (level: defaultLevels) => void;
+  handleSubLevelChange: (subLevel: string) => void;
+  selectedLevel: string | undefined;
+  levels: defaultLevels;
+  subLevels: defaultLevels;
+  selectedSubLevel: string | undefined;
+  mode: string;
+  setMode: (mode: "easy" | "hard") => void;
+  setText: (text: string) => void;
+  text: string;
+  setShuffleSentences: (shuffle: boolean) => void;
+  shuffleSentences: boolean;
+  setShouldSave: (shouldSave: boolean) => void;
+  shouldSave: boolean;
+  hasGapFill: boolean;
+  useGapFill: boolean;
+  configUseGapFill: () => void;
+  setRows: (value: React.SetStateAction<Row[]>) => void;
+  rows: any[];
+  levelSentences: Dict;
+}
+
+const Header: React.FC<HeaderProps> = ({
+  handleLevelChange,
+  handleSubLevelChange,
+  selectedLevel,
+  levels,
+  subLevels,
+  selectedSubLevel,
+  mode,
+  setMode,
+  setText,
+  text,
+  setShuffleSentences,
+  shuffleSentences,
+  setShouldSave,
+  shouldSave,
+  hasGapFill,
+  useGapFill,
+  configUseGapFill,
+  setRows,
+  rows,
+  levelSentences,
+}) => {
+  const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
+
+  const eventHandleSubLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const level = e.target.value;
+
+    handleSubLevelChange(level);
+  };
+
+  const eventHandleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const level = e.target.value as defaultLevels;
+
+    handleLevelChange(level);
+  };
+
+  const handleTextSubmit = (): void => {
+    let textToSplit = text;
+    if (!text && selectedLevel) {
+      textToSplit = levelSentences[selectedLevel] as string;
+      setText(textToSplit);
+    }
+    const sentences = selectedLevel === "Own Sentences" ? splitSentences(textToSplit) : splitAndShuffle(textToSplit);
+    setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+  };
+
+  const initTranslatedSentences = async () => {
+    setLoadingTranslation(true);
+    const originalSentences = rows.map((row) => row.sentence).join(" ");
+    const response = await translateSentence(originalSentences);
+    const translatedSentences = splitSentences(response);
+    const updated = rows.map((row, i) => {
+      row.translation = translatedSentences[i];
+      return row;
+    });
+
+    setRows(updated);
+    setLoadingTranslation(false);
+  };
+
+  const handleTextClear = (): void => {
+    setText("");
+  };
+  return (
+    <HeaderStyle>
+      <h1 style={{ marginBottom: "unset" }}>
+        <Image src={process.env.PUBLIC_URL + "/logo192.png"} alt="App Logo" width="70" height="70" /> <br />
+        <FeedbackSpan $correct={false}>Translate</FeedbackSpan> to <FeedbackSpan $correct={true}> German </FeedbackSpan>
+      </h1>
+      <MobileMenu>
+        <Label>Level:</Label>
+        <Select value={selectedLevel || "Select your Language Level"} onChange={eventHandleLevelChange}>
+          <option disabled>Select your Language Level</option>
+          {Object.values(levels as defaultLevels).map((lvl) => (
+            <option key={lvl} value={lvl}>
+              {lvl.toUpperCase()}
+            </option>
+          ))}
+        </Select>
+        {subLevels && (
+          <>
+            <Select value={selectedSubLevel || "Select Sub Level"} onChange={eventHandleSubLevelChange}>
+              <option disabled>Select Sub Level</option>
+              {Object.values(subLevels as defaultLevels).map((lvl) => (
+                <SubLevelOption key={lvl} selectedLevel={selectedLevel} subLevel={lvl} />
+              ))}
+            </Select>
+          </>
+        )}
+        {selectedLevel !== "Own Sentences" && (
+          <>
+            <Label>Mode:</Label>
+            <Select value={mode} onChange={(e: any) => setMode(e.target.value)}>
+              <option value="easy">Easy</option>
+              <option value="hard">Hard</option>
+            </Select>
+          </>
+        )}
+      </MobileMenu>
+      <TextAreaWrapper>
+        {selectedLevel === "Own Sentences" && (
+          <TextArea
+            placeholder="Enter English sentences here (make sure they end on a full stop or question mark) then click the paper plane to create the translation rows."
+            value={text}
+            onChange={(e: any) => setText(e.target.value)}
+          />
+        )}
+
+        <TextAreaButtonWrapper>
+          {selectedLevel !== "Own Sentences" && (
+            <>
+              <MenuButton
+                onClick={() => setShuffleSentences(!shuffleSentences)}
+                style={{ color: shuffleSentences ? "green" : "red" }}
+              >
+                <FontAwesomeIcon icon={faSyncAlt} />
+              </MenuButton>
+              <MenuButton onClick={() => setShouldSave(!shouldSave)} style={{ color: shouldSave ? "green" : "red" }}>
+                <FontAwesomeIcon icon={faSave} />
+              </MenuButton>
+
+              <MenuButton
+                disabled={!hasGapFill}
+                onClick={() => configUseGapFill()}
+                style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
+              >
+                <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
+              </MenuButton>
+            </>
+          )}
+
+          {selectedLevel === "Own Sentences" && (
+            <>
+              <MenuButton onClick={handleTextSubmit}>
+                <FontAwesomeIcon icon={faPaperPlane} />
+              </MenuButton>
+              <MenuButton onClick={handleTextClear}>
+                <FontAwesomeIcon icon={faTrash} />
+              </MenuButton>
+              <MenuButton onClick={initTranslatedSentences} disabled={loadingTranslation || rows.length === 0}>
+                <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
+                <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
+              </MenuButton>
+            </>
+          )}
+        </TextAreaButtonWrapper>
+      </TextAreaWrapper>
+    </HeaderStyle>
+  );
+};
+
+export default Header;

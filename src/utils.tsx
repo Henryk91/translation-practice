@@ -106,3 +106,23 @@ export const getLevelScoreAverage = (prefix: string, subItems: number): string |
   }
   return matchCount > 0 ? (matchCount / subItems).toFixed(0) : null;
 };
+
+export const translateSentence = async (sentence: string): Promise<string> => {
+  try {
+    const res = await fetch("https://note.henryk.co.za/api/translate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sentence }),
+    });
+
+    if (!res.ok) {
+      return "Error loading. Try again.";
+    }
+
+    const { translated } = await res.json();
+    return translated;
+  } catch (error) {
+    console.error("Error:", error);
+    return "Error loading. Try again.";
+  }
+};

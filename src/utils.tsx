@@ -88,3 +88,22 @@ const shuffleStrings = (input: string[]): string[] => {
   }
   return array;
 };
+
+export const getLevelScore = (prefix: string): string => {
+  let matchCount: number = 0;
+  let matchTotal: number = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith(prefix)) {
+      const value = localStorage.getItem(key);
+      if (value) {
+        const score: number = parseInt(value, 10);
+        if (!isNaN(score)) {
+          matchCount += score;
+          matchTotal++;
+        }
+      }
+    }
+  }
+  return matchTotal > 0 ? (matchCount / matchTotal).toFixed(0) : "0";
+};

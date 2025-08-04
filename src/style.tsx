@@ -7,6 +7,7 @@ export const GlobalStyle = createGlobalStyle`
     background-color: rgba(10,12,19,255);
     color: #e0e0e0;
     font-family: Roboto, sans-serif;
+    text-align: center;
   }
 `;
 

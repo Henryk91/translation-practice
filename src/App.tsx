@@ -34,6 +34,11 @@ import {
   FeedBackTableCell,
   Image,
   MenuButton,
+  SideMenu,
+  LevelOptions,
+  MobileMenu,
+  SubLevelOptionItem,
+  LevelSelect,
 } from "./style";
 import { Row } from "./types";
 import { focusNextInput, splitAndShuffle, splitSentences, updateRowFeedback, updateScore } from "./utils";
@@ -53,6 +58,7 @@ const App: React.FC = () => {
   const [useGapFill, setUseGapFill] = useState<boolean>(true);
   const [shuffleSentences, setShuffleSentences] = useState<boolean>(true);
   const [hasGapFill, setHasGapFill] = useState<boolean>(true);
+  const [showLevels, setShowLevels] = useState<boolean>(false);
   const defaultText = defaultLevelSentences[defaultLevels.A21];
 
   const [text, setText] = useState<string>(defaultText);
@@ -63,8 +69,8 @@ const App: React.FC = () => {
   const [lastEdited, setLastEdited] = useState<HTMLInputElement | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const handleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const level = e.target.value as defaultLevels;
+  const handleLevelChange = (level: defaultLevels): void => {
+    // const level = e.target.value as defaultLevels;
     const text = levelSentences[level];
     setSelectedLevel(level);
     localStorage.setItem("selectedLevel", level);
@@ -85,9 +91,13 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSubLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const subLevel = e.target.value as any;
+  const eventHandleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const level = e.target.value as defaultLevels;
 
+    handleLevelChange(level);
+  };
+
+  const handleSubLevelChange = (subLevel: string): void => {
     setSelectedSubLevel(subLevel);
     localStorage.setItem("selectedSubLevel", subLevel);
     if (!selectedLevel) return;
@@ -97,6 +107,12 @@ const App: React.FC = () => {
     if (typeof text === "string") {
       setText(text);
     }
+  };
+
+  const eventHandleSubLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    const level = e.target.value;
+
+    handleSubLevelChange(level);
   };
 
   const initTranslatedSentences = async () => {
@@ -361,163 +377,221 @@ const App: React.FC = () => {
     }
   }, [getTranslateSentence]);
 
+  const getLevelScore = (level: string, subLevel: string): string | null => {
+    return localStorage.getItem(`${level}-${subLevel}`) || null;
+  };
+
   return (
     <>
       <GlobalStyle />
-      <Container>
-        <Header>
-          <h1>
-            <Image src={process.env.PUBLIC_URL + "/logo192.png"} alt="App Logo" width="70" height="70" /> <br />
-            <FeedbackSpan $correct={false}>Translate</FeedbackSpan> to{" "}
-            <FeedbackSpan $correct={true}> German </FeedbackSpan>
-          </h1>
-          <div>
-            <Label>Level:</Label>
-            <Select value={selectedLevel || "Select your Language Level"} onChange={handleLevelChange}>
-              <option disabled>Select your Language Level</option>
-              {Object.values(levels as defaultLevels).map((lvl) => (
-                <option key={lvl} value={lvl}>
-                  {lvl.toUpperCase()}
-                </option>
-              ))}
-            </Select>
-            {subLevels && (
-              <>
-                <Select value={selectedSubLevel || "Select Sub Level"} onChange={handleSubLevelChange}>
-                  <option disabled>Select Sub Level</option>
-                  {Object.values(subLevels as defaultLevels).map((lvl) => (
-                    <SubLevelOption key={lvl} selectedLevel={selectedLevel} subLevel={lvl} />
-                  ))}
-                </Select>
-              </>
-            )}
-            {selectedLevel !== "Own Sentences" && (
-              <>
-                <Label>Mode:</Label>
-                <Select value={mode} onChange={(e: any) => setMode(e.target.value)}>
-                  <option value="easy">Easy</option>
-                  <option value="hard">Hard</option>
-                </Select>
-              </>
-            )}
-          </div>
-          <TextAreaWrapper>
-            {selectedLevel === "Own Sentences" && (
-              <TextArea
-                placeholder="Enter English text..."
-                value={text}
-                onChange={(e: any) => setText(e.target.value)}
-              />
-            )}
-
-            <TextAreaButtonWrapper>
-              {selectedLevel !== "Own Sentences" && (
-                <>
-                  <MenuButton
-                    onClick={() => setShuffleSentences(!shuffleSentences)}
-                    style={{ color: shuffleSentences ? "green" : "red" }}
+      <section style={{ display: "flex" }}>
+        <SideMenu>
+          <LevelSelect>
+            <p style={{ borderBottom: "1px solid #333", paddingBottom: "10px", width: "100%", fontSize: "20px" }}>
+              Levels Selected: <br />
+              <span style={{ color: "green" }}>{selectedLevel ? selectedLevel : ""}</span>
+            </p>
+            <MenuButton
+              style={{ fontSize: "15px" }}
+              onClick={() => {
+                setShowLevels(!showLevels);
+              }}
+            >
+              {showLevels ? "Hide Options" : "Show Level Options"}
+            </MenuButton>
+            {showLevels && (
+              <LevelOptions>
+                {Object.values(levels as defaultLevels).map((lvl) => (
+                  <SubLevelOptionItem
+                    onClick={() => {
+                      setShowLevels(false);
+                      handleLevelChange(lvl as any);
+                    }}
+                    key={lvl}
+                    style={{ margin: "0 10px", color: selectedLevel === lvl ? "green" : "white" }}
                   >
-                    <FontAwesomeIcon icon={faSyncAlt} />
-                  </MenuButton>
-                  <MenuButton
-                    onClick={() => setShouldSave(!shouldSave)}
-                    style={{ color: shouldSave ? "green" : "red" }}
-                  >
-                    <FontAwesomeIcon icon={faSave} />
-                  </MenuButton>
+                    {lvl}
+                  </SubLevelOptionItem>
+                ))}
+              </LevelOptions>
+            )}
+          </LevelSelect>
 
-                  <MenuButton
-                    disabled={!hasGapFill}
-                    onClick={() => configUseGapFill()}
-                    style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
-                  >
-                    <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
-                  </MenuButton>
-                </>
-              )}
-
-              {selectedLevel === "Own Sentences" && (
-                <>
-                  <MenuButton onClick={handleTextSubmit}>
-                    <FontAwesomeIcon icon={faPaperPlane} />
-                  </MenuButton>
-                  <MenuButton onClick={handleTextClear}>
-                    <FontAwesomeIcon icon={faTrash} />
-                  </MenuButton>
-                  <MenuButton onClick={initTranslatedSentences} disabled={loadingTranslation || rows.length === 0}>
-                    <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
-                    <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
-                  </MenuButton>
-                </>
-              )}
-            </TextAreaButtonWrapper>
-          </TextAreaWrapper>
-        </Header>
-        {rows.length > 0 && (
-          <Table>
+          {subLevels && !showLevels && (
             <div>
-              {rows.map((row, idx) => (
-                <TableRow key={idx}>
-                  <div className="translation-area">
-                    <TableCell style={{ justifyContent: "space-between" }}>
-                      <span>{idx + 1}. </span>
-                      <span style={{ width: "-webkit-fill-available" }}>{row.sentence}</span>
-                    </TableCell>
-                    <TableCell key={`${idx}-input`}>
-                      <InputWrapper>
-                        <InputSwitcher
-                          template={row.translation}
-                          userInput={row.userInput}
-                          onChange={(e: any) => handleInputChange(e, idx)}
-                          onKeyPress={(e: any) => handleKeyPress(e, idx)}
-                          triggerNext={focusNextInput}
-                          setLastEdited={setLastEdited}
-                          inputRef={(el: any) => (inputRefs.current[idx] = el)}
-                        />
-                      </InputWrapper>
-                    </TableCell>
-                    <FeedBackTableCell key={`feedbackTableCell-${idx}`}>
-                      <div className="feedbackWrapper">
-                        {row.feedback &&
-                          row.feedback.map((fb, i) => (
-                            <>
-                              <FeedbackSpan key={i} $correct={fb.correct}>
-                                {fb.word}
-                              </FeedbackSpan>{" "}
-                              <></>
-                            </>
-                          ))}
-                      </div>
-                      <div>
-                        {shouldShowCheck(row) ? (
-                          <Button
-                            onClick={() => handleTranslate(idx, lastEdited)}
-                            disabled={row.isLoading || !row.userInput}
-                          >
-                            <FontAwesomeIcon
-                              color="#398f6a"
-                              icon={row.isLoading ? faSpinner : faPaperPlane}
-                              spin={row.isLoading}
-                            />
-                          </Button>
-                        ) : (
-                          <Button
-                            onClick={() => handleAiCheck(idx)}
-                            disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
-                            style={{ color: row.aiCorrect === false ? "red" : "gray" }}
-                          >
-                            <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />{" "}
-                          </Button>
-                        )}
-                      </div>
-                    </FeedBackTableCell>
-                  </div>
-                </TableRow>
+              <p style={{ borderTop: "1px solid #333", paddingTop: "10px", minWidth: "300px", fontSize: "20px" }}>
+                Sub Levels: <br />
+              </p>
+              {Object.values(subLevels as defaultLevels).map((lvl) => (
+                <SubLevelOptionItem
+                  onClick={() => handleSubLevelChange(lvl as any)}
+                  key={lvl}
+                  style={{
+                    color: selectedSubLevel === lvl ? "green" : "white",
+                  }}
+                >
+                  <span style={{ textAlign: "left" }}>{lvl}</span>{" "}
+                  <span>{`(${getLevelScore(selectedLevel || "", lvl) ?? 0}%)`}</span>
+                </SubLevelOptionItem>
               ))}
             </div>
-          </Table>
-        )}
-      </Container>
+          )}
+        </SideMenu>
+        <Container style={{ width: "-webkit-fill-available" }}>
+          <Header>
+            <h1 style={{ marginBottom: "unset" }}>
+              <Image src={process.env.PUBLIC_URL + "/logo192.png"} alt="App Logo" width="70" height="70" /> <br />
+              <FeedbackSpan $correct={false}>Translate</FeedbackSpan> to{" "}
+              <FeedbackSpan $correct={true}> German </FeedbackSpan>
+            </h1>
+            <MobileMenu>
+              <Label>Level:</Label>
+              <Select value={selectedLevel || "Select your Language Level"} onChange={eventHandleLevelChange}>
+                <option disabled>Select your Language Level</option>
+                {Object.values(levels as defaultLevels).map((lvl) => (
+                  <option key={lvl} value={lvl}>
+                    {lvl.toUpperCase()}
+                  </option>
+                ))}
+              </Select>
+              {subLevels && (
+                <>
+                  <Select value={selectedSubLevel || "Select Sub Level"} onChange={eventHandleSubLevelChange}>
+                    <option disabled>Select Sub Level</option>
+                    {Object.values(subLevels as defaultLevels).map((lvl) => (
+                      <SubLevelOption key={lvl} selectedLevel={selectedLevel} subLevel={lvl} />
+                    ))}
+                  </Select>
+                </>
+              )}
+              {selectedLevel !== "Own Sentences" && (
+                <>
+                  <Label>Mode:</Label>
+                  <Select value={mode} onChange={(e: any) => setMode(e.target.value)}>
+                    <option value="easy">Easy</option>
+                    <option value="hard">Hard</option>
+                  </Select>
+                </>
+              )}
+            </MobileMenu>
+            <TextAreaWrapper>
+              {selectedLevel === "Own Sentences" && (
+                <TextArea
+                  placeholder="Enter English text..."
+                  value={text}
+                  onChange={(e: any) => setText(e.target.value)}
+                />
+              )}
+
+              <TextAreaButtonWrapper>
+                {selectedLevel !== "Own Sentences" && (
+                  <>
+                    <MenuButton
+                      onClick={() => setShuffleSentences(!shuffleSentences)}
+                      style={{ color: shuffleSentences ? "green" : "red" }}
+                    >
+                      <FontAwesomeIcon icon={faSyncAlt} />
+                    </MenuButton>
+                    <MenuButton
+                      onClick={() => setShouldSave(!shouldSave)}
+                      style={{ color: shouldSave ? "green" : "red" }}
+                    >
+                      <FontAwesomeIcon icon={faSave} />
+                    </MenuButton>
+
+                    <MenuButton
+                      disabled={!hasGapFill}
+                      onClick={() => configUseGapFill()}
+                      style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
+                    >
+                      <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
+                    </MenuButton>
+                  </>
+                )}
+
+                {selectedLevel === "Own Sentences" && (
+                  <>
+                    <MenuButton onClick={handleTextSubmit}>
+                      <FontAwesomeIcon icon={faPaperPlane} />
+                    </MenuButton>
+                    <MenuButton onClick={handleTextClear}>
+                      <FontAwesomeIcon icon={faTrash} />
+                    </MenuButton>
+                    <MenuButton onClick={initTranslatedSentences} disabled={loadingTranslation || rows.length === 0}>
+                      <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
+                      <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
+                    </MenuButton>
+                  </>
+                )}
+              </TextAreaButtonWrapper>
+            </TextAreaWrapper>
+          </Header>
+          {rows.length > 0 && (
+            <Table>
+              <div>
+                {rows.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <div className="translation-area">
+                      <TableCell style={{ justifyContent: "space-between" }}>
+                        <span>{idx + 1}. </span>
+                        <span style={{ width: "-webkit-fill-available" }}>{row.sentence}</span>
+                      </TableCell>
+                      <TableCell key={`${idx}-input`}>
+                        <InputWrapper>
+                          <InputSwitcher
+                            template={row.translation}
+                            userInput={row.userInput}
+                            onChange={(e: any) => handleInputChange(e, idx)}
+                            onKeyPress={(e: any) => handleKeyPress(e, idx)}
+                            triggerNext={focusNextInput}
+                            setLastEdited={setLastEdited}
+                            inputRef={(el: any) => (inputRefs.current[idx] = el)}
+                          />
+                        </InputWrapper>
+                      </TableCell>
+                      <FeedBackTableCell key={`feedbackTableCell-${idx}`}>
+                        <div className="feedbackWrapper">
+                          {row.feedback &&
+                            row.feedback.map((fb, i) => (
+                              <>
+                                <FeedbackSpan key={i} $correct={fb.correct}>
+                                  {fb.word}
+                                </FeedbackSpan>{" "}
+                                <></>
+                              </>
+                            ))}
+                        </div>
+                        <div>
+                          {shouldShowCheck(row) ? (
+                            <Button
+                              onClick={() => handleTranslate(idx, lastEdited)}
+                              disabled={row.isLoading || !row.userInput}
+                            >
+                              <FontAwesomeIcon
+                                color="#398f6a"
+                                icon={row.isLoading ? faSpinner : faPaperPlane}
+                                spin={row.isLoading}
+                              />
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={() => handleAiCheck(idx)}
+                              disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
+                              style={{ color: row.aiCorrect === false ? "red" : "gray" }}
+                            >
+                              <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />{" "}
+                            </Button>
+                          )}
+                        </div>
+                      </FeedBackTableCell>
+                    </div>
+                  </TableRow>
+                ))}
+              </div>
+            </Table>
+          )}
+        </Container>
+      </section>
     </>
   );
 };

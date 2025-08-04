@@ -16,12 +16,39 @@ export const Container = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 0;
-  width: 100vw;
   overflow: hidden;
+  overflow-y: scroll;
+  height: 100vh;
 
   @media (max-width: 600px) {
     padding: 0;
   }
+`;
+
+export const MobileMenu = styled.div`
+  @media (min-width: 600px) {
+    display: none;
+  }
+`;
+
+export const SideMenu = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+  height: 100vh;
+  width: 500px;
+
+  @media (max-width: 600px) {
+    padding: 0;
+
+    background-color: red;
+    visible: hidden !important;
+    display: none;
+  }
+  border-right: 1px solid #333;
 `;
 
 export const Image = styled.img`
@@ -29,9 +56,12 @@ export const Image = styled.img`
 `;
 export const Header = styled.div`
   display: flex;
-  margin-bottom: 20px;
   flex-direction: column;
   align-items: stretch;
+`;
+export const LevelOptions = styled.div`
+  border-bottom: 1px solid #333;
+  transition: height 0.3s ease;
 `;
 
 export const Label = styled.label`
@@ -178,4 +208,27 @@ export const InputWrapper = styled.div`
 export const FeedbackSpan = styled.span<{ $correct: boolean }>`
   color: ${(props) => (props.$correct ? "#4a9c78" : "#ec3d4c")};
   margin-right: 0px;
+`;
+
+export const LevelSelect = styled.div`
+  // height: 100px;
+  // overflow: hidden;
+  transition: height 0.3s ease;
+
+  // &:hover {
+  //   height: 100%;
+  // }
+`;
+
+export const SubLevelOptionItem = styled.div`
+  margin: 0 10px;
+  padding: 10px;
+  min-width: 300px;
+  border-bottom: 1px solid #333;
+  background: rgba(20, 23, 34, 255);
+  &:hover {
+    background: rgba(20, 23, 34, 0.4);
+  }
+  justify-content: space-between;
+  display: flex;
 `;

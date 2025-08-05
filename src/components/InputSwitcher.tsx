@@ -8,6 +8,8 @@ interface InputSwitcherProps {
   onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   triggerNext: (e: HTMLInputElement, back?: Boolean) => void;
   setLastEdited: (e: HTMLInputElement) => void;
+  shiftButtonDown: boolean;
+  setShiftButtonDown: (e: boolean) => void;
   inputRef?: (el: HTMLInputElement | null) => void;
 }
 
@@ -19,6 +21,8 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
   triggerNext,
   setLastEdited,
   inputRef,
+  shiftButtonDown,
+  setShiftButtonDown,
 }) => {
   const gapMatches = template.match(/\{.*?\}/g) || [];
   const gapCount = gapMatches.length;
@@ -27,8 +31,6 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
   const [inputs, setInputs] = useState<string[]>(() =>
     userInput.split(" ").slice(0, gapCount).concat(Array(gapCount).fill("")).slice(0, gapCount)
   );
-
-  const [shiftButtonDown, setShiftButtonDown] = useState<boolean>(false);
 
   useEffect(() => {
     if (userInput === "") {
@@ -56,6 +58,12 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
     onChange(syntheticEvent);
   };
 
+  const onKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Shift") {
+      setShiftButtonDown(false);
+    }
+  };
+
   const keyPressWrapper = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Shift") {
       setShiftButtonDown(false);
@@ -64,7 +72,6 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
 
     if (e.key === "Enter" && shiftButtonDown) {
       e.preventDefault();
-      setShiftButtonDown(false);
       triggerNext(e.target as HTMLInputElement, true);
       return;
     }
@@ -111,6 +118,7 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
       onChange={handleInternalChange}
       onKeyPress={keyPressWrapper}
       onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
       inputRefs={Array.from({ length: gapCount }, (_, i) => (i === 0 && inputRef ? inputRef : () => {}))}
     />
   );

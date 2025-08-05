@@ -52,6 +52,7 @@ const App: React.FC = () => {
   const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
   const [lastEdited, setLastEdited] = useState<HTMLInputElement | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [shiftButtonDown, setShiftButtonDown] = useState<boolean>(false);
 
   const handleLevelChange = (level: defaultLevels): void => {
     const text = levelSentences[level];
@@ -366,6 +367,8 @@ const App: React.FC = () => {
                             onKeyPress={(e: any) => handleKeyPress(e, idx)}
                             triggerNext={focusNextInput}
                             setLastEdited={setLastEdited}
+                            shiftButtonDown={shiftButtonDown}
+                            setShiftButtonDown={setShiftButtonDown}
                             inputRef={(el: any) => (inputRefs.current[idx] = el)}
                           />
                         </InputWrapper>

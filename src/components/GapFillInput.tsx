@@ -7,6 +7,7 @@ interface GapFillInputProps {
   onChange: (index: number, e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyUp: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   inputRefs?: ((el: HTMLInputElement | null) => void)[];
 }
 
@@ -16,6 +17,7 @@ const GapFillInput: React.FC<GapFillInputProps> = ({
   onChange,
   onKeyPress,
   onKeyDown,
+  onKeyUp,
   inputRefs = [],
 }) => {
   const parts: React.ReactNode[] = [];
@@ -37,6 +39,7 @@ const GapFillInput: React.FC<GapFillInputProps> = ({
         value={userInputs[currentIndex] || ""}
         onChange={(e: any) => onChange(currentIndex, e)}
         onKeyDown={onKeyDown}
+        onKeyUp={onKeyUp}
         onKeyPress={onKeyPress}
         style={{
           width,

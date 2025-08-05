@@ -64,6 +64,10 @@ export const focusNextInput = (currentInput: HTMLInputElement | undefined, back:
   const newIndex = back ? currentIndex - 1 : currentIndex + 1;
   if (newIndex > -1 && currentIndex < inputs.length - 1) {
     inputs[newIndex].focus();
+    inputs[newIndex].scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
   }
 };
 

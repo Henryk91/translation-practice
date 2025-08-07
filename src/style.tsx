@@ -5,7 +5,7 @@ export const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     background-color: rgba(10,12,19,255);
-    color: #e0e0e0;
+    color: rgba(255, 255, 255, 0.8);
     font-family: Roboto, sans-serif;
     text-align: center;
   }

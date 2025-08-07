@@ -60,7 +60,7 @@ const SideBar: React.FC<SideBarProps> = ({
                   handleLevelChange(lvl as any);
                 }}
                 key={lvl}
-                style={{ margin: "0 10px", color: selectedLevel === lvl ? "green" : "white" }}
+                style={{ margin: "0 10px", color: selectedLevel === lvl ? "green" : "" }}
               >
                 <span style={{ textAlign: "left" }}>{lvl}</span> <span>{levelScoreText(lvl)}</span>
               </SubLevelOptionItem>
@@ -79,7 +79,7 @@ const SideBar: React.FC<SideBarProps> = ({
               onClick={() => handleSubLevelChange(lvl as any)}
               key={lvl}
               style={{
-                color: selectedSubLevel === lvl ? "green" : "white",
+                color: selectedSubLevel === lvl ? "green" : "",
               }}
             >
               <span style={{ textAlign: "left" }}>{lvl}</span> <span>{subLevelScoreText(lvl)}</span>

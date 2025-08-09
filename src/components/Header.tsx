@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  FeedbackSpan,
   HeaderStyle,
   Label,
   MenuButton,
@@ -10,6 +9,7 @@ import {
   TextAreaButtonWrapper,
   TextAreaWrapper,
   Image,
+  TitleSpan,
 } from "../style";
 import { Level as defaultLevels, Row } from "../types";
 import {
@@ -116,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({
     <HeaderStyle>
       <h1 style={{ marginBottom: "unset" }}>
         <Image src={process.env.PUBLIC_URL + "/logo192.png"} alt="App Logo" width="70" height="70" /> <br />
-        <FeedbackSpan $correct={false}>Translate</FeedbackSpan> to <FeedbackSpan $correct={true}> German </FeedbackSpan>
+        <TitleSpan $correct={false}>Translate</TitleSpan> to <TitleSpan $correct={true}> German </TitleSpan>
       </h1>
       <MobileMenu>
         <Label>Level:</Label>

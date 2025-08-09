@@ -211,6 +211,11 @@ export const FeedbackSpan = styled.span<{ $correct: boolean }>`
   margin-right: 0px;
 `;
 
+export const TitleSpan = styled.span<{ $correct: boolean }>`
+  color: ${(props) => (props.$correct ? "#00ff00" : "#ff4444ff")};
+  margin-right: 0px;
+`;
+
 export const LevelSelect = styled.div`
   // height: 100px;
   // overflow: hidden;

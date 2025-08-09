@@ -1,22 +1,10 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane, faSpinner, faBrain } from "@fortawesome/free-solid-svg-icons";
 
 import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
 import { Level as defaultLevels, SelectedLevelType } from "./types";
 import { logUse } from "./helpers/requests";
 import { Dict } from "styled-components/dist/types";
-import {
-  GlobalStyle,
-  Container,
-  FeedbackSpan,
-  Button,
-  Table,
-  TableRow,
-  TableCell,
-  InputWrapper,
-  FeedBackTableCell,
-} from "./style";
+import { GlobalStyle, Container, Table, TableRow } from "./style";
 import { Row } from "./types";
 import {
   focusNextInput,
@@ -26,9 +14,9 @@ import {
   updateRowFeedback,
   updateScore,
 } from "./utils";
-import InputSwitcher from "./components/InputSwitcher";
 import SideBar from "./components/SideBar";
 import Header from "./components/Header";
+import TranslationArea from "./components/TranslationArea";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
@@ -50,9 +38,12 @@ const App: React.FC = () => {
   const [rows, setRows] = useState<Row[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<SelectedLevelType>();
   const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
-  const [lastEdited, setLastEdited] = useState<HTMLInputElement | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const [shiftButtonDown, setShiftButtonDown] = useState<boolean>(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number): void => {
+    const value = e.target.value;
+    setRows((current) => current.map((r, idx) => (idx === index ? { ...r, userInput: value } : r)));
+  };
 
   const handleLevelChange = (level: defaultLevels): void => {
     const text = levelSentences[level];
@@ -230,23 +221,6 @@ const App: React.FC = () => {
     setRows(newRows);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
-    setLastEdited(e.target as HTMLInputElement);
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleTranslate(index, e.target as HTMLInputElement);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number): void => {
-    const value = e.target.value;
-    setRows((current) => current.map((r, idx) => (idx === index ? { ...r, userInput: value } : r)));
-  };
-
-  const shouldShowCheck = (row: Row) => {
-    return row.isCorrect === undefined || row.isCorrect === true;
-  };
-
   const configUseGapFill = () => {
     setUseGapFill(!useGapFill);
     localStorage.setItem("useGapFill", JSON.stringify(!useGapFill));
@@ -353,62 +327,16 @@ const App: React.FC = () => {
               <div>
                 {rows.map((row, idx) => (
                   <TableRow key={idx}>
-                    <div className="translation-area">
-                      <TableCell style={{ justifyContent: "space-between" }}>
-                        <span>{idx + 1}. </span>
-                        <span style={{ width: "-webkit-fill-available" }}>{row.sentence}</span>
-                      </TableCell>
-                      <TableCell key={`${idx}-input`}>
-                        <InputWrapper>
-                          <InputSwitcher
-                            template={row.translation}
-                            userInput={row.userInput}
-                            onChange={(e: any) => handleInputChange(e, idx)}
-                            onKeyPress={(e: any) => handleKeyPress(e, idx)}
-                            triggerNext={focusNextInput}
-                            setLastEdited={setLastEdited}
-                            shiftButtonDown={shiftButtonDown}
-                            setShiftButtonDown={setShiftButtonDown}
-                            inputRef={(el: any) => (inputRefs.current[idx] = el)}
-                          />
-                        </InputWrapper>
-                      </TableCell>
-                      <FeedBackTableCell key={`feedbackTableCell-${idx}`}>
-                        <div className="feedbackWrapper">
-                          {row.feedback &&
-                            row.feedback.map((fb, i) => (
-                              <>
-                                <FeedbackSpan key={i} $correct={fb.correct}>
-                                  {fb.word}
-                                </FeedbackSpan>{" "}
-                                <></>
-                              </>
-                            ))}
-                        </div>
-                        <div>
-                          {shouldShowCheck(row) ? (
-                            <Button
-                              onClick={() => handleTranslate(idx, lastEdited)}
-                              disabled={row.isLoading || !row.userInput}
-                            >
-                              <FontAwesomeIcon
-                                color="#398f6a"
-                                icon={row.isLoading ? faSpinner : faPaperPlane}
-                                spin={row.isLoading}
-                              />
-                            </Button>
-                          ) : (
-                            <Button
-                              onClick={() => handleAiCheck(idx)}
-                              disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
-                              style={{ color: row.aiCorrect === false ? "red" : "gray" }}
-                            >
-                              <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />{" "}
-                            </Button>
-                          )}
-                        </div>
-                      </FeedBackTableCell>
-                    </div>
+                    <TranslationArea
+                      {...{
+                        idx,
+                        row,
+                        handleInputChange,
+                        inputRef: inputRefs.current[idx],
+                        handleTranslate,
+                        handleAiCheck,
+                      }}
+                    />
                   </TableRow>
                 ))}
               </div>

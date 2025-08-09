@@ -100,7 +100,11 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
               className={hasFocus ? "timer-btn animate" : ""}
               style={{ "--duration": `${getTimerDuration(row.sentence)}s` } as React.CSSProperties}
             >
-              <FontAwesomeIcon icon={row.isLoading ? faSpinner : faPaperPlane} spin={row.isLoading} />
+              <FontAwesomeIcon
+                className={row.isLoading || !row.userInput ? "checkButtonDisabled" : "checkButtonEnabled"}
+                icon={row.isLoading ? faSpinner : faPaperPlane}
+                spin={row.isLoading}
+              />
             </Button>
           ) : (
             <Button

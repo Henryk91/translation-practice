@@ -1,3 +1,9 @@
+.checkButtonEnabled {
+  color: rgba(57, 143, 106);
+}
+.checkButtonDisabled {
+  color: rgba(57, 143, 106, 0.3);
+}
 button:active {
   background-color: rgba(255, 226, 197, 0.5);
 }

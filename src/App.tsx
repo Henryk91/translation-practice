@@ -40,6 +40,7 @@ const App: React.FC = () => {
   const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [shiftButtonDown, setShiftButtonDown] = useState<boolean>(false);
+  const [altButtonDown, setAltButtonDown] = useState<boolean>(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number): void => {
     const value = e.target.value;
@@ -183,7 +184,7 @@ const App: React.FC = () => {
 
     const row = rows[index];
     const isCorrect = row.isCorrect;
-    if (!row.userInput || isCorrect === undefined || isCorrect === true) {
+    if (!row.userInput || (isCorrect === undefined && !altButtonDown) || isCorrect === true) {
       setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
       return;
     }
@@ -209,6 +210,10 @@ const App: React.FC = () => {
   };
 
   const handleTranslate = async (index: number, event: HTMLInputElement | undefined): Promise<void> => {
+    if (altButtonDown) {
+      await handleAiCheck(index, event);
+      return;
+    }
     setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
 
     const row = rows[index];
@@ -293,11 +298,15 @@ const App: React.FC = () => {
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === "Shift") {
         setShiftButtonDown(false);
+      } else if (e.key === "Alt") {
+        setAltButtonDown(false);
       }
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Shift") {
         setShiftButtonDown(true);
+      } else if (e.key === "Alt") {
+        setAltButtonDown(true);
       }
     };
 

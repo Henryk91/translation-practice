@@ -11,8 +11,10 @@ interface TranslationAreaProps {
   row: Row;
   inputRef: HTMLInputElement | null;
   handleTranslate: (index: number, event: HTMLInputElement | undefined) => Promise<void>;
-  handleAiCheck: (index: number) => Promise<void>;
+  handleAiCheck: (index: number, event: HTMLInputElement | undefined) => Promise<void>;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, index: number) => void;
+  useGapFill: boolean;
+  shiftButtonDown: boolean;
 }
 const TranslationArea: React.FC<TranslationAreaProps> = ({
   idx,
@@ -21,10 +23,11 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
   handleTranslate,
   handleAiCheck,
   handleInputChange,
+  useGapFill,
+  shiftButtonDown,
 }) => {
   const blurTimeout = useRef<NodeJS.Timeout | null>(null);
   const [hasFocus, setHasFocus] = useState<boolean>(false);
-  const [shiftButtonDown, setShiftButtonDown] = useState<boolean>(false);
   const [lastEdited, setLastEdited] = useState<HTMLInputElement | undefined>();
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
@@ -72,14 +75,14 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
       <TableCell key={`${idx}-input`} className="input-cell">
         <InputWrapper>
           <InputSwitcher
-            template={row.translation}
+            useGapFill={useGapFill}
+            row={row}
             userInput={row.userInput}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange(e, idx)}
             onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => handleKeyPress(e, idx)}
             triggerNext={focusNextInput}
             setLastEdited={setLastEdited}
             shiftButtonDown={shiftButtonDown}
-            setShiftButtonDown={setShiftButtonDown}
             inputRef={(el: HTMLInputElement | null) => (inputRef = el)}
           />
         </InputWrapper>
@@ -111,7 +114,7 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
             </Button>
           ) : (
             <Button
-              onClick={() => handleAiCheck(idx)}
+              onClick={() => handleAiCheck(idx, lastEdited)}
               disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
               style={{ color: row.aiCorrect === false ? "red" : "gray" }}
             >

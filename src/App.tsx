@@ -39,6 +39,7 @@ const App: React.FC = () => {
   const [selectedLevel, setSelectedLevel] = useState<SelectedLevelType>();
   const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [shiftButtonDown, setShiftButtonDown] = useState<boolean>(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number): void => {
     const value = e.target.value;
@@ -134,12 +135,11 @@ const App: React.FC = () => {
       const translatedSentences = await getSentenceWithTranslation();
       if (!translatedSentences || translatedSentences.length === 0) return;
 
-      let hasGapFill = false;
+      const hasGapFill =
+        translatedSentences[0].translation.includes("{") && translatedSentences[0].translation.includes("}");
       const rows = translatedSentences.map((item: Row) => {
-        if (!hasGapFill && item.translation.includes("{") && item.translation.includes("}")) {
-          hasGapFill = true;
-        }
-        if (!useGapFill) {
+        if (hasGapFill) {
+          item.gapTranslation = item.translation;
           item.translation = item.translation.replaceAll("{", "").replaceAll("}", "");
         }
         item.feedback = null;
@@ -152,7 +152,7 @@ const App: React.FC = () => {
       setRows(sentences);
       setHasGapFill(hasGapFill);
     },
-    [getSentenceWithTranslation, useGapFill]
+    [getSentenceWithTranslation]
   );
 
   const confirmTranslationCheck = useCallback(async (english: string, german: string): Promise<boolean> => {
@@ -178,7 +178,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleAiCheck = async (index: number): Promise<void> => {
+  const handleAiCheck = async (index: number, lastInput: HTMLInputElement | undefined): Promise<void> => {
     setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
 
     const row = rows[index];
@@ -201,6 +201,11 @@ const App: React.FC = () => {
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
     setRows(newRows);
     if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
+    if (isTranslationCorrect) {
+      focusNextInput(lastInput);
+    } else {
+      lastInput?.focus();
+    }
   };
 
   const handleTranslate = async (index: number, event: HTMLInputElement | undefined): Promise<void> => {
@@ -284,6 +289,27 @@ const App: React.FC = () => {
     [levelSentences]
   );
 
+  useEffect(() => {
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Shift") {
+        setShiftButtonDown(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Shift") {
+        setShiftButtonDown(true);
+      }
+    };
+
+    window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
     <>
       <GlobalStyle />
@@ -335,6 +361,8 @@ const App: React.FC = () => {
                         inputRef: inputRefs.current[idx],
                         handleTranslate,
                         handleAiCheck,
+                        useGapFill,
+                        shiftButtonDown,
                       }}
                     />
                   </TableRow>

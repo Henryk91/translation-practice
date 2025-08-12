@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
 import GapFillInput from "./GapFillInput";
 import { TextInput } from "../style";
+import { Row } from "../types";
 interface InputSwitcherProps {
-  template: string;
   userInput: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   triggerNext: (e: HTMLInputElement, back?: Boolean) => void;
   setLastEdited: (e: HTMLInputElement) => void;
   shiftButtonDown: boolean;
-  setShiftButtonDown: (e: boolean) => void;
   inputRef?: (el: HTMLInputElement | null) => void;
+  useGapFill: boolean;
+  row: Row;
 }
 
 const InputSwitcher: React.FC<InputSwitcherProps> = ({
-  template,
+  useGapFill,
+  row,
   userInput,
   onChange,
   onKeyPress,
@@ -22,9 +24,8 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
   setLastEdited,
   inputRef,
   shiftButtonDown,
-  setShiftButtonDown,
 }) => {
-  const gapMatches = template.match(/\{.*?\}/g) || [];
+  const gapMatches = row?.gapTranslation?.match(/\{.*?\}/g) || [];
   const gapCount = gapMatches.length;
   const hasGaps = gapCount > 0;
 
@@ -43,9 +44,9 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
     updated[index] = e.target.value;
     setInputs(updated);
 
-    let newSentence = template;
+    let newSentence = row.gapTranslation;
     gapMatches.forEach((match, i) => {
-      newSentence = newSentence.replace(match, `{${updated[i].trim()}}` || "");
+      newSentence = newSentence?.replace(match, `{${updated[i].trim()}}`);
     });
     const syntheticEvent = {
       ...e,
@@ -58,18 +59,7 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
     onChange(syntheticEvent);
   };
 
-  const onKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Shift") {
-      setShiftButtonDown(false);
-    }
-  };
-
   const keyPressWrapper = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Shift") {
-      setShiftButtonDown(false);
-      return;
-    }
-
     if (e.key === "Enter" && shiftButtonDown) {
       e.preventDefault();
       triggerNext(e.target as HTMLInputElement, true);
@@ -99,26 +89,16 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
     triggerNext(e.target as HTMLInputElement);
   };
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Shift") {
-      setShiftButtonDown(true);
-    }
-  };
-
-  if (!hasGaps) {
-    return (
-      <TextInput ref={inputRef} value={userInput} onChange={onChange} onKeyUp={keyPressWrapper} onKeyDown={onKeyDown} />
-    );
+  if (!useGapFill || !hasGaps) {
+    return <TextInput ref={inputRef} value={userInput} onChange={onChange} onKeyUp={keyPressWrapper} />;
   }
 
   return (
     <GapFillInput
-      template={template}
+      template={row.gapTranslation || ""}
       userInputs={inputs}
       onChange={handleInternalChange}
       onKeyPress={keyPressWrapper}
-      onKeyDown={onKeyDown}
-      onKeyUp={onKeyUp}
       inputRefs={Array.from({ length: gapCount }, (_, i) => (i === 0 && inputRef ? inputRef : () => {}))}
     />
   );

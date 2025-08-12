@@ -29,6 +29,7 @@ export interface Row {
   sentence: string;
   userInput: string;
   translation: string;
+  gapTranslation?: string;
   feedback: FeedbackWord[] | null;
   isLoading?: boolean;
   isCorrect?: boolean;

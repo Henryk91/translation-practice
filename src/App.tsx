@@ -290,6 +290,7 @@ const App: React.FC = () => {
       if (typeof text === "object") {
         const subLevels = Object.keys(text);
         setSubLevels(subLevels);
+        setShowLevels(false);
       }
 
       const redoErrors = localStorage.getItem("redoErrors");
@@ -306,7 +307,7 @@ const App: React.FC = () => {
     if (storedSubLevel) {
       setSelectedSubLevel(storedSubLevel);
     }
-  }, [levels, levelSentences, setUseGapFill, setRedoErrors]);
+  }, [levels, levelSentences, setUseGapFill, setRedoErrors, setShowLevels]);
 
   useEffect(() => {
     console.log("App initialized");

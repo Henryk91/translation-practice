@@ -56,13 +56,23 @@ button:disabled {
   isolation: isolate;
 }
 
+/* Allow smooth interpolation of hue */
+@property --h {
+  syntax: "<angle>";
+  initial-value: 120deg; /* green */
+  inherits: false;
+}
+
 .timer-btn::before {
   content: "";
   position: absolute;
   inset: calc(var(--ring, 4px) * -1);
   border-radius: 50%;
   padding: var(--ring, 4px);
-  background: conic-gradient(var(--ringColor, red) var(--progress, 0deg), transparent 0);
+
+  /* Arc color based on hue */
+  background: conic-gradient(hsl(var(--h) 90% 45%) var(--progress, 0deg), transparent 0);
+
   -webkit-mask: radial-gradient(
     farthest-side,
     transparent calc(100% - var(--ring, 4px)),
@@ -81,12 +91,14 @@ button:disabled {
 @keyframes timer {
   from {
     --progress: 0deg;
+    --h: 120deg; /* green */
   }
   to {
     --progress: 360deg;
+    --h: 0deg; /* red */
   }
 }
 
 .timer-btn.animate::before {
-  animation: timer var(--duration, 5s) linear forwards;
+  animation: timer var(--duration) linear forwards;
 }

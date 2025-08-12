@@ -114,9 +114,15 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
             </Button>
           ) : (
             <Button
+              className={hasFocus ? "timer-btn animate" : ""}
               onClick={() => handleAiCheck(idx, lastEdited)}
               disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
-              style={{ color: row.aiCorrect === false ? "red" : "gray" }}
+              style={
+                {
+                  color: row.aiCorrect === false ? "red" : "gray",
+                  "--duration": `${getTimerDuration(row.sentence)}s`,
+                } as React.CSSProperties
+              }
             >
               <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />{" "}
             </Button>

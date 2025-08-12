@@ -105,6 +105,7 @@ export const TextInput = styled.input`
 `;
 
 export const Button = styled.button`
+  position: relative;
   border: none;
   background-color: #333;
   cursor: pointer;

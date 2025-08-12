@@ -113,3 +113,24 @@ button:disabled {
   text-align: center;
   font-size: 1em;
 }
+
+.menu-button {
+  position: absolute;
+  display: none;
+  float: inline-end;
+  float: none;
+  cursor: pointer;
+  margin: 20px;
+  right: 0px;
+  margin-left: -100px;
+  font-size: 22px;
+}
+
+@media (max-width: 600px) {
+  .menu-button {
+    display: flex;
+  }
+}
+#toggle:checked ~ .hidden-content {
+  display: flex;
+}

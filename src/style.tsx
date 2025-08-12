@@ -18,8 +18,10 @@ export const Container = styled.div`
   padding: 0;
   overflow: hidden;
   overflow-y: scroll;
-  height: 100vh;
 
+  @media (min-width: 600px) {
+    height: 100vh;
+  }
   @media (max-width: 600px) {
     padding: 0;
   }
@@ -42,11 +44,11 @@ export const SideMenu = styled.div`
   width: 500px;
 
   @media (max-width: 600px) {
-    padding: 0;
-
-    background-color: red;
-    visible: hidden !important;
     display: none;
+    width: 100vw;
+    position: absolute;
+    background: rgb(10, 12, 19);
+    z-index: 100;
   }
   border-right: 1px solid #333;
 `;

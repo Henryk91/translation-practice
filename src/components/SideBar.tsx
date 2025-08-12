@@ -1,6 +1,8 @@
 import React, { useMemo } from "react";
 import { LevelOptions, LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../style";
 import { Level as defaultLevels } from "../types";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface SideBarProps {
   selectedLevel: string | undefined;
@@ -35,7 +37,10 @@ const SideBar: React.FC<SideBarProps> = ({
   );
 
   return (
-    <SideMenu>
+    <SideMenu className="hidden-content">
+      <label htmlFor="toggle" className="menu-button" style={{ position: "absolute" }}>
+        <FontAwesomeIcon icon={faBars} size="lg" />
+      </label>
       <LevelSelect>
         <p style={{ borderBottom: "1px solid #333", paddingBottom: "10px", width: "100%", fontSize: "20px" }}>
           Levels Selected: <br />
@@ -75,15 +80,16 @@ const SideBar: React.FC<SideBarProps> = ({
             Sub Levels: <br />
           </p>
           {Object.values(subLevels as defaultLevels).map((lvl) => (
-            <SubLevelOptionItem
-              onClick={() => handleSubLevelChange(lvl as any)}
-              key={lvl}
-              style={{
-                color: selectedSubLevel === lvl ? "green" : "",
-              }}
-            >
-              <span style={{ textAlign: "left" }}>{lvl}</span> <span>{subLevelScoreText(lvl)}</span>
-            </SubLevelOptionItem>
+            <label key={lvl} htmlFor="toggle" style={{ textAlign: "left" }}>
+              <SubLevelOptionItem
+                onClick={() => handleSubLevelChange(lvl as any)}
+                style={{
+                  color: selectedSubLevel === lvl ? "green" : "",
+                }}
+              >
+                <span style={{ textAlign: "left" }}>{lvl}</span> <span>{subLevelScoreText(lvl)}</span>
+              </SubLevelOptionItem>
+            </label>
           ))}
         </div>
       )}

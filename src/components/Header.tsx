@@ -21,6 +21,7 @@ import {
   faTrash,
   faLanguage,
   faRedoAlt,
+  faBars,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SubLevelOption } from "../subLevel";
@@ -140,6 +141,9 @@ const Header: React.FC<HeaderProps> = ({
   };
   return (
     <HeaderStyle>
+      <label htmlFor="toggle" className="menu-button" style={{ position: "absolute" }}>
+        <FontAwesomeIcon icon={faBars} size="lg" />
+      </label>
       <h1 style={{ marginBottom: "unset" }}>
         <Image src={process.env.PUBLIC_URL + "/logo192.png"} alt="App Logo" width="70" height="70" /> <br />
         <TitleSpan $correct={false}>Translate</TitleSpan> to <TitleSpan $correct={true}> German </TitleSpan>
@@ -213,7 +217,7 @@ const Header: React.FC<HeaderProps> = ({
                 style={{ color: redoErrors ? "green" : "red", padding: "1px" }}
               >
                 <RedoThreeIcon count={redoErrors ? 3 : 1} />
-                <div style={{ fontSize: "12px", color: "white" }}>Error Retry</div>
+                <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Error Retry</div>
               </MenuButton>
             </>
           )}

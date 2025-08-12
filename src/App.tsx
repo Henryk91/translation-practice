@@ -359,6 +359,8 @@ const App: React.FC = () => {
     <>
       <GlobalStyle />
       <section style={{ display: "flex" }}>
+        {/* For menu show hide  */}
+        <input type="checkbox" id="toggle" hidden></input>
         <SideBar
           selectedLevel={selectedLevel}
           levels={levels}

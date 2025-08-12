@@ -191,9 +191,11 @@ const Header: React.FC<HeaderProps> = ({
                 style={{ color: shuffleSentences ? "green" : "red" }}
               >
                 <FontAwesomeIcon icon={faSyncAlt} />
+                <div style={{ fontSize: "12px", color: "white" }}>Shuffle</div>
               </MenuButton>
               <MenuButton onClick={() => setShouldSave(!shouldSave)} style={{ color: shouldSave ? "green" : "red" }}>
                 <FontAwesomeIcon icon={faSave} />
+                <div style={{ fontSize: "12px", color: "white" }}>Save</div>
               </MenuButton>
 
               <MenuButton
@@ -202,6 +204,7 @@ const Header: React.FC<HeaderProps> = ({
                 style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
               >
                 <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
+                <div style={{ fontSize: "12px", color: "white" }}>Gap Fill</div>
               </MenuButton>
 
               <MenuButton
@@ -210,6 +213,7 @@ const Header: React.FC<HeaderProps> = ({
                 style={{ color: redoErrors ? "green" : "red", padding: "1px" }}
               >
                 <RedoThreeIcon count={redoErrors ? 3 : 1} />
+                <div style={{ fontSize: "12px", color: "white" }}>Error Retry</div>
               </MenuButton>
             </>
           )}

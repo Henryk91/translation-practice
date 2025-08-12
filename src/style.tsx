@@ -130,6 +130,7 @@ export const MenuButton = styled.button`
   color: #e0e0e0;
   cursor: pointer;
   width: fit-content;
+  min-width: 70px;
   white-space: nowrap;
   font-size: 30px;
   &:hover {

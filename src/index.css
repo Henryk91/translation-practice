@@ -102,3 +102,7 @@ button:disabled {
 .timer-btn.animate::before {
   animation: timer var(--duration) linear forwards;
 }
+
+.input-cell {
+  padding: 5px 0 5px 0;
+}

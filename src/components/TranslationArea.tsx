@@ -1,6 +1,6 @@
 import { faSpinner, faPaperPlane, faBrain } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { TableCell, InputWrapper, FeedBackTableCell, FeedbackSpan, Button } from "../style";
 import { Row } from "../types";
 import { focusNextInput } from "../utils";
@@ -59,13 +59,17 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
     return 2 + 0.5 * words;
   }, []);
 
+  useEffect(() => {
+    if (idx === 0) inputRef?.focus();
+  }, [idx, row.sentence, inputRef]);
+
   return (
     <div className="translation-area" onFocus={handleFocus} onBlur={handleBlur}>
       <TableCell style={{ justifyContent: "space-between" }}>
         <span>{idx + 1}. </span>
         <span style={{ width: "-webkit-fill-available" }}>{row.sentence}</span>
       </TableCell>
-      <TableCell key={`${idx}-input`}>
+      <TableCell key={`${idx}-input`} className="input-cell">
         <InputWrapper>
           <InputSwitcher
             template={row.translation}
@@ -84,12 +88,11 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
         <div className="feedbackWrapper">
           {row.feedback &&
             row.feedback.map((fb: any, i: number) => (
-              <>
+              <span key={`wrap${idx}-${i}`}>
                 <FeedbackSpan key={i} $correct={fb.correct}>
                   {fb.word}
                 </FeedbackSpan>{" "}
-                <></>
-              </>
+              </span>
             ))}
         </div>
         <div>

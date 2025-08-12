@@ -24,18 +24,13 @@ const GapFillInput: React.FC<GapFillInputProps> = ({ template, userInputs, onCha
     const width = `${(match[1]?.length || 4) + 1}ch`;
     parts.push(
       <TextInput
+        className="gap-fill-input"
         key={`input-${currentIndex}`}
         ref={inputRefs[currentIndex]}
         value={userInputs[currentIndex] || ""}
         onChange={(e: any) => onChange(currentIndex, e)}
         onKeyPress={onKeyPress}
-        style={{
-          width,
-          padding: "1px 8px",
-          marginRight: "1px",
-          textAlign: "center",
-          fontSize: "1.0em",
-        }}
+        style={{ width }}
       />
     );
 

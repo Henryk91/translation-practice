@@ -20,11 +20,33 @@ import {
   faPaperPlane,
   faTrash,
   faLanguage,
+  faRedoAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SubLevelOption } from "../subLevel";
 import { splitAndShuffle, splitSentences, translateSentence } from "../utils";
 import { Dict } from "styled-components/dist/types";
+
+const RedoThreeIcon: React.FC<{ count: number }> = ({ count }) => {
+  return (
+    <div style={{ position: "relative", margin: "0 2px 0 2px" }}>
+      <FontAwesomeIcon icon={faRedoAlt} style={{ fontSize: "1.2em" }} />
+      <span
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          fontSize: "0.9rem",
+          fontWeight: "bold",
+          color: "white",
+        }}
+      >
+        {count}
+      </span>
+    </div>
+  );
+};
 
 interface HeaderProps {
   handleLevelChange: (level: defaultLevels) => void;
@@ -47,6 +69,8 @@ interface HeaderProps {
   setRows: (value: React.SetStateAction<Row[]>) => void;
   rows: any[];
   levelSentences: Dict;
+  redoErrors: boolean;
+  setRedoErrors: (val: boolean) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -70,6 +94,8 @@ const Header: React.FC<HeaderProps> = ({
   setRows,
   rows,
   levelSentences,
+  redoErrors,
+  setRedoErrors,
 }) => {
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
 
@@ -176,6 +202,14 @@ const Header: React.FC<HeaderProps> = ({
                 style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
               >
                 <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
+              </MenuButton>
+
+              <MenuButton
+                disabled={!hasGapFill}
+                onClick={() => setRedoErrors(!redoErrors)}
+                style={{ color: redoErrors ? "green" : "red", padding: "1px" }}
+              >
+                <RedoThreeIcon count={redoErrors ? 3 : 1} />
               </MenuButton>
             </>
           )}

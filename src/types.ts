@@ -34,4 +34,5 @@ export interface Row {
   isLoading?: boolean;
   isCorrect?: boolean;
   aiCorrect?: boolean;
+  isRetry?: boolean;
 }

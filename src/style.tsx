@@ -183,6 +183,7 @@ export const FeedBackTableCell = styled.div`
 `;
 
 export const TextAreaButtonWrapper = styled.div`
+  display: flex;
   margin: 5px;
   Button {
     margin: 5px;

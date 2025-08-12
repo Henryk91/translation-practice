@@ -8,7 +8,7 @@ export const updateScore = (
   let totalCount = 0;
   let correctCount = 0;
   rows.forEach((row) => {
-    if (row.hasOwnProperty("isCorrect")) {
+    if (row.hasOwnProperty("isCorrect") && !row.hasOwnProperty("isRetry")) {
       totalCount++;
       if (row.isCorrect) {
         correctCount++;

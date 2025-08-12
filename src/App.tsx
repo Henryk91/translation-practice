@@ -31,6 +31,7 @@ const App: React.FC = () => {
   const [shuffleSentences, setShuffleSentences] = useState<boolean>(true);
   const [hasGapFill, setHasGapFill] = useState<boolean>(true);
   const [showLevels, setShowLevels] = useState<boolean>(true);
+  const [redoErrors, setRedoErrors] = useState<boolean>(false);
   const defaultText = defaultLevelSentences[defaultLevels.A21];
 
   const [text, setText] = useState<string>(defaultText);
@@ -192,6 +193,7 @@ const App: React.FC = () => {
     const promptWords = row.sentence;
     const checkSentence = row.userInput.replaceAll("{", "").replaceAll("}", "");
     const isTranslationCorrect = await confirmTranslationCheck(promptWords, checkSentence);
+    const wasFalse = row.isCorrect === false || row.aiCorrect === false;
 
     const updatedRow = updateRowFeedback(
       mode,
@@ -200,6 +202,17 @@ const App: React.FC = () => {
       isTranslationCorrect
     );
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
+
+    if (redoErrors) {
+      if (wasFalse && (updatedRow.isCorrect || row.aiCorrect)) {
+        newRows.splice(index + 1, 3);
+      } else if (!row.isRetry) {
+        const retryRow = { ...updatedRow, userInput: "", feedback: null, isRetry: true };
+        delete retryRow.aiCorrect;
+        newRows.splice(index + 1, 0, retryRow, retryRow, retryRow);
+      }
+    }
+
     setRows(newRows);
     if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
     if (isTranslationCorrect) {
@@ -225,10 +238,27 @@ const App: React.FC = () => {
     if (event) focusNextInput(event);
     const translated = row.translation ? row.translation : await translateSentence(row.sentence);
 
+    const wasFalse = row.isCorrect === false || row.aiCorrect === false;
     const updatedRow = updateRowFeedback(mode, row, translated, row.aiCorrect);
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
+
+    if (redoErrors) {
+      if (wasFalse && (updatedRow.isCorrect || row.aiCorrect)) {
+        newRows.splice(index + 1, 3);
+      } else if (!row.isRetry) {
+        const retryRow = { ...updatedRow, userInput: "", feedback: null, isRetry: true };
+        delete retryRow.aiCorrect;
+        newRows.splice(index + 1, 0, retryRow, retryRow, retryRow);
+      }
+    }
+
     if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
     setRows(newRows);
+  };
+
+  const configSetRedoErrors = (redoErrors: boolean) => {
+    setRedoErrors(redoErrors);
+    localStorage.setItem("redoErrors", JSON.stringify(redoErrors));
   };
 
   const configUseGapFill = () => {
@@ -262,6 +292,11 @@ const App: React.FC = () => {
         setSubLevels(subLevels);
       }
 
+      const redoErrors = localStorage.getItem("redoErrors");
+      if (redoErrors !== null) {
+        setRedoErrors(JSON.parse(redoErrors));
+      }
+
       const useGapFill = localStorage.getItem("useGapFill");
       if (useGapFill !== null) {
         setUseGapFill(JSON.parse(useGapFill));
@@ -271,7 +306,7 @@ const App: React.FC = () => {
     if (storedSubLevel) {
       setSelectedSubLevel(storedSubLevel);
     }
-  }, [levels, levelSentences, setUseGapFill]);
+  }, [levels, levelSentences, setUseGapFill, setRedoErrors]);
 
   useEffect(() => {
     console.log("App initialized");
@@ -336,6 +371,8 @@ const App: React.FC = () => {
         />
         <Container style={{ width: "-webkit-fill-available" }}>
           <Header
+            redoErrors={redoErrors}
+            setRedoErrors={configSetRedoErrors}
             handleLevelChange={handleLevelChange}
             handleSubLevelChange={handleSubLevelChange}
             selectedLevel={selectedLevel}

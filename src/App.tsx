@@ -206,7 +206,7 @@ const App: React.FC = () => {
     if (redoErrors) {
       if (wasFalse && (updatedRow.isCorrect || row.aiCorrect)) {
         newRows.splice(index + 1, 3);
-      } else if (!row.isRetry) {
+      } else if (!row.isRetry && updatedRow.aiCorrect === false) {
         const retryRow = { ...updatedRow, userInput: "", feedback: null, isRetry: true };
         delete retryRow.aiCorrect;
         newRows.splice(index + 1, 0, retryRow, retryRow, retryRow);
@@ -245,7 +245,7 @@ const App: React.FC = () => {
     if (redoErrors) {
       if (wasFalse && (updatedRow.isCorrect || row.aiCorrect)) {
         newRows.splice(index + 1, 3);
-      } else if (!row.isRetry) {
+      } else if (!row.isRetry && updatedRow.isCorrect === false) {
         const retryRow = { ...updatedRow, userInput: "", feedback: null, isRetry: true };
         delete retryRow.aiCorrect;
         newRows.splice(index + 1, 0, retryRow, retryRow, retryRow);

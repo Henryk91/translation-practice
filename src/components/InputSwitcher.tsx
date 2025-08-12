@@ -90,7 +90,8 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
   };
 
   if (!useGapFill || !hasGaps) {
-    return <TextInput ref={inputRef} value={userInput} onChange={onChange} onKeyUp={keyPressWrapper} />;
+    const value = userInput.includes("{") ? userInput.replaceAll("{", "").replaceAll("}", "") : userInput;
+    return <TextInput ref={inputRef} value={value} onChange={onChange} onKeyUp={keyPressWrapper} />;
   }
 
   return (

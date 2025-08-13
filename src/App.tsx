@@ -4,7 +4,7 @@ import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
 import { Level as defaultLevels, SelectedLevelType } from "./types";
 import { logUse } from "./helpers/requests";
 import { Dict } from "styled-components/dist/types";
-import { GlobalStyle, Container, Table, TableRow } from "./style";
+import { GlobalStyle, Container, Table, TableRow, MenuButton } from "./style";
 import { Row } from "./types";
 import {
   focusNextInput,
@@ -17,6 +17,8 @@ import {
 import SideBar from "./components/SideBar";
 import Header from "./components/Header";
 import TranslationArea from "./components/TranslationArea";
+import { faSyncAlt } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
@@ -156,6 +158,22 @@ const App: React.FC = () => {
     },
     [getSentenceWithTranslation]
   );
+
+  const redoSentences = (rows: Row[]) => {
+    const filteredRows = rows.filter((row: Row) => !row.isRetry);
+    const cleanRows = filteredRows.map((row: Row) => {
+      return {
+        ...row,
+        feedback: null,
+        userInput: "",
+        isLoading: undefined,
+        isCorrect: undefined,
+        aiCorrect: undefined,
+      };
+    });
+    const sentences = shuffleSentences ? shuffleRow(cleanRows) : cleanRows;
+    setRows(sentences);
+  };
 
   const confirmTranslationCheck = useCallback(async (english: string, german: string): Promise<boolean> => {
     if (!english || !german) return false;
@@ -416,6 +434,17 @@ const App: React.FC = () => {
                     />
                   </TableRow>
                 ))}
+                <div>
+                  <MenuButton
+                    onClick={() => {
+                      if (selectedSubLevel) redoSentences(rows);
+                    }}
+                    style={{ color: shuffleSentences ? "green" : "red" }}
+                  >
+                    <FontAwesomeIcon icon={faSyncAlt} />
+                    <div style={{ fontSize: "12px", color: "white" }}>Again</div>
+                  </MenuButton>
+                </div>
               </div>
             </Table>
           )}

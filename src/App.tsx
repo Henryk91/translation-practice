@@ -242,7 +242,7 @@ const App: React.FC = () => {
     const updatedRow = updateRowFeedback(mode, row, translated, row.aiCorrect);
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
 
-    if (redoErrors) {
+    if (redoErrors && !row.isRetry) {
       if (wasFalse && (updatedRow.isCorrect || row.aiCorrect)) {
         newRows.splice(index + 1, 3);
       } else if (!row.isRetry && updatedRow.isCorrect === false) {

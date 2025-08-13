@@ -93,6 +93,7 @@ const SideBar: React.FC<SideBarProps> = ({
           ))}
         </div>
       )}
+      <br />
     </SideMenu>
   );
 };

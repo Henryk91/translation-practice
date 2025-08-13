@@ -17,7 +17,7 @@ import {
 import SideBar from "./components/SideBar";
 import Header from "./components/Header";
 import TranslationArea from "./components/TranslationArea";
-import { faSyncAlt } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faArrowRight, faSyncAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const App: React.FC = () => {
@@ -284,6 +284,36 @@ const App: React.FC = () => {
     localStorage.setItem("useGapFill", JSON.stringify(!useGapFill));
   };
 
+  const nextExercise = (previous?: boolean) => {
+    const currentIndex = subLevels.indexOf(selectedSubLevel);
+    if (currentIndex < 0) return;
+
+    const canGoForwards = previous !== true && subLevels.length - 1 > currentIndex;
+    const canGoBackwards = previous === true && currentIndex > 0;
+
+    if (canGoForwards || canGoBackwards) {
+      const nextInd = previous ? currentIndex - 1 : currentIndex + 1;
+      handleSubLevelChange(subLevels[nextInd]);
+      return;
+    }
+
+    const levelList = Object.keys(levels);
+    const currentLevelIndex = levelList.indexOf(`${selectedLevel}`);
+
+    if (currentLevelIndex < 0) return;
+
+    const nextLevelIndex = previous ? currentLevelIndex - 1 : currentLevelIndex + 1;
+    const newLevel = levelList[nextLevelIndex];
+    const localSubLevels = Object.keys(levelSentences[newLevel]);
+    const newSubLevel = previous ? localSubLevels[localSubLevels.length - 1] : localSubLevels[0];
+
+    handleLevelChange(newLevel as any);
+    setSubLevels(localSubLevels);
+    // setSelectedSubLevel(newSubLevel);
+
+    handleSubLevelChange(newSubLevel);
+  };
+
   const loadText = useCallback(() => {
     const sentences = splitAndShuffle(text);
     setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
@@ -434,7 +464,16 @@ const App: React.FC = () => {
                     />
                   </TableRow>
                 ))}
-                <div>
+                <div style={{ display: "flex", justifyContent: "center" }}>
+                  <MenuButton
+                    style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
+                    onClick={() => {
+                      nextExercise(true);
+                    }}
+                  >
+                    <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowLeft} />
+                    Prev Exercise
+                  </MenuButton>
                   <MenuButton
                     onClick={() => {
                       if (selectedSubLevel) redoSentences(rows);
@@ -444,7 +483,16 @@ const App: React.FC = () => {
                     <FontAwesomeIcon icon={faSyncAlt} />
                     <div style={{ fontSize: "12px", color: "white" }}>Again</div>
                   </MenuButton>
+                  <MenuButton
+                    style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
+                    onClick={() => {
+                      nextExercise();
+                    }}
+                  >
+                    Next Exercise <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowRight} />
+                  </MenuButton>
                 </div>
+                <br />
               </div>
             </Table>
           )}

@@ -54,7 +54,7 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
     // Delay before setting hasFocus to false
     blurTimeout.current = setTimeout(() => {
       setHasFocus(false);
-    }, 150); // adjust delay as needed
+    }, 10); // adjust delay as needed
   };
 
   const getTimerDuration = useCallback((sentence: string) => {
@@ -65,6 +65,12 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
   useEffect(() => {
     if (idx === 0) inputRef?.focus();
   }, [idx, row.sentence, inputRef]);
+
+  useEffect(() => {
+    if (hasFocus === true && row.isLoading) {
+      setHasFocus(false);
+    }
+  }, [row.isLoading, hasFocus, setHasFocus]);
 
   return (
     <div className="translation-area" onFocus={handleFocus} onBlur={handleBlur}>
@@ -103,7 +109,7 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
             <Button
               onClick={() => handleTranslate(idx, lastEdited)}
               disabled={row.isLoading || !row.userInput}
-              className={hasFocus ? "timer-btn animate" : ""}
+              className={hasFocus && !row.isCorrect ? "timer-btn animate" : ""}
               style={{ "--duration": `${getTimerDuration(row.sentence)}s` } as React.CSSProperties}
             >
               <FontAwesomeIcon

@@ -198,6 +198,18 @@ const App: React.FC = () => {
     }
   }, []);
 
+  const setRetryRows = (newRows: Row[], wasFalse: boolean, index: number, row: Row, updatedRow: Row) => {
+    if (redoErrors && !row.isRetry) {
+      if (wasFalse && (updatedRow.isCorrect || row.aiCorrect)) {
+        newRows.splice(index + 1, 3);
+      } else if (!row.isRetry && updatedRow.isCorrect === false && !rows?.[index + 1]?.isRetry) {
+        const retryRow = { ...updatedRow, userInput: "", feedback: null, isRetry: true };
+        delete retryRow.aiCorrect;
+        newRows.splice(index + 1, 0, retryRow, retryRow, retryRow);
+      }
+    }
+  };
+
   const handleAiCheck = async (index: number, lastInput: HTMLInputElement | undefined): Promise<void> => {
     setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
 
@@ -221,15 +233,7 @@ const App: React.FC = () => {
     );
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
 
-    if (redoErrors) {
-      if (wasFalse && (updatedRow.isCorrect || row.aiCorrect)) {
-        newRows.splice(index + 1, 3);
-      } else if (!row.isRetry && updatedRow.aiCorrect === false) {
-        const retryRow = { ...updatedRow, userInput: "", feedback: null, isRetry: true };
-        delete retryRow.aiCorrect;
-        newRows.splice(index + 1, 0, retryRow, retryRow, retryRow);
-      }
-    }
+    setRetryRows(newRows, wasFalse, index, row, updatedRow);
 
     setRows(newRows);
     if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
@@ -260,15 +264,7 @@ const App: React.FC = () => {
     const updatedRow = updateRowFeedback(mode, row, translated, row.aiCorrect);
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
 
-    if (redoErrors && !row.isRetry) {
-      if (wasFalse && (updatedRow.isCorrect || row.aiCorrect)) {
-        newRows.splice(index + 1, 3);
-      } else if (!row.isRetry && updatedRow.isCorrect === false) {
-        const retryRow = { ...updatedRow, userInput: "", feedback: null, isRetry: true };
-        delete retryRow.aiCorrect;
-        newRows.splice(index + 1, 0, retryRow, retryRow, retryRow);
-      }
-    }
+    setRetryRows(newRows, wasFalse, index, row, updatedRow);
 
     if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
     setRows(newRows);

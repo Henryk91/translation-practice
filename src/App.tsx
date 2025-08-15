@@ -2,7 +2,7 @@ import React, { useMemo, useCallback, useEffect, useRef, useState } from "react"
 
 import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
 import { Level as defaultLevels, SelectedLevelType } from "./types";
-import { logUse } from "./helpers/requests";
+import { apiFetch, logUse } from "./helpers/requests";
 import { Dict } from "styled-components/dist/types";
 import { GlobalStyle, Container, Table, TableRow, MenuButton } from "./style";
 import { Row } from "./types";
@@ -93,9 +93,9 @@ const App: React.FC = () => {
   };
 
   const getTranslateSentence = useCallback(() => {
-    fetch("https://note.henryk.co.za/api/full-translate-practice")
-      .then((res) => res.json())
-      .then((data) => {
+    apiFetch("https://note.henryk.co.za/api/full-translate-practice")
+      .then((res: any) => res?.json())
+      .then((data: any) => {
         if (data) {
           const newLevelSentences = { ...initialLevelDict, ...data };
           setLevelSentences(newLevelSentences);
@@ -108,7 +108,7 @@ const App: React.FC = () => {
           setLevels(newLevelsKeys);
         }
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.log("Error:", error);
       });
   }, [initialLevelDict]);
@@ -118,15 +118,15 @@ const App: React.FC = () => {
     const encodedSelectedSubLevel = encodeURIComponent(`${selectedSubLevel}`);
 
     try {
-      const res = await fetch(
+      const res = await apiFetch(
         `https://note.henryk.co.za/api/saved-translation?level=${encodedSelectedLevel}&subLevel=${encodedSelectedSubLevel}`
       );
 
-      if (!res.ok) {
+      if (!res?.ok) {
         return "Error loading. Try again.";
       }
 
-      const response = await res.json();
+      const response = await res?.json();
       return response;
     } catch (error) {
       console.error("Error:", error);
@@ -179,17 +179,17 @@ const App: React.FC = () => {
     if (!english || !german) return false;
 
     try {
-      const res = await fetch("https://note.henryk.co.za/api/confirm-translation", {
+      const res = await apiFetch("https://note.henryk.co.za/api/confirm-translation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ english, german }),
       });
 
-      if (!res.ok) {
+      if (!res?.ok) {
         return false;
       }
 
-      const { isCorrect } = await res.json();
+      const { isCorrect } = await res?.json();
       console.log("isCorrect", isCorrect);
       return isCorrect;
     } catch (error) {

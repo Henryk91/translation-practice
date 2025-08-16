@@ -41,19 +41,7 @@ Check out the live application here: [Translation Practice Live](https://henryk.
 
 To deploy the app to GitHub Pages:
 
-1. Build the project:
-
-   ```bash
-   npm run build
-   ```
-
-2. Deploy to GitHub Pages:
-
-   ```bash
-   npm run deploy:github
-   ```
-
-   The app will be deployed to the `gh-pages` branch of your repository.
+- Update the ./github/workflows/deploy.yml
 
 ## Scripts
 

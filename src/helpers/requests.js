@@ -8,8 +8,8 @@ export function logoutUser(next) {
   })
     .then((res) => res?.json())
     .then((data) => {
-      console.log("logoutUser localStorage.clear()");
-      localStorage.clear();
+      console.log("logoutUser localStorage.removeItem()");
+      localStorage.removeItem("userId");
       next(data);
     })
     .catch((error) => {
@@ -28,8 +28,8 @@ async function refreshToken() {
   });
 
   if (res.status === 401) {
-    console.log("refreshToken localStorage.clear()");
-    localStorage.clear();
+    console.log("refreshToken localStorage.removeItem()");
+    localStorage.removeItem("userId");
     window.location.reload();
   }
   return res;

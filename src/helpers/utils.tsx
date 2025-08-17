@@ -162,11 +162,18 @@ export const initScores = () => {
       if (scores?.length) {
         scores.forEach((score: TranslationScore) => {
           const localExerciseId = `translation-score-${score.exerciseId}`;
-          console.log("score", score);
           localStorage.setItem(localExerciseId, JSON.stringify(score));
         });
         console.log("Scores initialized");
       }
     });
   }
+};
+
+export const clearLocalScores = () => {
+  Object.keys(localStorage).forEach((k) => {
+    if (k.startsWith("translation-score-")) {
+      localStorage.removeItem(k);
+    }
+  });
 };

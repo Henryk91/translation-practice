@@ -4,6 +4,7 @@ import { Level as defaultLevels } from "../helpers/types";
 import { faBars, faDoorOpen, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { logoutUser } from "../helpers/requests";
+import { clearLocalScores } from "../helpers/utils";
 
 interface SideBarProps {
   selectedLevel: string | undefined;
@@ -40,14 +41,6 @@ const SideBar: React.FC<SideBarProps> = ({
   );
 
   const loggedIn = localStorage.getItem("userId");
-
-  const clearLocalScores = () => {
-    Object.keys(localStorage).forEach((k) => {
-      if (k.startsWith("translation-score-")) {
-        localStorage.removeItem(k);
-      }
-    });
-  };
 
   const clickLogin = () => {
     if (loggedIn) {

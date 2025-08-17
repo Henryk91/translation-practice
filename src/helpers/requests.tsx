@@ -1,4 +1,5 @@
 import { KeyValue, NextFn } from "./types";
+import { clearLocalScores } from "./utils";
 
 const BACKEND_URL = "https://note.henryk.co.za";
 
@@ -37,6 +38,7 @@ async function refreshToken(): Promise<Response | { ok: false }> {
     localStorage.removeItem("userId");
     const e = await res.json();
     console.log("Error:", e?.error);
+    clearLocalScores();
   }
   return res;
 }

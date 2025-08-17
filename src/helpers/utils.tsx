@@ -128,10 +128,11 @@ export const getLevelScoreAverage = (prefix: string, subItems: number): string |
   let matchCount: number = 0;
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith(prefix + "-")) {
+    if (key && key.startsWith("translation-score-" + prefix + "-")) {
       const value = localStorage.getItem(key);
       if (value) {
-        const score: number = parseInt(value, 10);
+        const localSaveJson = JSON.parse(value);
+        const score: number = parseInt(localSaveJson.score, 10);
         if (!isNaN(score)) {
           matchCount += score;
         }

@@ -31,8 +31,10 @@ const SideBar: React.FC<SideBarProps> = ({
   const subLevelScoreText = useMemo(
     () => (lvl: string) => {
       if (!selectedLevel) return "";
-      const score = localStorage.getItem(`${selectedLevel}-${lvl}`) || null;
-      return score ? `(${score}%)` : "";
+      const localSave = localStorage.getItem(`${selectedLevel}-${lvl}`);
+      if (localSave === null) return "";
+      const localSaveJson = JSON.parse(localSave);
+      return `(${localSaveJson.score}%)`;
     },
     [selectedLevel]
   );

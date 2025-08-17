@@ -21,11 +21,24 @@ export const updateScore = (
   });
   const score = totalCount > 0 ? ((correctCount / totalCount) * 100).toFixed(0) : "0";
   const exerciseId = `${selectedLevel}-${selectedSubLevel}`;
-  localStorage.setItem(exerciseId, score);
+  const toSave = {
+    exerciseId,
+    score: Number(score),
+    attempts: 1,
+    updatedAt: "",
+  };
+
+  const localSave = localStorage.getItem(exerciseId);
+  if (localSave) {
+    const localSaveJson = JSON.parse(localSave);
+    toSave.updatedAt = localSaveJson.updatedAt;
+    toSave.attempts = localSaveJson.attempts + 1;
+  }
+  localStorage.setItem(exerciseId, JSON.stringify(toSave));
 
   const reachedEnd = totalCount + retryCount === rows.length;
   if (reachedEnd) {
-    setTranslationScore({ exerciseId: exerciseId, score: Number(score), attempts: 0 }, (res: any) => {
+    setTranslationScore(toSave, (res: any) => {
       console.log("Saved:", res);
     });
   }
@@ -143,7 +156,7 @@ export const initScores = () => {
     getTranslationScores((scores: TranslationScore[]) => {
       if (scores?.length) {
         scores.forEach((score: TranslationScore) => {
-          localStorage.setItem(score.exerciseId, score.score + "");
+          localStorage.setItem(score.exerciseId, JSON.stringify(score));
         });
         console.log("Scores initialized");
       }

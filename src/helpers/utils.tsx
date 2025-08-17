@@ -1,4 +1,4 @@
-import { getTranslationScores, setTranslationScore } from "./requests";
+import { getTranslationScores, refreshToken, setTranslationScore } from "./requests";
 import { Row, SelectedLevelType, TranslationScore } from "./types";
 
 export const updateScore = (
@@ -153,6 +153,10 @@ export const checkLogin = () => {
       url.searchParams.delete("userId");
       window.history.replaceState({}, "", url);
     }
+  } else {
+    refreshToken().then((res) => {
+      console.log("Token checked");
+    });
   }
 };
 

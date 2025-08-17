@@ -21,7 +21,7 @@ export const logoutUser = async (): Promise<KeyValue | undefined> => {
   }
 };
 
-async function refreshToken(): Promise<Response | { ok: false }> {
+export async function refreshToken(): Promise<Response | { ok: false }> {
   const userId = localStorage.getItem("userId");
   if (!userId) return { ok: false };
 

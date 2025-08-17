@@ -2,24 +2,23 @@ import { KeyValue, NextFn } from "../types";
 
 const BACKEND_URL = "https://note.henryk.co.za";
 
-export function logoutUser(next: NextFn): void {
-  apiFetch(`${BACKEND_URL}/api/logout`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: "",
-  })
-    .then((res: Response) => res?.json())
-    .then((data) => {
-      localStorage.removeItem("userId");
-      next(data);
-    })
-    .catch((error) => {
-      console.log("Error:", error);
-      next(error);
+export const logoutUser = async (): Promise<KeyValue | undefined> => {
+  try {
+    const res: Response = await apiFetch("/api/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: "",
     });
-}
+    if (res.ok) return res.json();
+
+    return Promise.resolve(undefined);
+  } catch (error) {
+    console.error("Error:", error);
+    return Promise.resolve(undefined);
+  }
+};
 
 async function refreshToken(): Promise<Response | { ok: false }> {
   const userId = localStorage.getItem("userId");

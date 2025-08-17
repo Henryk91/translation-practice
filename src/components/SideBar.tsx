@@ -1,8 +1,9 @@
 import React, { useMemo } from "react";
 import { LevelOptions, LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../style";
 import { Level as defaultLevels } from "../types";
-import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faDoorOpen, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { logoutUser } from "../helpers/requests";
 
 interface SideBarProps {
   selectedLevel: string | undefined;
@@ -36,18 +37,41 @@ const SideBar: React.FC<SideBarProps> = ({
     [selectedLevel]
   );
 
+  const loggedIn = localStorage.getItem("userId");
+
+  const clickLogin = () => {
+    if (loggedIn) {
+      logoutUser().then((res) => {
+        if (res?.ok) {
+          localStorage.removeItem("userId");
+          window.location.reload();
+        }
+      });
+      return;
+    }
+    window.location.assign(`https://henryk.co.za/login.html?redirect=${window.location.href}`);
+  };
+
   return (
     <SideMenu className="hidden-content">
-      <label htmlFor="toggle" className="menu-button" style={{ position: "absolute" }}>
-        <FontAwesomeIcon icon={faBars} size="lg" />
-      </label>
       <LevelSelect>
-        <p style={{ borderBottom: "1px solid #333", paddingBottom: "10px", width: "100%", fontSize: "20px" }}>
-          Levels Selected: <br />
-          <span style={{ color: "green" }}>
-            {selectedLevel ? `${selectedLevel} ${levelScoreText(selectedLevel)}` : ""} {}
+        <div className="sidebar-menu">
+          <MenuButton className="login-button" onClick={clickLogin}>
+            <FontAwesomeIcon icon={loggedIn ? faDoorOpen : faUser} size="lg" />
+            <div style={{ fontSize: "12px", color: "white" }}>{loggedIn ? "Log Out" : "Log In"}</div>
+          </MenuButton>
+          <p style={{ borderBottom: "1px solid #333", paddingBottom: "10px", fontSize: "20px" }}>
+            Levels Selected: <br />
+            <span style={{ color: "green" }}>
+              {selectedLevel ? `${selectedLevel} ${levelScoreText(selectedLevel)}` : ""} {}
+            </span>
+          </p>
+          <span style={{ minWidth: "50px" }}>
+            <label htmlFor="toggle" className="sidebar-menu-button">
+              <FontAwesomeIcon icon={faBars} size="lg" />
+            </label>
           </span>
-        </p>
+        </div>
         <MenuButton
           style={{ fontSize: "15px" }}
           onClick={() => {

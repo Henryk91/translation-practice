@@ -114,6 +114,13 @@ button:disabled {
   font-size: 1em;
 }
 
+.login-button {
+  height: fit-content;
+  left: 0px;
+  font-size: 22px !important;
+  min-width: 0 !important;
+}
+
 .menu-button {
   position: absolute;
   display: none;
@@ -122,10 +129,20 @@ button:disabled {
   cursor: pointer;
   margin: 20px;
   right: 0px;
+  top: 15px;
   margin-left: -100px;
   font-size: 22px;
 }
 
+.sidebar-menu-button {
+  font-size: 22px;
+}
+
+@media (min-width: 600px) {
+  .sidebar-menu-button {
+    display: none;
+  }
+}
 @media (max-width: 600px) {
   .menu-button {
     display: flex;
@@ -133,4 +150,12 @@ button:disabled {
 }
 #toggle:checked ~ .hidden-content {
   display: flex;
+}
+
+.sidebar-menu {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  width: -webkit-fill-available;
+  justify-content: space-around;
 }

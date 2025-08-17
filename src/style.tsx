@@ -129,7 +129,7 @@ export const MenuButton = styled.button`
   padding: 8px;
   border: none;
   border-radius: 4px;
-  background-color: #333;
+  background-color: rgba(51, 51, 51, 0.4);
   color: #e0e0e0;
   cursor: pointer;
   width: fit-content;
@@ -137,7 +137,7 @@ export const MenuButton = styled.button`
   white-space: nowrap;
   font-size: 30px;
   &:hover {
-    background-color: #444;
+    background-color: rgba(51, 51, 51, 0.8);
   }
 
   margin: 5px;
@@ -222,13 +222,8 @@ export const TitleSpan = styled.span<{ $correct: boolean }>`
 `;
 
 export const LevelSelect = styled.div`
-  // height: 100px;
-  // overflow: hidden;
   transition: height 0.3s ease;
-
-  // &:hover {
-  //   height: 100%;
-  // }
+  width: -webkit-fill-available;
 `;
 
 export const SubLevelOptionItem = styled.div`

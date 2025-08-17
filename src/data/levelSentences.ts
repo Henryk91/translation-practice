@@ -1,4 +1,4 @@
-import { Level } from "../types";
+import { Level } from "../helpers/types";
 export const levelSentences: Record<Level, string> = {
   "a1.1": [
     "Hello.",

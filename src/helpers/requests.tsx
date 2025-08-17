@@ -1,4 +1,4 @@
-import { KeyValue, NextFn } from "../types";
+import { KeyValue, NextFn } from "./types";
 
 const BACKEND_URL = "https://note.henryk.co.za";
 

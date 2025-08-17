@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
 
 import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
-import { Level as defaultLevels, SelectedLevelType } from "./types";
+import { Level as defaultLevels, SelectedLevelType } from "./helpers/types";
 import {
   confirmTranslationCheck,
   getSentences,
@@ -10,8 +10,8 @@ import {
   translateSentence,
 } from "./helpers/requests";
 import { Dict } from "styled-components/dist/types";
-import { GlobalStyle, Container, Table, TableRow, MenuButton } from "./style";
-import { Row } from "./types";
+import { GlobalStyle, Container, Table, TableRow, MenuButton } from "./helpers/style";
+import { Row } from "./helpers/types";
 import {
   focusNextInput,
   getLevelScoreAverage,
@@ -20,7 +20,7 @@ import {
   updateScore,
   checkLogin,
   initScores,
-} from "./utils";
+} from "./helpers/utils";
 import SideBar from "./components/SideBar";
 import Header from "./components/Header";
 import TranslationArea from "./components/TranslationArea";

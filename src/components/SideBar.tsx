@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import { LevelOptions, LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../style";
-import { Level as defaultLevels } from "../types";
+import { LevelOptions, LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../helpers/style";
+import { Level as defaultLevels } from "../helpers/types";
 import { faBars, faDoorOpen, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { logoutUser } from "../helpers/requests";

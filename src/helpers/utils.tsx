@@ -1,4 +1,4 @@
-import { getTranslationScores, setTranslationScore } from "./helpers/requests";
+import { getTranslationScores, setTranslationScore } from "./requests";
 import { Row, SelectedLevelType, TranslationScore } from "./types";
 
 export const updateScore = (

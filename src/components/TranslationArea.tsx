@@ -1,9 +1,9 @@
 import { faSpinner, faPaperPlane, faBrain } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState, useCallback, useEffect } from "react";
-import { TableCell, InputWrapper, FeedBackTableCell, FeedbackSpan, Button } from "../style";
-import { Row } from "../types";
-import { focusNextInput } from "../utils";
+import { TableCell, InputWrapper, FeedBackTableCell, FeedbackSpan, Button } from "../helpers/style";
+import { Row } from "../helpers/types";
+import { focusNextInput } from "../helpers/utils";
 import InputSwitcher from "./InputSwitcher";
 
 interface TranslationAreaProps {

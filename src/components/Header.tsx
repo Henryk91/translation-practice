@@ -10,8 +10,8 @@ import {
   TextAreaWrapper,
   Image,
   TitleSpan,
-} from "../style";
-import { Level as defaultLevels, Row } from "../types";
+} from "../helpers/style";
+import { Level as defaultLevels, Row } from "../helpers/types";
 import {
   faSyncAlt,
   faSave,
@@ -24,8 +24,8 @@ import {
   faBars,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { SubLevelOption } from "../subLevel";
-import { splitAndShuffle, splitSentences } from "../utils";
+import { SubLevelOption } from "../helpers/subLevel";
+import { splitAndShuffle, splitSentences } from "../helpers/utils";
 import { Dict } from "styled-components/dist/types";
 import { translateSentence } from "../helpers/requests";
 

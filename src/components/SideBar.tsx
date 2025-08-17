@@ -31,7 +31,7 @@ const SideBar: React.FC<SideBarProps> = ({
   const subLevelScoreText = useMemo(
     () => (lvl: string) => {
       if (!selectedLevel) return "";
-      const localSave = localStorage.getItem(`${selectedLevel}-${lvl}`);
+      const localSave = localStorage.getItem(`translation-score-${selectedLevel}-${lvl}`);
       if (localSave === null) return "";
       const localSaveJson = JSON.parse(localSave);
       return `(${localSaveJson.score}%)`;
@@ -41,11 +41,20 @@ const SideBar: React.FC<SideBarProps> = ({
 
   const loggedIn = localStorage.getItem("userId");
 
+  const clearLocalScores = () => {
+    Object.keys(localStorage).forEach((k) => {
+      if (k.startsWith("translation-score-")) {
+        localStorage.removeItem(k);
+      }
+    });
+  };
+
   const clickLogin = () => {
     if (loggedIn) {
       logoutUser().then((res) => {
         if (res?.ok) {
           localStorage.removeItem("userId");
+          clearLocalScores();
           window.location.reload();
         }
       });

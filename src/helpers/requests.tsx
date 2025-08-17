@@ -39,6 +39,7 @@ async function refreshToken(): Promise<Response | { ok: false }> {
     const e = await res.json();
     console.log("Error:", e?.error);
     clearLocalScores();
+    window.location.reload();
   }
   return res;
 }

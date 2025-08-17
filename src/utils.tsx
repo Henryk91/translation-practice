@@ -1,4 +1,5 @@
-import { Row, SelectedLevelType } from "./types";
+import { getTranslationScores, setTranslationScore } from "./helpers/requests";
+import { Row, SelectedLevelType, TranslationScore } from "./types";
 
 export const updateScore = (
   rows: Row[],
@@ -7,16 +8,27 @@ export const updateScore = (
 ): void => {
   let totalCount = 0;
   let correctCount = 0;
+  let retryCount = 0;
   rows.forEach((row) => {
     if (row.hasOwnProperty("isCorrect") && !row.hasOwnProperty("isRetry")) {
       totalCount++;
       if (row.isCorrect) {
         correctCount++;
       }
+    } else if (row.hasOwnProperty("isRetry")) {
+      retryCount++;
     }
   });
   const score = totalCount > 0 ? ((correctCount / totalCount) * 100).toFixed(0) : "0";
-  localStorage.setItem(`${selectedLevel}-${selectedSubLevel}`, score);
+  const exerciseId = `${selectedLevel}-${selectedSubLevel}`;
+  localStorage.setItem(exerciseId, score);
+
+  const reachedEnd = totalCount + retryCount === rows.length;
+  if (reachedEnd) {
+    setTranslationScore({ exerciseId: exerciseId, score: Number(score), attempts: 0 }, (res: any) => {
+      console.log("Saved:", res);
+    });
+  }
 };
 
 export const updateRowFeedback = (
@@ -111,22 +123,30 @@ export const getLevelScoreAverage = (prefix: string, subItems: number): string |
   return matchCount > 0 ? (matchCount / subItems).toFixed(0) : null;
 };
 
-export const translateSentence = async (sentence: string): Promise<string> => {
-  try {
-    const res = await fetch("https://note.henryk.co.za/api/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sentence }),
-    });
-
-    if (!res.ok) {
-      return "Error loading. Try again.";
+export const checkLogin = () => {
+  const userId = localStorage.getItem("userId");
+  if (!userId) {
+    console.log("Not Logged in");
+    const url = new URL(window.location.href);
+    const userId = url.searchParams.get("userId");
+    if (userId) {
+      localStorage.setItem("userId", userId);
+      url.searchParams.delete("userId");
+      window.history.replaceState({}, "", url);
     }
+  }
+};
 
-    const { translated } = await res.json();
-    return translated;
-  } catch (error) {
-    console.error("Error:", error);
-    return "Error loading. Try again.";
+export const initScores = () => {
+  const userId = localStorage.getItem("userId");
+  if (userId) {
+    getTranslationScores((scores: TranslationScore[]) => {
+      if (scores?.length) {
+        scores.forEach((score: TranslationScore) => {
+          localStorage.setItem(score.exerciseId, score.score + "");
+        });
+        console.log("Scores initialized");
+      }
+    });
   }
 };

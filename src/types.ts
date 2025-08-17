@@ -36,3 +36,14 @@ export interface Row {
   aiCorrect?: boolean;
   isRetry?: boolean;
 }
+
+export interface TranslationScore {
+  exerciseId: string;
+  score: Number;
+}
+
+export type KeyValue<T = any> = {
+  [key: string]: T;
+};
+
+export type NextFn<T = any> = (data: T) => void;

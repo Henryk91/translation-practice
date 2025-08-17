@@ -25,8 +25,9 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SubLevelOption } from "../subLevel";
-import { splitAndShuffle, splitSentences, translateSentence } from "../utils";
+import { splitAndShuffle, splitSentences } from "../utils";
 import { Dict } from "styled-components/dist/types";
+import { translateSentence } from "../helpers/requests";
 
 const RedoThreeIcon: React.FC<{ count: number }> = ({ count }) => {
   return (

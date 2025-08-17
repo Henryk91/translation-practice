@@ -2,7 +2,13 @@ import React, { useMemo, useCallback, useEffect, useRef, useState } from "react"
 
 import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
 import { Level as defaultLevels, SelectedLevelType } from "./types";
-import { apiFetch, logUse } from "./helpers/requests";
+import {
+  confirmTranslationCheck,
+  getSentences,
+  getSentenceWithTranslation,
+  logUse,
+  translateSentence,
+} from "./helpers/requests";
 import { Dict } from "styled-components/dist/types";
 import { GlobalStyle, Container, Table, TableRow, MenuButton } from "./style";
 import { Row } from "./types";
@@ -10,9 +16,10 @@ import {
   focusNextInput,
   getLevelScoreAverage,
   splitAndShuffle,
-  translateSentence,
   updateRowFeedback,
   updateScore,
+  checkLogin,
+  initScores,
 } from "./utils";
 import SideBar from "./components/SideBar";
 import Header from "./components/Header";
@@ -93,50 +100,24 @@ const App: React.FC = () => {
   };
 
   const getTranslateSentence = useCallback(() => {
-    apiFetch("https://note.henryk.co.za/api/full-translate-practice")
-      .then((res: any) => res?.json())
-      .then((data: any) => {
-        if (data) {
-          const newLevelSentences = { ...initialLevelDict, ...data };
-          setLevelSentences(newLevelSentences);
+    getSentences().then((data) => {
+      if (data) {
+        const newLevelSentences = { ...initialLevelDict, ...data };
+        setLevelSentences(newLevelSentences);
 
-          const newLevelsKeys = Object.keys(newLevelSentences).reduce((acc: any, key: string) => {
-            acc[key] = key;
-            return acc;
-          }, {});
+        const newLevelsKeys = Object.keys(newLevelSentences).reduce((acc: any, key: string) => {
+          acc[key] = key;
+          return acc;
+        }, {});
 
-          setLevels(newLevelsKeys);
-        }
-      })
-      .catch((error: any) => {
-        console.log("Error:", error);
-      });
-  }, [initialLevelDict]);
-
-  const getSentenceWithTranslation = useCallback(async (): Promise<any> => {
-    const encodedSelectedLevel = encodeURIComponent(`${selectedLevel}`);
-    const encodedSelectedSubLevel = encodeURIComponent(`${selectedSubLevel}`);
-
-    try {
-      const res = await apiFetch(
-        `https://note.henryk.co.za/api/saved-translation?level=${encodedSelectedLevel}&subLevel=${encodedSelectedSubLevel}`
-      );
-
-      if (!res?.ok) {
-        return "Error loading. Try again.";
+        setLevels(newLevelsKeys);
       }
-
-      const response = await res?.json();
-      return response;
-    } catch (error) {
-      console.error("Error:", error);
-      return "Error loading. Try again.";
-    }
-  }, [selectedLevel, selectedSubLevel]);
+    });
+  }, [initialLevelDict]);
 
   const setSentenceWithTranslation = useCallback(
     async (shuffleSentence: Boolean): Promise<void> => {
-      const translatedSentences = await getSentenceWithTranslation();
+      const translatedSentences = await getSentenceWithTranslation(selectedLevel + "", selectedSubLevel + "");
       if (!translatedSentences || translatedSentences.length === 0) return;
 
       const hasGapFill =
@@ -156,7 +137,7 @@ const App: React.FC = () => {
       setRows(sentences);
       setHasGapFill(hasGapFill);
     },
-    [getSentenceWithTranslation]
+    [selectedLevel, selectedSubLevel]
   );
 
   const redoSentences = (rows: Row[]) => {
@@ -174,29 +155,6 @@ const App: React.FC = () => {
     const sentences = shuffleSentences ? shuffleRow(cleanRows) : cleanRows;
     setRows(sentences);
   };
-
-  const confirmTranslationCheck = useCallback(async (english: string, german: string): Promise<boolean> => {
-    if (!english || !german) return false;
-
-    try {
-      const res = await apiFetch("https://note.henryk.co.za/api/confirm-translation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ english, german }),
-      });
-
-      if (!res?.ok) {
-        return false;
-      }
-
-      const { isCorrect } = await res?.json();
-      console.log("isCorrect", isCorrect);
-      return isCorrect;
-    } catch (error) {
-      console.error("Error:", error);
-      return false;
-    }
-  }, []);
 
   const setRetryRows = (newRows: Row[], wasFalse: boolean, index: number, row: Row, updatedRow: Row) => {
     if (redoErrors && !row.isRetry) {
@@ -354,8 +312,8 @@ const App: React.FC = () => {
   }, [levels, levelSentences, setUseGapFill, setRedoErrors, setShowLevels]);
 
   useEffect(() => {
-    console.log("App initialized");
     if (hasInit.current) return; // skip second call in development
+    console.log("App initialized");
     hasInit.current = true;
     getTranslateSentence();
     const hasLoggedUse = sessionStorage.getItem("hasLoggedUse");
@@ -363,6 +321,8 @@ const App: React.FC = () => {
       sessionStorage.setItem("hasLoggedUse", "true");
       logUse();
     }
+    checkLogin();
+    initScores();
   }, [getTranslateSentence]);
 
   const levelScoreText = useMemo(

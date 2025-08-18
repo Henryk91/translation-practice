@@ -1,5 +1,18 @@
 import { getTranslationScores, refreshToken, setTranslationScore } from "./requests";
-import { Row, SelectedLevelType, TranslationScore } from "./types";
+import { IncorrectRow, Row, SelectedLevelType, TranslationScore } from "./types";
+
+const saveIncorrectList = (incorrectRows: IncorrectRow[], exerciseId: string) => {
+  const userId = localStorage.getItem("userId") ?? "unknown";
+  const storageKey = userId + "-incorrectRows";
+  const alreadySaved = localStorage.getItem(storageKey);
+  if (alreadySaved) {
+    const savedRows = JSON.parse(alreadySaved);
+    const filtered = savedRows.filter((row: IncorrectRow) => row.exerciseId !== exerciseId);
+    localStorage.setItem(storageKey, JSON.stringify([...filtered, ...incorrectRows]));
+  } else {
+    localStorage.setItem(storageKey, JSON.stringify(incorrectRows));
+  }
+};
 
 export const updateScore = (
   rows: Row[],
@@ -9,18 +22,23 @@ export const updateScore = (
   let totalCount = 0;
   let correctCount = 0;
   let retryCount = 0;
+  const incorrect: IncorrectRow[] = [];
+  const exerciseId = `${selectedLevel}-${selectedSubLevel}`;
+
   rows.forEach((row) => {
     if (row.hasOwnProperty("isCorrect") && !row.hasOwnProperty("isRetry")) {
       totalCount++;
       if (row.isCorrect) {
         correctCount++;
+      } else {
+        incorrect.push({ exerciseId, ...row });
       }
     } else if (row.hasOwnProperty("isRetry")) {
       retryCount++;
     }
   });
   const score = totalCount > 0 ? ((correctCount / totalCount) * 100).toFixed(0) : "0";
-  const exerciseId = `${selectedLevel}-${selectedSubLevel}`;
+
   const localExerciseId = `translation-score-${exerciseId}`;
   const toSave = {
     exerciseId,
@@ -48,6 +66,8 @@ export const updateScore = (
     setTranslationScore(toSave, (res: any) => {
       console.log("Saved:", res?.exerciseId);
     });
+
+    saveIncorrectList(incorrect, exerciseId);
   }
 };
 

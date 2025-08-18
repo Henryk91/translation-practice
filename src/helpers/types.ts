@@ -37,6 +37,10 @@ export interface Row {
   isRetry?: boolean;
 }
 
+export interface IncorrectRow extends Row {
+  exerciseId: string;
+}
+
 export interface TranslationScore {
   exerciseId: string;
   score: Number;

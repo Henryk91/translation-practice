@@ -68,9 +68,14 @@ const App: React.FC = () => {
     if (alreadySaved) {
       const savedRows = JSON.parse(alreadySaved);
       const newRow = savedRows.map((row: Row) => {
-        row.feedback = null;
-        row.userInput = "";
-        return row;
+        return {
+          ...row,
+          feedback: null,
+          userInput: "",
+          isLoading: undefined,
+          isCorrect: undefined,
+          aiCorrect: undefined,
+        };
       });
       setRows(newRow);
     }

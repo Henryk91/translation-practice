@@ -34,6 +34,8 @@ export const updateScore = (
     const localSaveJson = JSON.parse(localSave);
     localSaveJson.score = Number(score);
     localStorage.setItem(localExerciseId, JSON.stringify(localSaveJson));
+  } else {
+    localStorage.setItem(localExerciseId, JSON.stringify(toSave));
   }
 
   const reachedEnd = totalCount + retryCount === rows.length;

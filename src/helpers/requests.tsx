@@ -108,6 +108,11 @@ export function getTranslationScores(next: NextFn): void {
 }
 
 export function setTranslationScore(payload: Record<string, unknown>, next: NextFn): void {
+  if (!localStorage.getItem("userId")) {
+    next("Not Logged In!");
+    return;
+  }
+
   apiFetch("/api/translation-scores", {
     method: "POST",
     headers: {

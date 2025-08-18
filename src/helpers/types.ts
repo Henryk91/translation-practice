@@ -16,6 +16,7 @@ export enum Level {
 export enum CustomLevel {
   ByLevel = "By Level",
   OwnSentences = "Own Sentences",
+  IncorrectSentences = "Incorrect Sentences",
 }
 
 export type SelectedLevelType = Level | CustomLevel | undefined;

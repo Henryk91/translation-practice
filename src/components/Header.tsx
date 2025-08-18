@@ -11,7 +11,7 @@ import {
   Image,
   TitleSpan,
 } from "../helpers/style";
-import { Level as defaultLevels, Row } from "../helpers/types";
+import { Level as defaultLevels, Row, SelectedLevelType } from "../helpers/types";
 import {
   faSyncAlt,
   faSave,
@@ -54,7 +54,7 @@ interface HeaderProps {
   handleLevelChange: (level: defaultLevels) => void;
   handleSubLevelChange: (subLevel: string) => void;
   selectedLevel: string | undefined;
-  levels: defaultLevels;
+  levels: SelectedLevelType;
   subLevels: defaultLevels;
   selectedSubLevel: string | undefined;
   mode: string;

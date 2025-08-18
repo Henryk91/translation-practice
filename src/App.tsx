@@ -20,6 +20,7 @@ import {
   updateScore,
   checkLogin,
   initScores,
+  hasIncorrectSentences,
 } from "./helpers/utils";
 import SideBar from "./components/SideBar";
 import Header from "./components/Header";
@@ -29,8 +30,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
-    return { "Own Sentences": "", "By Level": defaultLevelSentences };
+    const defaultVal = { "Own Sentences": "", "By Level": defaultLevelSentences };
+    if (hasIncorrectSentences()) return { "Incorrect Sentences": "", ...defaultVal };
+    return defaultVal;
   }, []);
+
   const [levelSentences, setLevelSentences] = useState<Dict>(initialLevelDict);
   const [levels, setLevels] = useState<any>(["By Level"]);
   const [subLevels, setSubLevels] = useState<any>();
@@ -57,10 +61,31 @@ const App: React.FC = () => {
     setRows((current) => current.map((r, idx) => (idx === index ? { ...r, userInput: value } : r)));
   };
 
-  const handleLevelChange = (level: defaultLevels): void => {
-    const text = levelSentences[level];
+  const loadIncorrectSentences = () => {
+    const userId = localStorage.getItem("userId") ?? "unknown";
+    const storageKey = userId + "-incorrectRows";
+    const alreadySaved = localStorage.getItem(storageKey);
+    if (alreadySaved) {
+      const savedRows = JSON.parse(alreadySaved);
+      const newRow = savedRows.map((row: Row) => {
+        row.feedback = null;
+        row.userInput = "";
+        return row;
+      });
+      setRows(newRow);
+    }
+  };
+
+  const handleLevelChange = (level: SelectedLevelType): void => {
+    const text = level ? levelSentences[level] : "";
     setSelectedLevel(level);
-    localStorage.setItem("selectedLevel", level);
+
+    if (level) localStorage.setItem("selectedLevel", level);
+    if (level === "Incorrect Sentences") {
+      setSubLevels(undefined);
+      setSelectedSubLevel(undefined);
+      return;
+    }
 
     if (typeof text === "string") {
       const sentences = splitAndShuffle(text);
@@ -274,7 +299,9 @@ const App: React.FC = () => {
   }, [text, setRows]);
 
   useEffect(() => {
-    if (selectedLevel && selectedSubLevel) {
+    if (selectedLevel === "Incorrect Sentences") {
+      loadIncorrectSentences();
+    } else if (selectedLevel && selectedSubLevel) {
       if (selectedLevel !== "By Level") {
         setSentenceWithTranslation(shuffleSentences);
       } else {
@@ -284,7 +311,7 @@ const App: React.FC = () => {
   }, [selectedLevel, selectedSubLevel, shuffleSentences, loadText, setSentenceWithTranslation]);
 
   useEffect(() => {
-    const storedLevel = localStorage.getItem("selectedLevel") as defaultLevels | null;
+    const storedLevel = localStorage.getItem("selectedLevel") as SelectedLevelType | null;
     const storedSubLevel = localStorage.getItem("selectedSubLevel") || null;
     if (storedLevel) {
       setSelectedLevel(storedLevel);

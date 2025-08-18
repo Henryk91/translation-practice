@@ -5,7 +5,7 @@ const saveIncorrectList = (incorrectRows: IncorrectRow[], exerciseId: string) =>
   const userId = localStorage.getItem("userId") ?? "unknown";
   const storageKey = userId + "-incorrectRows";
   const alreadySaved = localStorage.getItem(storageKey);
-  if (alreadySaved) {
+  if (alreadySaved && exerciseId !== "Incorrect Sentences-undefined") {
     const savedRows = JSON.parse(alreadySaved);
     const filtered = savedRows.filter((row: IncorrectRow) => row.exerciseId !== exerciseId);
     localStorage.setItem(storageKey, JSON.stringify([...filtered, ...incorrectRows]));
@@ -203,4 +203,10 @@ export const clearLocalScores = () => {
       localStorage.removeItem(k);
     }
   });
+};
+
+export const hasIncorrectSentences = () => {
+  const userId = localStorage.getItem("userId") ?? "unknown";
+  const hasIncorrect = localStorage.getItem(userId + "-incorrectRows");
+  return !!hasIncorrect;
 };

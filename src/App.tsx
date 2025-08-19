@@ -208,8 +208,9 @@ const App: React.FC = () => {
       return;
     }
 
-    const promptWords = row.sentence;
-    const checkSentence = row.userInput.replaceAll("{", "").replaceAll("}", "");
+    const promptWords = mode === "easy" ? row.sentence.toLowerCase() : row.sentence;
+    let checkSentence = row.userInput.replaceAll("{", "").replaceAll("}", "");
+    checkSentence = mode === "easy" ? checkSentence.toLowerCase() : checkSentence;
     const isTranslationCorrect = await confirmTranslationCheck(promptWords, checkSentence);
     const wasFalse = row.isCorrect === false || row.aiCorrect === false;
 

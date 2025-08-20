@@ -177,7 +177,7 @@ export const Table = styled.div`
 
 export const TableRow = styled.div`
   max-width: 100vw;
-  width: 100%;
+  width: -webkit-fill-available;
   align-content: center;
   @media (min-width: 600px) {
     margin: 15px;

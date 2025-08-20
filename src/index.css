@@ -134,6 +134,25 @@ button:disabled {
   font-size: 22px;
 }
 
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+@keyframes slideOut {
+  from {
+    display: flex;
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+    display: none;
+  }
+}
+
 .sidebar-menu-button {
   font-size: 22px;
 }
@@ -148,8 +167,16 @@ button:disabled {
     display: flex;
   }
 }
-#toggle:checked ~ .hidden-content {
-  display: flex;
+
+@media (max-width: 600px) {
+  #toggle:checked ~ .hidden-content {
+    display: flex;
+    animation: slideIn 0.5s ease-out forwards;
+  }
+  #toggle:not(:checked) ~ .hidden-content {
+    /* display: flex; */
+    animation: slideOut 0.5s ease-out forwards;
+  }
 }
 
 .sidebar-menu {

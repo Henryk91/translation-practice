@@ -10,7 +10,7 @@ import {
   translateSentence,
 } from "./helpers/requests";
 import { Dict } from "styled-components/dist/types";
-import { GlobalStyle, Container, Table, TableRow, MenuButton, SpeechContainer, TextArea } from "./helpers/style";
+import { GlobalStyle, Container, Table, TableRow, MenuButton, SpeechContainer, TextInput } from "./helpers/style";
 import { Row } from "./helpers/types";
 import {
   focusNextInput,
@@ -424,8 +424,6 @@ const App: React.FC = () => {
             selectedSubLevel={selectedSubLevel}
             mode={mode}
             setMode={setMode}
-            setText={setText}
-            text={text}
             setShuffleSentences={setShuffleSentences}
             shuffleSentences={shuffleSentences}
             setShouldSave={setShouldSave}
@@ -433,9 +431,6 @@ const App: React.FC = () => {
             hasGapFill={hasGapFill}
             useGapFill={useGapFill}
             configUseGapFill={configUseGapFill}
-            setRows={setRows}
-            rows={rows}
-            levelSentences={levelSentences}
             setUseMic={setUseMic}
             useMic={useMic}
           />
@@ -469,33 +464,40 @@ const App: React.FC = () => {
                 <br />
               </Table>
 
-              <div style={{ display: "flex", justifyContent: "center" }}>
-                <MenuButton
-                  style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
-                  onClick={() => {
-                    nextExercise(true);
-                  }}
-                >
-                  <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowLeft} />
-                  Prev Exercise
-                </MenuButton>
-                <MenuButton
-                  onClick={() => {
-                    if (selectedSubLevel) redoSentences(rows);
-                  }}
-                  style={{ color: shuffleSentences ? "green" : "red" }}
-                >
-                  <FontAwesomeIcon icon={faSyncAlt} />
-                  <div style={{ fontSize: "12px", color: "white" }}>Again</div>
-                </MenuButton>
-                <MenuButton
-                  style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
-                  onClick={() => {
-                    nextExercise();
-                  }}
-                >
-                  Next Exercise <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowRight} />
-                </MenuButton>
+              <div style={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
+                {useMic && (
+                  <SpeechContainer>
+                    <TextInput id="interim-text" />
+                  </SpeechContainer>
+                )}
+                <div style={{ display: "flex", justifyContent: "center", flexDirection: "row" }}>
+                  <MenuButton
+                    style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
+                    onClick={() => {
+                      nextExercise(true);
+                    }}
+                  >
+                    <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowLeft} />
+                    Prev Exercise
+                  </MenuButton>
+                  <MenuButton
+                    onClick={() => {
+                      if (selectedSubLevel) redoSentences(rows);
+                    }}
+                    style={{ color: shuffleSentences ? "green" : "red" }}
+                  >
+                    <FontAwesomeIcon icon={faSyncAlt} />
+                    <div style={{ fontSize: "12px", color: "white" }}>Again</div>
+                  </MenuButton>
+                  <MenuButton
+                    style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
+                    onClick={() => {
+                      nextExercise();
+                    }}
+                  >
+                    Next Exercise <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowRight} />
+                  </MenuButton>
+                </div>
               </div>
             </>
           )}

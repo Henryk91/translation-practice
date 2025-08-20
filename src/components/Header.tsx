@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   HeaderStyle,
   Label,
@@ -10,7 +10,7 @@ import {
   Image,
   TitleSpan,
 } from "../helpers/style";
-import { Level as defaultLevels, Row, SelectedLevelType } from "../helpers/types";
+import { Level as defaultLevels, SelectedLevelType } from "../helpers/types";
 import {
   faSyncAlt,
   faSave,
@@ -24,7 +24,6 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SubLevelOption } from "../helpers/subLevel";
 import { focusNextInput } from "../helpers/utils";
-import { Dict } from "styled-components/dist/types";
 import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 
 const RedoThreeIcon: React.FC<{ count: number }> = ({ count }) => {
@@ -57,8 +56,6 @@ interface HeaderProps {
   selectedSubLevel: string | undefined;
   mode: string;
   setMode: (mode: "easy" | "hard") => void;
-  setText: (text: string) => void;
-  text: string;
   setShuffleSentences: (shuffle: boolean) => void;
   shuffleSentences: boolean;
   setShouldSave: (shouldSave: boolean) => void;
@@ -66,9 +63,6 @@ interface HeaderProps {
   hasGapFill: boolean;
   useGapFill: boolean;
   configUseGapFill: () => void;
-  setRows: (value: React.SetStateAction<Row[]>) => void;
-  rows: any[];
-  levelSentences: Dict;
   redoErrors: boolean;
   setRedoErrors: (val: boolean) => void;
   setUseMic: (val: boolean) => void;
@@ -84,8 +78,6 @@ const Header: React.FC<HeaderProps> = ({
   selectedSubLevel,
   mode,
   setMode,
-  setText,
-  text,
   setShuffleSentences,
   shuffleSentences,
   setShouldSave,
@@ -93,16 +85,13 @@ const Header: React.FC<HeaderProps> = ({
   hasGapFill,
   useGapFill,
   configUseGapFill,
-  setRows,
-  rows,
-  levelSentences,
   redoErrors,
   setRedoErrors,
   setUseMic,
   useMic,
 }) => {
-  const recognition = useSpeechRecognition("de-DE", useMic);
-  const seeFeature = localStorage.getItem("userId") !== "68988da2b947c4d46023d679";
+  const recognition = useSpeechRecognition("de-DE", useMic, setUseMic);
+  const seeFeature = localStorage.getItem("userId") === "68988da2b947c4d46023d679";
 
   const eventHandleSubLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const level = e.target.value;

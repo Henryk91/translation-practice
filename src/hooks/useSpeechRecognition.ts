@@ -9,32 +9,26 @@ const getSpeechRecognitionCtor = (): SpeechRecognitionCtor | undefined => {
   return window.SpeechRecognition || window.webkitSpeechRecognition;
 };
 
-const reactSetInputValue = (input: HTMLInputElement, value: string) => {
-  if (!input) return;
-  const proto = Object.getPrototypeOf(input);
-  const desc = Object.getOwnPropertyDescriptor(proto, "value");
-  desc?.set?.call(input, value.trim()); // use native setter
-  input.dispatchEvent(new Event("input", { bubbles: true })); // notify React
-  input.focus();
-};
-
-export const reactAppendInputValue = (element: HTMLInputElement | HTMLTextAreaElement | null, text: string): void => {
-  if (!element) return;
+export const reactInsertAtCursor = (element: HTMLInputElement | HTMLTextAreaElement, text: string): void => {
+  const start = element.selectionStart ?? element.value.length;
+  const end = element.selectionEnd ?? element.value.length;
+  const newValue = element.value.slice(0, start) + text + element.value.slice(end);
   const proto = Object.getPrototypeOf(element);
   const desc = Object.getOwnPropertyDescriptor(proto, "value");
-
   if (!desc?.set) return;
-  const newValue = element.value + text;
+
   desc.set.call(element, newValue);
 
+  // Set caret after inserted text
+  const caret = start + text.length;
+  element.setSelectionRange(caret, caret);
+
+  // Fire input event so React's onChange runs
   element.dispatchEvent(new Event("input", { bubbles: true }));
-  element.focus();
-  element.selectionStart = element.selectionEnd = newValue.length;
 };
 
-export function useSpeechRecognition(lang = "de-DE", start: boolean) {
+export function useSpeechRecognition(lang = "de-DE", start: boolean, setUseMic: (val: boolean) => void) {
   const recRef = useRef<SpeechRecognition | null>(null);
-  const keepRunning = useRef<boolean>(start);
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -42,17 +36,16 @@ export function useSpeechRecognition(lang = "de-DE", start: boolean) {
     if (!start) return;
     const Ctor = getSpeechRecognitionCtor();
     if (!Ctor) return;
-
     const rec = new Ctor();
     rec.lang = lang;
     rec.continuous = true;
     rec.interimResults = true;
-    const output = document.getElementById("output") as HTMLInputElement;
+    const output = document.getElementById("interim-text") as HTMLInputElement;
 
-    // Example event handler
     rec.onresult = (event: any) => {
       let finalText = "";
       let interimText = "";
+
       const input = document.activeElement instanceof HTMLInputElement ? document.activeElement : null;
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -61,14 +54,13 @@ export function useSpeechRecognition(lang = "de-DE", start: boolean) {
           finalText += transcript + " ";
         } else {
           interimText += transcript + " ";
-          if (output && interimText !== "") {
-            reactSetInputValue(output, interimText);
-          }
+          output.value = interimText;
         }
       }
 
       if (finalText && input) {
-        reactAppendInputValue(input, finalText);
+        reactInsertAtCursor(input, finalText);
+        output.value = "";
       }
     };
 
@@ -76,7 +68,8 @@ export function useSpeechRecognition(lang = "de-DE", start: boolean) {
     recRef.current = rec;
 
     rec.onend = () => {
-      if (keepRunning.current) rec.start();
+      setUseMic(false);
+      // if (keepRunning.current || start) rec.start();
     };
 
     return () => {
@@ -87,7 +80,7 @@ export function useSpeechRecognition(lang = "de-DE", start: boolean) {
       }
       recRef.current = null;
     };
-  }, [lang, start]);
+  }, [lang, start, setUseMic]);
 
   return recRef;
 }

@@ -226,6 +226,10 @@ export const TextAreaWrapper = styled.div`
   width: 100%;
 
   margin: 5px 0px 5px 0;
+
+  @media (max-width: 600px) {
+    align-items: center;
+  }
 `;
 
 export const InputWrapper = styled.div`
@@ -265,7 +269,5 @@ export const SubLevelOptionItem = styled.div`
 `;
 
 export const SpeechContainer = styled.div`
-  position: absolute;
-  bottom: 0;
-  background: red;
+  margin: 15px;
 `;

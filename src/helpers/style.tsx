@@ -17,7 +17,9 @@ export const Container = styled.div`
   align-items: center;
   padding: 0;
   overflow: hidden;
+  height: 100vh;
   overflow-y: scroll;
+  width: -webkit-fill-available;
 
   @media (min-width: 600px) {
     height: 100vh;
@@ -28,6 +30,7 @@ export const Container = styled.div`
 `;
 
 export const MobileMenu = styled.div`
+  display: none;
   @media (min-width: 600px) {
     display: none;
   }
@@ -55,11 +58,29 @@ export const SideMenu = styled.div`
 
 export const Image = styled.img`
   border-radius: 5px;
+  height: -webkit-fill-available;
+  height: 60px;
+  @media (max-width: 600px) {
+    height: 60px;
+  }
 `;
 export const HeaderStyle = styled.div`
   display: flex;
   flex-direction: column;
   align-items: stretch;
+
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-between;
+  width: -webkit-fill-available;
+  background-color: rgba(20, 23, 34, 255);
+  height: 80px;
+  padding: 0px 10px 0px 10px;
+  @media (max-width: 600px) {
+    flex-direction: column;
+    height: fit-content;
+  }
 `;
 export const LevelOptions = styled.div`
   border-bottom: 1px solid #333;
@@ -133,7 +154,7 @@ export const MenuButton = styled.button`
   color: #e0e0e0;
   cursor: pointer;
   width: fit-content;
-  min-width: 70px;
+  min-width: 60px;
   white-space: nowrap;
   font-size: 30px;
   &:hover {
@@ -147,8 +168,11 @@ export const Table = styled.div`
   border-collapse: collapse;
   table-layout: fixed;
   max-width: none;
-  width: 100vw;
   margin: 0;
+  height: -webkit-fill-available;
+  overflow-y: scroll;
+  width: -webkit-fill-available;
+  margin-top: 10px;
 `;
 
 export const TableRow = styled.div`
@@ -188,7 +212,6 @@ export const FeedBackTableCell = styled.div`
 
 export const TextAreaButtonWrapper = styled.div`
   display: flex;
-  margin: 5px;
   Button {
     margin: 5px;
   }
@@ -196,11 +219,13 @@ export const TextAreaButtonWrapper = styled.div`
 
 export const TextAreaWrapper = styled.div`
   display: flex;
-  align-items: center;
+  align-items: end;
   justify-content: center;
   flex-direction: column;
-  margin: 5px;
+  margin: 50px;
   width: 100%;
+
+  margin: 5px 0px 5px 0;
 `;
 
 export const InputWrapper = styled.div`
@@ -218,7 +243,7 @@ export const FeedbackSpan = styled.span<{ $correct: boolean }>`
 
 export const TitleSpan = styled.span<{ $correct: boolean }>`
   color: ${(props) => (props.$correct ? "#00ff00" : "#ff4444ff")};
-  margin-right: 0px;
+  margin: 0px 5px 0px 5px;
 `;
 
 export const LevelSelect = styled.div`
@@ -237,4 +262,10 @@ export const SubLevelOptionItem = styled.div`
   }
   justify-content: space-between;
   display: flex;
+`;
+
+export const SpeechContainer = styled.div`
+  position: absolute;
+  bottom: 0;
+  background: red;
 `;

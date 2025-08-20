@@ -5,7 +5,6 @@ import {
   MenuButton,
   MobileMenu,
   Select,
-  TextArea,
   TextAreaButtonWrapper,
   TextAreaWrapper,
   Image,
@@ -17,9 +16,6 @@ import {
   faSave,
   faEdit,
   faHighlighter,
-  faPaperPlane,
-  faTrash,
-  faLanguage,
   faRedoAlt,
   faBars,
   faMicrophoneSlash,
@@ -27,9 +23,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SubLevelOption } from "../helpers/subLevel";
-import { focusNextInput, splitAndShuffle, splitSentences } from "../helpers/utils";
+import { focusNextInput } from "../helpers/utils";
 import { Dict } from "styled-components/dist/types";
-import { translateSentence } from "../helpers/requests";
 import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 
 const RedoThreeIcon: React.FC<{ count: number }> = ({ count }) => {
@@ -106,9 +101,8 @@ const Header: React.FC<HeaderProps> = ({
   setUseMic,
   useMic,
 }) => {
-  const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
   const recognition = useSpeechRecognition("de-DE", useMic);
-  const seeFeature = localStorage.getItem("userId") === "68988da2b947c4d46023d679";
+  const seeFeature = localStorage.getItem("userId") !== "68988da2b947c4d46023d679";
 
   const eventHandleSubLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const level = e.target.value;
@@ -122,42 +116,18 @@ const Header: React.FC<HeaderProps> = ({
     handleLevelChange(level);
   };
 
-  const handleTextSubmit = (): void => {
-    let textToSplit = text;
-    if (!text && selectedLevel) {
-      textToSplit = levelSentences[selectedLevel] as string;
-      setText(textToSplit);
-    }
-    const sentences = selectedLevel === "Own Sentences" ? splitSentences(textToSplit) : splitAndShuffle(textToSplit);
-    setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
-  };
-
-  const initTranslatedSentences = async () => {
-    setLoadingTranslation(true);
-    const originalSentences = rows.map((row) => row.sentence).join(" ");
-    const response = await translateSentence(originalSentences);
-    const translatedSentences = splitSentences(response);
-    const updated = rows.map((row, i) => {
-      row.translation = translatedSentences[i];
-      return row;
-    });
-
-    setRows(updated);
-    setLoadingTranslation(false);
-  };
-
-  const handleTextClear = (): void => {
-    setText("");
-  };
   return (
     <HeaderStyle>
-      <label htmlFor="toggle" className="menu-button" style={{ position: "absolute" }}>
-        <FontAwesomeIcon icon={faBars} size="lg" />
-      </label>
-      <h1 style={{ marginBottom: "unset" }}>
-        <Image src={process.env.PUBLIC_URL + "/logo192.png"} alt="App Logo" width="70" height="70" /> <br />
-        <TitleSpan $correct={false}>Translate</TitleSpan> to <TitleSpan $correct={true}> German </TitleSpan>
-      </h1>
+      <div className="image-wrapper">
+        <Image src={process.env.PUBLIC_URL + "/logo192.png"} alt="App Logo" />
+        <div style={{ display: "flex", flexDirection: "row", width: "fit-content" }}>
+          <TitleSpan $correct={false}>Translate</TitleSpan> <span>to</span>{" "}
+          <TitleSpan $correct={true}> German </TitleSpan>
+        </div>
+        <label htmlFor="toggle" className="menu-button">
+          <FontAwesomeIcon icon={faBars} size="lg" />
+        </label>
+      </div>
       <MobileMenu>
         <Label>Level:</Label>
         <Select value={selectedLevel || "Select your Language Level"} onChange={eventHandleLevelChange}>
@@ -189,80 +159,55 @@ const Header: React.FC<HeaderProps> = ({
         )}
       </MobileMenu>
       <TextAreaWrapper>
-        {selectedLevel === "Own Sentences" && (
-          <TextArea
-            placeholder="Enter English sentences here (make sure they end on a full stop or question mark) then click the paper plane to create the translation rows."
-            value={text}
-            onChange={(e: any) => setText(e.target.value)}
-          />
-        )}
-
         <TextAreaButtonWrapper>
-          {selectedLevel !== "Own Sentences" && (
-            <>
-              <MenuButton
-                onClick={() => setShuffleSentences(!shuffleSentences)}
-                style={{ color: shuffleSentences ? "green" : "red" }}
-              >
-                <FontAwesomeIcon icon={faSyncAlt} />
-                <div style={{ fontSize: "12px", color: "white" }}>Shuffle</div>
-              </MenuButton>
-              <MenuButton onClick={() => setShouldSave(!shouldSave)} style={{ color: shouldSave ? "green" : "red" }}>
-                <FontAwesomeIcon icon={faSave} />
-                <div style={{ fontSize: "12px", color: "white" }}>Save</div>
-              </MenuButton>
+          <>
+            <MenuButton
+              onClick={() => setShuffleSentences(!shuffleSentences)}
+              style={{ color: shuffleSentences ? "green" : "red" }}
+            >
+              <FontAwesomeIcon icon={faSyncAlt} />
+              <div style={{ fontSize: "12px", color: "white" }}>Shuffle</div>
+            </MenuButton>
+            <MenuButton onClick={() => setShouldSave(!shouldSave)} style={{ color: shouldSave ? "green" : "red" }}>
+              <FontAwesomeIcon icon={faSave} />
+              <div style={{ fontSize: "12px", color: "white" }}>Save</div>
+            </MenuButton>
 
-              <MenuButton
-                disabled={!hasGapFill}
-                onClick={() => configUseGapFill()}
-                style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
-              >
-                <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
-                <div style={{ fontSize: "12px", color: "white" }}>Gap Fill</div>
-              </MenuButton>
+            <MenuButton
+              disabled={!hasGapFill}
+              onClick={() => configUseGapFill()}
+              style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
+            >
+              <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
+              <div style={{ fontSize: "12px", color: "white" }}>Gap Fill</div>
+            </MenuButton>
 
+            <MenuButton
+              disabled={!hasGapFill}
+              onClick={() => setRedoErrors(!redoErrors)}
+              style={{ color: redoErrors ? "green" : "red", padding: "1px" }}
+            >
+              <RedoThreeIcon count={redoErrors ? 3 : 1} />
+              <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Error Retry</div>
+            </MenuButton>
+            {seeFeature && (
               <MenuButton
-                disabled={!hasGapFill}
-                onClick={() => setRedoErrors(!redoErrors)}
-                style={{ color: redoErrors ? "green" : "red", padding: "1px" }}
+                onClick={() => {
+                  if (useMic) {
+                    recognition?.current?.stop();
+                  } else {
+                    focusNextInput(undefined);
+                    recognition?.current?.start();
+                  }
+                  setUseMic(!useMic);
+                }}
+                style={{ color: useMic ? "green" : "red", padding: "1px" }}
               >
-                <RedoThreeIcon count={redoErrors ? 3 : 1} />
-                <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Error Retry</div>
+                <FontAwesomeIcon icon={useMic ? faMicrophoneSlash : faMicrophone} />
+                <div style={{ fontSize: "12px", color: "white" }}>Use Mic</div>
               </MenuButton>
-              {seeFeature && (
-                <MenuButton
-                  onClick={() => {
-                    if (useMic) {
-                      recognition?.current?.stop();
-                    } else {
-                      focusNextInput(undefined);
-                      recognition?.current?.start();
-                    }
-                    setUseMic(!useMic);
-                  }}
-                  style={{ color: useMic ? "green" : "red", padding: "1px" }}
-                >
-                  <FontAwesomeIcon icon={useMic ? faMicrophoneSlash : faMicrophone} />
-                  <div style={{ fontSize: "12px", color: "white" }}>Use Mic</div>
-                </MenuButton>
-              )}
-            </>
-          )}
-
-          {selectedLevel === "Own Sentences" && (
-            <>
-              <MenuButton onClick={handleTextSubmit}>
-                <FontAwesomeIcon icon={faPaperPlane} />
-              </MenuButton>
-              <MenuButton onClick={handleTextClear}>
-                <FontAwesomeIcon icon={faTrash} />
-              </MenuButton>
-              <MenuButton onClick={initTranslatedSentences} disabled={loadingTranslation || rows.length === 0}>
-                <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
-                <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
-              </MenuButton>
-            </>
-          )}
+            )}
+          </>
         </TextAreaButtonWrapper>
       </TextAreaWrapper>
     </HeaderStyle>

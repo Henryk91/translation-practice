@@ -10,7 +10,7 @@ import {
   translateSentence,
 } from "./helpers/requests";
 import { Dict } from "styled-components/dist/types";
-import { GlobalStyle, Container, Table, TableRow, MenuButton } from "./helpers/style";
+import { GlobalStyle, Container, Table, TableRow, MenuButton, SpeechContainer, TextArea } from "./helpers/style";
 import { Row } from "./helpers/types";
 import {
   focusNextInput,
@@ -27,6 +27,7 @@ import Header from "./components/Header";
 import TranslationArea from "./components/TranslationArea";
 import { faArrowLeft, faArrowRight, faSyncAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import CustomUserInput from "./components/CustomUserInput";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
@@ -411,7 +412,7 @@ const App: React.FC = () => {
           showLevels={showLevels}
           setShowLevels={setShowLevels}
         />
-        <Container style={{ width: "-webkit-fill-available" }}>
+        <Container className="main-page">
           <Header
             redoErrors={redoErrors}
             setRedoErrors={configSetRedoErrors}
@@ -438,9 +439,17 @@ const App: React.FC = () => {
             setUseMic={setUseMic}
             useMic={useMic}
           />
+          <CustomUserInput
+            selectedLevel={selectedLevel}
+            setText={setText}
+            text={text}
+            setRows={setRows}
+            rows={rows}
+            levelSentences={levelSentences}
+          />
           {rows.length > 0 && (
-            <Table>
-              <div>
+            <>
+              <Table>
                 {rows.map((row, idx) => (
                   <TableRow key={idx}>
                     <TranslationArea
@@ -457,37 +466,38 @@ const App: React.FC = () => {
                     />
                   </TableRow>
                 ))}
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <MenuButton
-                    style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
-                    onClick={() => {
-                      nextExercise(true);
-                    }}
-                  >
-                    <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowLeft} />
-                    Prev Exercise
-                  </MenuButton>
-                  <MenuButton
-                    onClick={() => {
-                      if (selectedSubLevel) redoSentences(rows);
-                    }}
-                    style={{ color: shuffleSentences ? "green" : "red" }}
-                  >
-                    <FontAwesomeIcon icon={faSyncAlt} />
-                    <div style={{ fontSize: "12px", color: "white" }}>Again</div>
-                  </MenuButton>
-                  <MenuButton
-                    style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
-                    onClick={() => {
-                      nextExercise();
-                    }}
-                  >
-                    Next Exercise <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowRight} />
-                  </MenuButton>
-                </div>
                 <br />
+              </Table>
+
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <MenuButton
+                  style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
+                  onClick={() => {
+                    nextExercise(true);
+                  }}
+                >
+                  <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowLeft} />
+                  Prev Exercise
+                </MenuButton>
+                <MenuButton
+                  onClick={() => {
+                    if (selectedSubLevel) redoSentences(rows);
+                  }}
+                  style={{ color: shuffleSentences ? "green" : "red" }}
+                >
+                  <FontAwesomeIcon icon={faSyncAlt} />
+                  <div style={{ fontSize: "12px", color: "white" }}>Again</div>
+                </MenuButton>
+                <MenuButton
+                  style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
+                  onClick={() => {
+                    nextExercise();
+                  }}
+                >
+                  Next Exercise <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowRight} />
+                </MenuButton>
               </div>
-            </Table>
+            </>
           )}
         </Container>
       </section>

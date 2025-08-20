@@ -71,7 +71,7 @@ const SideBar: React.FC<SideBarProps> = ({
             </span>
           </p>
           <span style={{ minWidth: "50px" }}>
-            <label htmlFor="toggle" className="sidebar-menu-button">
+            <label htmlFor="toggle" className="sidebar-menu-button1 menu-button">
               <FontAwesomeIcon icon={faBars} size="lg" />
             </label>
           </span>

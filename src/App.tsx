@@ -46,6 +46,7 @@ const App: React.FC = () => {
   const [showLevels, setShowLevels] = useState<boolean>(true);
   const [redoErrors, setRedoErrors] = useState<boolean>(false);
   const defaultText = defaultLevelSentences[defaultLevels.A21];
+  const [useMic, setUseMic] = useState<boolean>(false);
 
   const [text, setText] = useState<string>(defaultText);
   const [mode, setMode] = useState<"easy" | "hard">("easy");
@@ -434,6 +435,8 @@ const App: React.FC = () => {
             setRows={setRows}
             rows={rows}
             levelSentences={levelSentences}
+            setUseMic={setUseMic}
+            useMic={useMic}
           />
           {rows.length > 0 && (
             <Table>

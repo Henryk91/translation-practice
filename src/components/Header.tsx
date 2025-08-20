@@ -22,12 +22,15 @@ import {
   faLanguage,
   faRedoAlt,
   faBars,
+  faMicrophoneSlash,
+  faMicrophone,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SubLevelOption } from "../helpers/subLevel";
-import { splitAndShuffle, splitSentences } from "../helpers/utils";
+import { focusNextInput, splitAndShuffle, splitSentences } from "../helpers/utils";
 import { Dict } from "styled-components/dist/types";
 import { translateSentence } from "../helpers/requests";
+import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 
 const RedoThreeIcon: React.FC<{ count: number }> = ({ count }) => {
   return (
@@ -73,6 +76,8 @@ interface HeaderProps {
   levelSentences: Dict;
   redoErrors: boolean;
   setRedoErrors: (val: boolean) => void;
+  setUseMic: (val: boolean) => void;
+  useMic: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -98,8 +103,12 @@ const Header: React.FC<HeaderProps> = ({
   levelSentences,
   redoErrors,
   setRedoErrors,
+  setUseMic,
+  useMic,
 }) => {
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
+  const recognition = useSpeechRecognition("de-DE", useMic);
+  const seeFeature = localStorage.getItem("userId") === "68988da2b947c4d46023d679";
 
   const eventHandleSubLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     const level = e.target.value;
@@ -220,6 +229,23 @@ const Header: React.FC<HeaderProps> = ({
                 <RedoThreeIcon count={redoErrors ? 3 : 1} />
                 <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Error Retry</div>
               </MenuButton>
+              {seeFeature && (
+                <MenuButton
+                  onClick={() => {
+                    if (useMic) {
+                      recognition?.current?.stop();
+                    } else {
+                      focusNextInput(undefined);
+                      recognition?.current?.start();
+                    }
+                    setUseMic(!useMic);
+                  }}
+                  style={{ color: useMic ? "green" : "red", padding: "1px" }}
+                >
+                  <FontAwesomeIcon icon={useMic ? faMicrophoneSlash : faMicrophone} />
+                  <div style={{ fontSize: "12px", color: "white" }}>Use Mic</div>
+                </MenuButton>
+              )}
             </>
           )}
 

@@ -84,15 +84,6 @@ export const updateScore = (
   const incorrect: IncorrectRow[] = [];
   const exerciseId = `${selectedLevel}-${selectedSubLevel}`;
 
-  const sentences: string[] = [];
-  rows = rows.filter((row) => {
-    if (!sentences.includes(row.sentence)) {
-      sentences.push(row.sentence);
-      return true;
-    }
-    return false;
-  });
-
   rows.forEach((row) => {
     if (row.hasOwnProperty("isCorrect") && !row.hasOwnProperty("isRetry")) {
       totalCount++;
@@ -101,7 +92,7 @@ export const updateScore = (
       } else {
         incorrect.push({ exerciseId, ...row });
       }
-    } else if (row.hasOwnProperty("isRetry")) {
+    } else if (row.hasOwnProperty("isRetry") && row.feedback) {
       retryCount++;
     }
   });

@@ -52,3 +52,11 @@ export type KeyValue<T = any> = {
 };
 
 export type NextFn<T = any> = (data: T) => void;
+
+export interface IncorrectSentences {
+  exerciseId: string;
+  sentence: string;
+  userInput: string;
+  translation: string;
+  corrected?: boolean;
+}

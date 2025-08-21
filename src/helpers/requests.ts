@@ -1,4 +1,4 @@
-import { KeyValue, NextFn } from "./types";
+import { IncorrectSentences, KeyValue, NextFn } from "./types";
 import { clearLocalScores } from "./utils";
 
 const BACKEND_URL = "https://note.henryk.co.za";
@@ -203,5 +203,42 @@ export const confirmTranslationCheck = async (english: string, german: string): 
   } catch (error) {
     console.error("Error:", error);
     return false;
+  }
+};
+
+export const sendIncorrectSentences = async (sentences: IncorrectSentences[]): Promise<KeyValue | undefined> => {
+  const userId = localStorage.getItem("userId");
+  if (!userId) return { ok: false };
+  try {
+    const res: Response = await apiFetch("/api/incorrect-translations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sentences),
+    });
+
+    if (!res.ok) {
+      return Promise.resolve(undefined);
+    }
+    if (res.ok) return res.json();
+  } catch (error) {
+    console.error("Error:", error);
+    return Promise.resolve(undefined);
+  }
+};
+
+export const getIncorrectSentences = async (): Promise<KeyValue | undefined> => {
+  const userId = localStorage.getItem("userId");
+  if (!userId) return { ok: false };
+  try {
+    const res: Response = await apiFetch("/api/incorrect-translations?corrected=false");
+
+    if (!res.ok) {
+      console.error("Error:", res);
+      return Promise.resolve(undefined);
+    }
+    if (res.ok) return res.json();
+  } catch (error) {
+    console.error("Error:", error);
+    return Promise.resolve(undefined);
   }
 };

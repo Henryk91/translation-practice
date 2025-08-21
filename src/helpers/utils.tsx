@@ -1,15 +1,59 @@
-import { getTranslationScores, refreshToken, setTranslationScore } from "./requests";
+import {
+  getIncorrectSentences,
+  getTranslationScores,
+  refreshToken,
+  sendIncorrectSentences,
+  setTranslationScore,
+} from "./requests";
 import { IncorrectRow, Row, SelectedLevelType, TranslationScore } from "./types";
+
+const saveUserIncorrectList = (rows: IncorrectRow[], exerciseId: string) => {
+  const isIncorrectSentences = exerciseId.includes("Incorrect Sentences");
+
+  let sentences = rows
+    .filter((row) => row.userInput !== "")
+    .map((row: IncorrectRow) => {
+      return {
+        exerciseId: row?.exerciseId ?? exerciseId,
+        sentence: row.sentence,
+        userInput: row.userInput,
+        translation: row?.gapTranslation ?? row.translation,
+        corrected: !!(row?.isCorrect || row?.aiCorrect),
+      };
+    });
+
+  if (!isIncorrectSentences) {
+    sentences = sentences.filter((row) => !row.corrected);
+  }
+
+  if (!sentences.length) return;
+
+  sendIncorrectSentences(sentences).then((res) => {
+    sentences = sentences.filter((row) => !row.corrected);
+    const userId = localStorage.getItem("userId") ?? "unknown";
+    const storageKey = userId + "-incorrectRows";
+    localStorage.setItem(storageKey, JSON.stringify(sentences));
+  });
+};
 
 const saveIncorrectList = (incorrectRows: IncorrectRow[], exerciseId: string) => {
   const userId = localStorage.getItem("userId") ?? "unknown";
   const storageKey = userId + "-incorrectRows";
   const alreadySaved = localStorage.getItem(storageKey);
+
   if (alreadySaved && exerciseId !== "Incorrect Sentences-undefined") {
     const savedRows = JSON.parse(alreadySaved);
     const filtered = savedRows.filter((row: IncorrectRow) => row.exerciseId !== exerciseId);
     localStorage.setItem(storageKey, JSON.stringify([...filtered, ...incorrectRows]));
   } else {
+    const sentences: string[] = [];
+    incorrectRows = incorrectRows.filter((row) => {
+      if (!sentences.includes(row.sentence)) {
+        sentences.push(row.sentence);
+        return true;
+      }
+      return false;
+    });
     localStorage.setItem(storageKey, JSON.stringify(incorrectRows));
   }
 };
@@ -24,6 +68,15 @@ export const updateScore = (
   let retryCount = 0;
   const incorrect: IncorrectRow[] = [];
   const exerciseId = `${selectedLevel}-${selectedSubLevel}`;
+
+  const sentences: string[] = [];
+  rows = rows.filter((row) => {
+    if (!sentences.includes(row.sentence)) {
+      sentences.push(row.sentence);
+      return true;
+    }
+    return false;
+  });
 
   rows.forEach((row) => {
     if (row.hasOwnProperty("isCorrect") && !row.hasOwnProperty("isRetry")) {
@@ -63,11 +116,16 @@ export const updateScore = (
       toSave.attempts = localSaveJson.attempts + 1;
     }
 
-    setTranslationScore(toSave, (res: any) => {
-      console.log("Saved:", res?.exerciseId);
-    });
-
-    saveIncorrectList(incorrect, exerciseId);
+    if (!exerciseId.includes("Incorrect Sentences")) {
+      setTranslationScore(toSave, (res: any) => {
+        console.log("Saved:", res?.exerciseId);
+      });
+    }
+    if (localStorage.getItem("userId")) {
+      saveUserIncorrectList(rows as IncorrectRow[], exerciseId);
+    } else {
+      saveIncorrectList(incorrect, exerciseId);
+    }
   }
 };
 
@@ -191,6 +249,21 @@ export const initScores = () => {
           localStorage.setItem(localExerciseId, JSON.stringify(score));
         });
         console.log("Scores initialized");
+      }
+    });
+
+    getIncorrectSentences().then((res) => {
+      if (res?.items) {
+        const store = res.items.map((row: any) => {
+          return {
+            ...row,
+            gapTranslation: row.translation,
+            translation: row.translation.replaceAll("{", "").replaceAll("}", ""),
+          };
+        });
+        const userId = localStorage.getItem("userId") ?? "unknown";
+        const storageKey = userId + "-incorrectRows";
+        localStorage.setItem(storageKey, JSON.stringify(store));
       }
     });
   }

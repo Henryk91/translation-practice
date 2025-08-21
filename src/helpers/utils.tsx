@@ -7,6 +7,24 @@ import {
 } from "./requests";
 import { IncorrectRow, Row, SelectedLevelType, TranslationScore } from "./types";
 
+const loadIncorrectSentences = () => {
+  getIncorrectSentences().then((res) => {
+    if (res?.items) {
+      const items = res.items?.length > 20 ? res.items.slice(0, 20) : res.items;
+      const store = items.map((row: any) => {
+        return {
+          ...row,
+          gapTranslation: row.translation,
+          translation: row.translation.replaceAll("{", "").replaceAll("}", ""),
+        };
+      });
+      const userId = localStorage.getItem("userId") ?? "unknown";
+      const storageKey = userId + "-incorrectRows";
+      localStorage.setItem(storageKey, JSON.stringify(store));
+    }
+  });
+};
+
 const saveUserIncorrectList = (rows: IncorrectRow[], exerciseId: string) => {
   const isIncorrectSentences = exerciseId.includes("Incorrect Sentences");
 
@@ -29,10 +47,7 @@ const saveUserIncorrectList = (rows: IncorrectRow[], exerciseId: string) => {
   if (!sentences.length) return;
 
   sendIncorrectSentences(sentences).then((res) => {
-    sentences = sentences.filter((row) => !row.corrected);
-    const userId = localStorage.getItem("userId") ?? "unknown";
-    const storageKey = userId + "-incorrectRows";
-    localStorage.setItem(storageKey, JSON.stringify(sentences));
+    if (res) loadIncorrectSentences();
   });
 };
 
@@ -252,20 +267,7 @@ export const initScores = () => {
       }
     });
 
-    getIncorrectSentences().then((res) => {
-      if (res?.items) {
-        const store = res.items.map((row: any) => {
-          return {
-            ...row,
-            gapTranslation: row.translation,
-            translation: row.translation.replaceAll("{", "").replaceAll("}", ""),
-          };
-        });
-        const userId = localStorage.getItem("userId") ?? "unknown";
-        const storageKey = userId + "-incorrectRows";
-        localStorage.setItem(storageKey, JSON.stringify(store));
-      }
-    });
+    loadIncorrectSentences();
   }
 };
 

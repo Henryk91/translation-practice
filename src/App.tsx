@@ -92,6 +92,7 @@ const App: React.FC = () => {
     if (level === "Incorrect Sentences") {
       setSubLevels(undefined);
       setSelectedSubLevel(undefined);
+      localStorage.removeItem("selectedSubLevel");
       return;
     }
 
@@ -201,66 +202,71 @@ const App: React.FC = () => {
     }
   };
 
-  const handleAiCheck = async (index: number, lastInput: HTMLInputElement | undefined): Promise<void> => {
-    setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
+  const handleAiCheck = useCallback(
+    async (index: number, lastInput: HTMLInputElement | undefined): Promise<void> => {
+      setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
 
-    const row = rows[index];
-    const isCorrect = row.isCorrect;
-    if (!row.userInput || (isCorrect === undefined && !altButtonDown) || isCorrect === true) {
-      setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
-      return;
-    }
+      const row = rows[index];
+      const isCorrect = row.isCorrect;
+      if (!row.userInput || (isCorrect === undefined && !altButtonDown) || isCorrect === true) {
+        setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
+        return;
+      }
 
-    const promptWords = mode === "easy" ? row.sentence.toLowerCase() : row.sentence;
-    let checkSentence = row.userInput.replaceAll("{", "").replaceAll("}", "");
-    checkSentence = mode === "easy" ? checkSentence.toLowerCase() : checkSentence;
-    const isTranslationCorrect = await confirmTranslationCheck(promptWords, checkSentence);
-    const wasFalse = row.isCorrect === false || row.aiCorrect === false;
+      const promptWords = mode === "easy" ? row.sentence.toLowerCase() : row.sentence;
+      let checkSentence = row.userInput.replaceAll("{", "").replaceAll("}", "");
+      checkSentence = mode === "easy" ? checkSentence.toLowerCase() : checkSentence;
+      const isTranslationCorrect = await confirmTranslationCheck(promptWords, checkSentence);
+      const wasFalse = row.isCorrect === false || row.aiCorrect === false;
 
-    const updatedRow = updateRowFeedback(
-      mode,
-      row,
-      isTranslationCorrect ? row.userInput : row.translation,
-      isTranslationCorrect
-    );
-    const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
+      const updatedRow = updateRowFeedback(
+        mode,
+        row,
+        isTranslationCorrect ? row.userInput : row.translation,
+        isTranslationCorrect
+      );
+      const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
 
-    setRetryRows(newRows, wasFalse, index, row, updatedRow);
+      setRetryRows(newRows, wasFalse, index, row, updatedRow);
 
-    setRows(newRows);
-    if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
-    if (isTranslationCorrect) {
-      focusNextInput(lastInput);
-    } else {
-      lastInput?.focus();
-    }
-  };
+      setRows(newRows);
+      if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
+      if (isTranslationCorrect) {
+        focusNextInput(lastInput);
+      } else {
+        lastInput?.focus();
+      }
+    },
+    [selectedLevel, selectedSubLevel, rows]
+  );
 
-  const handleTranslate = async (index: number, event: HTMLInputElement | undefined): Promise<void> => {
-    if (altButtonDown) {
-      await handleAiCheck(index, event);
-      return;
-    }
-    setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
+  const handleTranslate = useCallback(
+    async (index: number, event: HTMLInputElement | undefined): Promise<void> => {
+      if (altButtonDown) {
+        await handleAiCheck(index, event);
+        return;
+      }
+      setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
 
-    const row = rows[index];
-    if (!row.userInput) {
-      setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
-      return;
-    }
+      const row = rows[index];
+      if (!row.userInput) {
+        setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
+        return;
+      }
 
-    if (event) focusNextInput(event);
-    const translated = row.translation ? row.translation : await translateSentence(row.sentence);
+      if (event) focusNextInput(event);
+      const translated = row.translation ? row.translation : await translateSentence(row.sentence);
 
-    const wasFalse = row.isCorrect === false || row.aiCorrect === false;
-    const updatedRow = updateRowFeedback(mode, row, translated, row.aiCorrect);
-    const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
+      const wasFalse = row.isCorrect === false || row.aiCorrect === false;
+      const updatedRow = updateRowFeedback(mode, row, translated, row.aiCorrect);
+      const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
 
-    setRetryRows(newRows, wasFalse, index, row, updatedRow);
-
-    if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
-    setRows(newRows);
-  };
+      setRetryRows(newRows, wasFalse, index, row, updatedRow);
+      if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
+      setRows(newRows);
+    },
+    [selectedLevel, selectedSubLevel, rows]
+  );
 
   const configSetRedoErrors = (redoErrors: boolean) => {
     setRedoErrors(redoErrors);
@@ -324,6 +330,12 @@ const App: React.FC = () => {
     const storedSubLevel = localStorage.getItem("selectedSubLevel") || null;
     if (storedLevel) {
       setSelectedLevel(storedLevel);
+      if (storedLevel === "Incorrect Sentences") {
+        setSubLevels(undefined);
+        setSelectedSubLevel(undefined);
+        localStorage.removeItem("selectedSubLevel");
+        return;
+      }
       const text = levelSentences[storedLevel];
       if (typeof text === "object") {
         const subLevels = Object.keys(text);

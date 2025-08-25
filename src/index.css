@@ -187,13 +187,13 @@ button:disabled {
 }
 
 @media (max-width: 600px) {
-  #toggle:checked ~ .hidden-content {
-    display: flex;
-    animation: slideIn 0.5s ease-out forwards;
+  .hidden-content {
+    transform: translateX(-100%);
+    transition: transform 0.5s ease-out;
   }
-  #toggle:not(:checked) ~ .hidden-content {
-    /* display: flex; */
-    animation: slideOut 0.5s ease-out forwards;
+
+  #toggle:checked ~ .hidden-content {
+    transform: translateX(0);
   }
 }
 

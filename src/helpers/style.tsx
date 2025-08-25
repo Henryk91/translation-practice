@@ -47,7 +47,6 @@ export const SideMenu = styled.div`
   width: 500px;
 
   @media (max-width: 600px) {
-    display: none;
     width: 100vw;
     position: absolute;
     background: rgb(10, 12, 19);

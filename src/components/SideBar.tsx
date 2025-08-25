@@ -77,12 +77,16 @@ const SideBar: React.FC<SideBarProps> = ({
           </span>
         </div>
         <MenuButton
-          style={{ fontSize: "15px" }}
-          onClick={() => {
-            setShowLevels(!showLevels);
-          }}
+          style={{ fontSize: "15px", backgroundColor: showLevels ? "rgba(51, 51, 51, 0.8)" : "" }}
+          onClick={() => setShowLevels(true)}
         >
-          {showLevels ? "Hide Options" : "Show Level Options"}
+          Select Level
+        </MenuButton>
+        <MenuButton
+          style={{ fontSize: "15px", backgroundColor: !showLevels ? "rgba(51, 51, 51, 0.8)" : "" }}
+          onClick={() => setShowLevels(false)}
+        >
+          Select Sub Level
         </MenuButton>
         {showLevels && (
           <LevelOptions>

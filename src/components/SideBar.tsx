@@ -100,6 +100,15 @@ const SideBar: React.FC<SideBarProps> = ({
         >
           Select Sub Level
         </MenuButton>
+      </LevelSelect>
+      {subLevels && !showLevels && (
+        <>
+          <p style={{ borderTop: "1px solid #333", paddingTop: "10px", minWidth: "300px", fontSize: "20px" }}>
+            Sub Levels: <br />
+          </p>
+        </>
+      )}
+      <div style={{ height: "-webkit-fill-available", overflowY: "scroll" }}>
         {showLevels && (
           <LevelOptions>
             {Object.values(levels as defaultLevels).map((lvl) => (
@@ -115,27 +124,23 @@ const SideBar: React.FC<SideBarProps> = ({
             ))}
           </LevelOptions>
         )}
-      </LevelSelect>
-
-      {subLevels && !showLevels && (
-        <div>
-          <p style={{ borderTop: "1px solid #333", paddingTop: "10px", minWidth: "300px", fontSize: "20px" }}>
-            Sub Levels: <br />
-          </p>
-          {Object.values(subLevels as defaultLevels).map((lvl) => (
-            <label key={lvl} htmlFor="toggle" style={{ textAlign: "left" }}>
-              <SubLevelOptionItem
-                onClick={() => handleSubLevelChange(lvl as any)}
-                style={{
-                  color: selectedSubLevel === lvl ? "green" : "",
-                }}
-              >
-                <span style={{ textAlign: "left" }}>{lvl}</span> <span>{subLevelScoreText(lvl)}</span>
-              </SubLevelOptionItem>
-            </label>
-          ))}
-        </div>
-      )}
+        {subLevels && !showLevels && (
+          <>
+            {Object.values(subLevels as defaultLevels).map((lvl) => (
+              <label key={lvl} htmlFor="toggle" style={{ textAlign: "left" }}>
+                <SubLevelOptionItem
+                  onClick={() => handleSubLevelChange(lvl as any)}
+                  style={{
+                    color: selectedSubLevel === lvl ? "green" : "",
+                  }}
+                >
+                  <span style={{ textAlign: "left" }}>{lvl}</span> <span>{subLevelScoreText(lvl)}</span>
+                </SubLevelOptionItem>
+              </label>
+            ))}
+          </>
+        )}
+      </div>
       <br />
     </SideMenu>
   );

@@ -94,10 +94,9 @@ const SideBar: React.FC<SideBarProps> = ({
           Select Level
         </MenuButton>
         <MenuButton
+          disabled={!!selectedLevel && noSubLevel.includes(selectedLevel)}
           style={{ fontSize: "15px", backgroundColor: !showLevels ? "rgba(51, 51, 51, 0.8)" : "" }}
-          onClick={() => {
-            if (selectedLevel && !noSubLevel.includes(selectedLevel)) setShowLevels(false);
-          }}
+          onClick={() => setShowLevels(false)}
         >
           Select Sub Level
         </MenuButton>

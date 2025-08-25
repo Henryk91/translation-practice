@@ -111,7 +111,7 @@ export const TextArea = styled.textarea`
   font-size: 16px;
   background-color: rgba(20, 23, 34, 255);
   color: #e0e0e0;
-  width: 400px;
+  width: 90%;
   height: 200px;
 `;
 export const TextInput = styled.input`
@@ -218,6 +218,21 @@ export const TextAreaButtonWrapper = styled.div`
 `;
 
 export const TextAreaWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-top: 50px;
+  width: 100%;
+
+  // margin: 5px 0px 5px 0;
+
+  @media (max-width: 600px) {
+    align-items: center;
+  }
+`;
+
+export const HeaderButtonWrapper = styled.div`
   display: flex;
   align-items: end;
   justify-content: center;

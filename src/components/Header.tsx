@@ -6,9 +6,9 @@ import {
   MobileMenu,
   Select,
   TextAreaButtonWrapper,
-  TextAreaWrapper,
   Image,
   TitleSpan,
+  HeaderButtonWrapper,
 } from "../helpers/style";
 import { Level as defaultLevels, SelectedLevelType } from "../helpers/types";
 import {
@@ -147,7 +147,7 @@ const Header: React.FC<HeaderProps> = ({
           </>
         )}
       </MobileMenu>
-      <TextAreaWrapper>
+      <HeaderButtonWrapper>
         <TextAreaButtonWrapper>
           <>
             <MenuButton
@@ -198,7 +198,7 @@ const Header: React.FC<HeaderProps> = ({
             )}
           </>
         </TextAreaButtonWrapper>
-      </TextAreaWrapper>
+      </HeaderButtonWrapper>
     </HeaderStyle>
   );
 };

@@ -18,6 +18,8 @@ interface SideBarProps {
   setShowLevels: (show: boolean) => void;
 }
 
+const noSubLevel: string[] = ["Incorrect Sentences", "Own Sentences"];
+
 const SideBar: React.FC<SideBarProps> = ({
   selectedLevel,
   levels,
@@ -56,6 +58,15 @@ const SideBar: React.FC<SideBarProps> = ({
     window.location.assign(`https://henryk.co.za/login.html?redirect=${window.location.href}`);
   };
 
+  const handleMenuLevelClick = (name: string) => {
+    handleLevelChange(name as any);
+    if (noSubLevel.includes(name)) {
+      document.getElementById("toggle")?.click();
+      return;
+    }
+    setShowLevels(false);
+  };
+
   return (
     <SideMenu className="hidden-content">
       <LevelSelect>
@@ -84,7 +95,9 @@ const SideBar: React.FC<SideBarProps> = ({
         </MenuButton>
         <MenuButton
           style={{ fontSize: "15px", backgroundColor: !showLevels ? "rgba(51, 51, 51, 0.8)" : "" }}
-          onClick={() => setShowLevels(false)}
+          onClick={() => {
+            if (selectedLevel && !noSubLevel.includes(selectedLevel)) setShowLevels(false);
+          }}
         >
           Select Sub Level
         </MenuButton>
@@ -93,8 +106,7 @@ const SideBar: React.FC<SideBarProps> = ({
             {Object.values(levels as defaultLevels).map((lvl) => (
               <SubLevelOptionItem
                 onClick={() => {
-                  setShowLevels(false);
-                  handleLevelChange(lvl as any);
+                  handleMenuLevelClick(lvl);
                 }}
                 key={lvl}
                 style={{ margin: "0 10px", color: selectedLevel === lvl ? "green" : "" }}

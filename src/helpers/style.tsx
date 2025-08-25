@@ -270,10 +270,11 @@ export const LevelSelect = styled.div`
 `;
 
 export const SubLevelOptionItem = styled.div`
-  margin: 0 10px;
-  padding: 10px;
-  min-width: 300px;
-  border-bottom: 1px solid #333;
+  margin-top: 5px;
+  padding: 8px;
+  // min-width: 300px;
+  // border-bottom: 1px solid #333;
+  border-radius: 5px;
   background: rgba(20, 23, 34, 255);
   &:hover {
     background: rgba(20, 23, 34, 0.4);

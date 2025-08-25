@@ -204,3 +204,10 @@ button:disabled {
   width: -webkit-fill-available;
   justify-content: space-around;
 }
+
+#sub-level-label {
+  padding-top: 10px;
+  min-width: 300px;
+  font-size: 20px;
+  margin: unset;
+}

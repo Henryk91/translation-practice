@@ -7,11 +7,10 @@ import {
 } from "./requests";
 import { IncorrectRow, Row, SelectedLevelType, TranslationScore } from "./types";
 
-const loadIncorrectSentences = () => {
+const initIncorrectSentences = () => {
   getIncorrectSentences().then((res) => {
     if (res?.items) {
-      const items = res.items?.length > 20 ? res.items.slice(0, 20) : res.items;
-      const store = items.map((row: any) => {
+      const store = res.items.map((row: any) => {
         return {
           ...row,
           gapTranslation: row.translation,
@@ -47,7 +46,7 @@ const saveUserIncorrectList = (rows: IncorrectRow[], exerciseId: string) => {
   if (!sentences.length) return;
 
   sendIncorrectSentences(sentences).then((res) => {
-    if (res) loadIncorrectSentences();
+    if (res) initIncorrectSentences();
   });
 };
 
@@ -258,7 +257,7 @@ export const initScores = () => {
       }
     });
 
-    loadIncorrectSentences();
+    initIncorrectSentences();
   }
 };
 

@@ -5,6 +5,7 @@ import { faBars, faDoorOpen, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { logoutUser } from "../helpers/requests";
 import { clearLocalScores } from "../helpers/utils";
+import { noSubLevel } from "../data/levelSentences";
 
 interface SideBarProps {
   selectedLevel: string | undefined;
@@ -17,8 +18,6 @@ interface SideBarProps {
   showLevels: boolean;
   setShowLevels: (show: boolean) => void;
 }
-
-const noSubLevel: string[] = ["Incorrect Sentences", "Own Sentences"];
 
 const SideBar: React.FC<SideBarProps> = ({
   selectedLevel,

@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
 
-import { levelSentences as defaultLevelSentences } from "./data/levelSentences";
+import { levelSentences as defaultLevelSentences, noSubLevel } from "./data/levelSentences";
 import { Level as defaultLevels, SelectedLevelType } from "./helpers/types";
 import {
   confirmTranslationCheck,
@@ -63,13 +63,15 @@ const App: React.FC = () => {
     setRows((current) => current.map((r, idx) => (idx === index ? { ...r, userInput: value } : r)));
   };
 
-  const loadIncorrectSentences = () => {
+  const loadIncorrectSentences = useCallback(() => {
     const userId = localStorage.getItem("userId") ?? "unknown";
     const storageKey = userId + "-incorrectRows";
     const alreadySaved = localStorage.getItem(storageKey);
     if (alreadySaved) {
       const savedRows = JSON.parse(alreadySaved);
-      const newRow = savedRows.map((row: Row) => {
+      const shuffle = shuffleSentences ? shuffleRow(savedRows) : savedRows;
+      const items = shuffle.length > 20 ? shuffle.slice(0, 20) : shuffle;
+      const newRows = items.map((row: Row) => {
         delete row.isCorrect;
         delete row.aiCorrect;
         delete row.isRetry;
@@ -80,9 +82,9 @@ const App: React.FC = () => {
           isLoading: undefined,
         };
       });
-      setRows(newRow);
+      setRows(newRows);
     }
-  };
+  }, [shuffleSentences]);
 
   const handleLevelChange = (level: SelectedLevelType): void => {
     const text = level ? levelSentences[level] : "";
@@ -302,6 +304,16 @@ const App: React.FC = () => {
     handleSubLevelChange(newSubLevel);
   };
 
+  const clickSentenceAgain = (rows: Row[]) => {
+    if (noSubLevel.includes(selectedLevel as string)) {
+      loadIncorrectSentences();
+      return;
+    }
+    if (selectedSubLevel) {
+      redoSentences(rows);
+    }
+  };
+
   const loadText = useCallback(() => {
     const sentences = splitAndShuffle(text);
     setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
@@ -317,7 +329,7 @@ const App: React.FC = () => {
         loadText();
       }
     }
-  }, [selectedLevel, selectedSubLevel, shuffleSentences, loadText, setSentenceWithTranslation]);
+  }, [selectedLevel, selectedSubLevel, shuffleSentences, loadText, setSentenceWithTranslation, loadIncorrectSentences]);
 
   useEffect(() => {
     const storedLevel = localStorage.getItem("selectedLevel") as SelectedLevelType | null;
@@ -478,6 +490,7 @@ const App: React.FC = () => {
                 )}
                 <div style={{ display: "flex", justifyContent: "center", flexDirection: "row" }}>
                   <MenuButton
+                    disabled={!subLevels}
                     style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
                     onClick={() => {
                       nextExercise(true);
@@ -487,15 +500,14 @@ const App: React.FC = () => {
                     Prev Exercise
                   </MenuButton>
                   <MenuButton
-                    onClick={() => {
-                      if (selectedSubLevel) redoSentences(rows);
-                    }}
+                    onClick={() => clickSentenceAgain(rows)}
                     style={{ color: shuffleSentences ? "green" : "red" }}
                   >
                     <FontAwesomeIcon icon={faSyncAlt} />
                     <div style={{ fontSize: "12px", color: "white" }}>Again</div>
                   </MenuButton>
                   <MenuButton
+                    disabled={!subLevels}
                     style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
                     onClick={() => {
                       nextExercise();

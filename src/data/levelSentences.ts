@@ -1,4 +1,7 @@
 import { Level } from "../helpers/types";
+
+export const noSubLevel: string[] = ["Incorrect Sentences", "Own Sentences"];
+
 export const levelSentences: Record<Level, string> = {
   "a1.1": [
     "Hello.",

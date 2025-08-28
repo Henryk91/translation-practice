@@ -199,6 +199,7 @@ const App: React.FC = () => {
       } else if (!row.isRetry && updatedRow.isCorrect === false && !rows?.[index + 1]?.isRetry) {
         const retryRow = { ...updatedRow, userInput: "", feedback: null, isRetry: true };
         delete retryRow.aiCorrect;
+        delete retryRow.isCorrect;
         newRows.splice(index + 1, 0, retryRow, retryRow, retryRow);
       }
     }

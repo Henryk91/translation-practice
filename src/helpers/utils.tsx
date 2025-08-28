@@ -5,7 +5,7 @@ import {
   sendIncorrectSentences,
   setTranslationScore,
 } from "./requests";
-import { IncorrectRow, Row, SelectedLevelType, TranslationScore } from "./types";
+import { IncorrectRow, Row, TranslationScore } from "./types";
 
 const initIncorrectSentences = () => {
   getIncorrectSentences().then((res) => {
@@ -74,7 +74,7 @@ const saveIncorrectList = (incorrectRows: IncorrectRow[], exerciseId: string) =>
 
 export const updateScore = (
   rows: Row[],
-  selectedLevel: SelectedLevelType,
+  selectedLevel: string | undefined,
   selectedSubLevel: string | undefined
 ): void => {
   let totalCount = 0;

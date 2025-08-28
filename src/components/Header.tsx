@@ -10,7 +10,6 @@ import {
   TitleSpan,
   HeaderButtonWrapper,
 } from "../helpers/style";
-import { Level as defaultLevels, SelectedLevelType } from "../helpers/types";
 import {
   faSyncAlt,
   faSave,
@@ -48,11 +47,11 @@ const RedoThreeIcon: React.FC<{ count: number }> = ({ count }) => {
 };
 
 interface HeaderProps {
-  handleLevelChange: (level: defaultLevels) => void;
+  handleLevelChange: (level: string) => void;
   handleSubLevelChange: (subLevel: string) => void;
   selectedLevel: string | undefined;
-  levels: SelectedLevelType;
-  subLevels: defaultLevels;
+  levels: string[];
+  subLevels: string[] | undefined;
   selectedSubLevel: string | undefined;
   mode: string;
   setMode: (mode: "easy" | "hard") => void;
@@ -94,15 +93,11 @@ const Header: React.FC<HeaderProps> = ({
   const seeFeature = localStorage.getItem("userId") === "68988da2b947c4d46023d679";
 
   const eventHandleSubLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const level = e.target.value;
-
-    handleSubLevelChange(level);
+    handleSubLevelChange(e.target.value);
   };
 
   const eventHandleLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const level = e.target.value as defaultLevels;
-
-    handleLevelChange(level);
+    handleLevelChange(e.target.value);
   };
 
   return (
@@ -121,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({
         <Label>Level:</Label>
         <Select value={selectedLevel || "Select your Language Level"} onChange={eventHandleLevelChange}>
           <option disabled>Select your Language Level</option>
-          {Object.values(levels as defaultLevels).map((lvl) => (
+          {levels.map((lvl) => (
             <option key={lvl} value={lvl}>
               {lvl.toUpperCase()}
             </option>
@@ -131,7 +126,7 @@ const Header: React.FC<HeaderProps> = ({
           <>
             <Select value={selectedSubLevel || "Select Sub Level"} onChange={eventHandleSubLevelChange}>
               <option disabled>Select Sub Level</option>
-              {Object.values(subLevels as defaultLevels).map((lvl) => (
+              {subLevels?.map((lvl) => (
                 <SubLevelOption key={lvl} selectedLevel={selectedLevel} subLevel={lvl} />
               ))}
             </Select>

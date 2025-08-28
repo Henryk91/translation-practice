@@ -150,9 +150,9 @@ export const translateSentence = async (sentence: string): Promise<string> => {
   }
 };
 
-export const getSentences = async (): Promise<KeyValue | undefined> => {
+export const getLevels = async (): Promise<KeyValue | undefined> => {
   try {
-    const res: Response = await apiFetch("/api/full-translate-practice");
+    const res: Response = await apiFetch("/api/translate-levels");
     if (res.ok) return res.json();
 
     return Promise.resolve(undefined);

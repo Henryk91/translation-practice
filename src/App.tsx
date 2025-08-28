@@ -1,10 +1,9 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
 
 import { noSubLevel } from "./data/levelSentences";
-import { SelectedLevelType } from "./helpers/types";
 import {
   confirmTranslationCheck,
-  getSentences,
+  getLevels,
   getSentenceWithTranslation,
   logUse,
   translateSentence,
@@ -37,8 +36,8 @@ const App: React.FC = () => {
   }, []);
 
   const [levelSentences, setLevelSentences] = useState<Dict>(initialLevelDict);
-  const [levels, setLevels] = useState<any>(["By Level"]);
-  const [subLevels, setSubLevels] = useState<any>();
+  const [levels, setLevels] = useState<string[]>(["By Level"]);
+  const [subLevels, setSubLevels] = useState<string[] | undefined>();
   const hasInit = useRef(false);
   const [shouldSave, setShouldSave] = useState<boolean>(true);
   const [useGapFill, setUseGapFill] = useState<boolean>(true);
@@ -51,7 +50,7 @@ const App: React.FC = () => {
   const [text, setText] = useState<string>("");
   const [mode, setMode] = useState<"easy" | "hard">("easy");
   const [rows, setRows] = useState<Row[]>([]);
-  const [selectedLevel, setSelectedLevel] = useState<SelectedLevelType>();
+  const [selectedLevel, setSelectedLevel] = useState<string>();
   const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [shiftButtonDown, setShiftButtonDown] = useState<boolean>(false);
@@ -85,7 +84,7 @@ const App: React.FC = () => {
     }
   }, [shuffleSentences]);
 
-  const handleLevelChange = (level: SelectedLevelType): void => {
+  const handleLevelChange = (level: string): void => {
     const text = level ? levelSentences[level] : "";
     setSelectedLevel(level);
 
@@ -99,7 +98,7 @@ const App: React.FC = () => {
 
     if (typeof text === "string") {
       const sentences = splitAndShuffle(text);
-      setSubLevels(null);
+      setSubLevels([]);
 
       setText(text);
       setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
@@ -127,24 +126,11 @@ const App: React.FC = () => {
   };
 
   const getTranslateSentence = useCallback(() => {
-    getSentences().then((data) => {
+    getLevels().then((data) => {
       if (data) {
         const newLevelSentences = { ...initialLevelDict, ...data };
-        //TODO: Fix this
-        const test: any = {};
-        Object.keys(newLevelSentences).forEach((key) => {
-          const keys = Object.keys((newLevelSentences as any)[key]);
-          test[key] = keys.length ? keys : "";
-        });
-
-        setLevelSentences(test);
-
-        const newLevelsKeys = Object.keys(test).reduce((acc: any, key: string) => {
-          acc[key] = key;
-          return acc;
-        }, {});
-
-        setLevels(newLevelsKeys);
+        setLevelSentences(newLevelSentences);
+        setLevels(Object.keys(newLevelSentences));
       }
     });
   }, [initialLevelDict]);
@@ -274,6 +260,7 @@ const App: React.FC = () => {
   };
 
   const nextExercise = (previous?: boolean) => {
+    if (!subLevels || !selectedSubLevel) return;
     const currentIndex = subLevels.indexOf(selectedSubLevel);
     if (currentIndex < 0) return;
 
@@ -286,13 +273,11 @@ const App: React.FC = () => {
       return;
     }
 
-    const levelList = Object.keys(levels);
-    const currentLevelIndex = levelList.indexOf(`${selectedLevel}`);
-
+    const currentLevelIndex = levels.indexOf(`${selectedLevel}`);
     if (currentLevelIndex < 0) return;
 
     const nextLevelIndex = previous ? currentLevelIndex - 1 : currentLevelIndex + 1;
-    const newLevel = levelList[nextLevelIndex];
+    const newLevel = levels[nextLevelIndex];
     const localSubLevels = levelSentences[newLevel];
     const newSubLevel = previous ? localSubLevels[localSubLevels.length - 1] : localSubLevels[0];
 
@@ -319,7 +304,7 @@ const App: React.FC = () => {
   }, [selectedLevel, selectedSubLevel, shuffleSentences, setSentenceWithTranslation, loadIncorrectSentences]);
 
   useEffect(() => {
-    const storedLevel = localStorage.getItem("selectedLevel") as SelectedLevelType | null;
+    const storedLevel = localStorage.getItem("selectedLevel");
     const storedSubLevel = localStorage.getItem("selectedSubLevel") || null;
     if (storedLevel) {
       setSelectedLevel(storedLevel);

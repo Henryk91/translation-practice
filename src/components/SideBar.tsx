@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import { LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../helpers/style";
-import { Level as defaultLevels } from "../helpers/types";
 import { faBars, faDoorOpen, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { logoutUser } from "../helpers/requests";
@@ -9,11 +8,11 @@ import { noSubLevel } from "../data/levelSentences";
 
 interface SideBarProps {
   selectedLevel: string | undefined;
-  levels: defaultLevels;
+  levels: string[];
   levelScoreText: (level: string) => string;
-  subLevels: defaultLevels;
+  subLevels: string[] | undefined;
   selectedSubLevel: string | undefined;
-  handleLevelChange: (level: defaultLevels) => void;
+  handleLevelChange: (level: string) => void;
   handleSubLevelChange: (subLevel: string) => void;
   showLevels: boolean;
   setShowLevels: (show: boolean) => void;
@@ -111,7 +110,7 @@ const SideBar: React.FC<SideBarProps> = ({
       >
         {showLevels && (
           <>
-            {Object.values(levels as defaultLevels).map((lvl) => (
+            {levels.map((lvl) => (
               <SubLevelOptionItem
                 onClick={() => {
                   handleMenuLevelClick(lvl);
@@ -126,7 +125,7 @@ const SideBar: React.FC<SideBarProps> = ({
         )}
         {subLevels && !showLevels && (
           <>
-            {Object.values(subLevels as defaultLevels).map((lvl) => (
+            {subLevels.map((lvl) => (
               <label key={lvl} htmlFor="toggle" style={{ textAlign: "left" }}>
                 <SubLevelOptionItem
                   onClick={() => handleSubLevelChange(lvl as any)}

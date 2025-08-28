@@ -26,7 +26,7 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
   shiftButtonDown,
 }) => {
   const gapMatches = row?.gapTranslation?.match(/\{.*?\}/g) || [];
-  const gapCount = gapMatches.length;
+  const gapCount = !useGapFill ? 1 : gapMatches.length;
   const hasGaps = gapCount > 0;
 
   const [inputs, setInputs] = useState<string[]>(() =>

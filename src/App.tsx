@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
 
-import { levelSentences as defaultLevelSentences, noSubLevel } from "./data/levelSentences";
-import { Level as defaultLevels, SelectedLevelType } from "./helpers/types";
+import { noSubLevel } from "./data/levelSentences";
+import { SelectedLevelType } from "./helpers/types";
 import {
   confirmTranslationCheck,
   getSentences,
@@ -31,7 +31,7 @@ import CustomUserInput from "./components/CustomUserInput";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
-    const defaultVal = { "Own Sentences": "", "By Level": defaultLevelSentences };
+    const defaultVal = { "Own Sentences": "" };
     if (hasIncorrectSentences()) return { "Incorrect Sentences": "", ...defaultVal };
     return defaultVal;
   }, []);
@@ -46,10 +46,9 @@ const App: React.FC = () => {
   const [hasGapFill, setHasGapFill] = useState<boolean>(true);
   const [showLevels, setShowLevels] = useState<boolean>(true);
   const [redoErrors, setRedoErrors] = useState<boolean>(false);
-  const defaultText = defaultLevelSentences[defaultLevels.A21];
   const [useMic, setUseMic] = useState<boolean>(false);
 
-  const [text, setText] = useState<string>(defaultText);
+  const [text, setText] = useState<string>("");
   const [mode, setMode] = useState<"easy" | "hard">("easy");
   const [rows, setRows] = useState<Row[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<SelectedLevelType>();
@@ -105,10 +104,9 @@ const App: React.FC = () => {
       setText(text);
       setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
     } else if (typeof text === "object") {
-      const subLevels = Object.keys(text);
       setText("");
       setRows([]);
-      setSubLevels(subLevels);
+      setSubLevels(text);
       setSelectedSubLevel(undefined);
       localStorage.removeItem("selectedSubLevel");
     }
@@ -117,13 +115,6 @@ const App: React.FC = () => {
   const handleSubLevelChange = (subLevel: string): void => {
     setSelectedSubLevel(subLevel);
     localStorage.setItem("selectedSubLevel", subLevel);
-    if (!selectedLevel) return;
-    const obj = levelSentences[selectedLevel];
-    const text = typeof obj === "object" ? obj[subLevel] : "";
-
-    if (typeof text === "string") {
-      setText(text);
-    }
   };
 
   const shuffleRow = (rows: Row[]): Row[] => {
@@ -139,9 +130,16 @@ const App: React.FC = () => {
     getSentences().then((data) => {
       if (data) {
         const newLevelSentences = { ...initialLevelDict, ...data };
-        setLevelSentences(newLevelSentences);
+        //TODO: Fix this
+        const test: any = {};
+        Object.keys(newLevelSentences).forEach((key) => {
+          const keys = Object.keys((newLevelSentences as any)[key]);
+          test[key] = keys.length ? keys : "";
+        });
 
-        const newLevelsKeys = Object.keys(newLevelSentences).reduce((acc: any, key: string) => {
+        setLevelSentences(test);
+
+        const newLevelsKeys = Object.keys(test).reduce((acc: any, key: string) => {
           acc[key] = key;
           return acc;
         }, {});
@@ -295,13 +293,10 @@ const App: React.FC = () => {
 
     const nextLevelIndex = previous ? currentLevelIndex - 1 : currentLevelIndex + 1;
     const newLevel = levelList[nextLevelIndex];
-    const localSubLevels = Object.keys(levelSentences[newLevel]);
+    const localSubLevels = levelSentences[newLevel];
     const newSubLevel = previous ? localSubLevels[localSubLevels.length - 1] : localSubLevels[0];
 
     handleLevelChange(newLevel as any);
-    setSubLevels(localSubLevels);
-    // setSelectedSubLevel(newSubLevel);
-
     handleSubLevelChange(newSubLevel);
   };
 
@@ -315,22 +310,13 @@ const App: React.FC = () => {
     }
   };
 
-  const loadText = useCallback(() => {
-    const sentences = splitAndShuffle(text);
-    setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
-  }, [text, setRows]);
-
   useEffect(() => {
     if (selectedLevel === "Incorrect Sentences") {
       loadIncorrectSentences();
     } else if (selectedLevel && selectedSubLevel) {
-      if (selectedLevel !== "By Level") {
-        setSentenceWithTranslation(shuffleSentences);
-      } else {
-        loadText();
-      }
+      setSentenceWithTranslation(shuffleSentences);
     }
-  }, [selectedLevel, selectedSubLevel, shuffleSentences, loadText, setSentenceWithTranslation, loadIncorrectSentences]);
+  }, [selectedLevel, selectedSubLevel, shuffleSentences, setSentenceWithTranslation, loadIncorrectSentences]);
 
   useEffect(() => {
     const storedLevel = localStorage.getItem("selectedLevel") as SelectedLevelType | null;
@@ -345,8 +331,7 @@ const App: React.FC = () => {
       }
       const text = levelSentences[storedLevel];
       if (typeof text === "object") {
-        const subLevels = Object.keys(text);
-        setSubLevels(subLevels);
+        setSubLevels(text);
         setShowLevels(false);
       }
 

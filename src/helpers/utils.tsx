@@ -165,7 +165,7 @@ export const updateRowFeedback = (
     feedback,
     isLoading: false,
     isCorrect,
-    aiCorrect,
+    aiCorrect: !isCorrect ? false : aiCorrect,
   };
 };
 

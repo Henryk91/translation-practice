@@ -3,6 +3,37 @@ import { clearLocalScores } from "./utils";
 
 const BACKEND_URL = "https://note.henryk.co.za";
 
+const cache = new Map();
+
+export async function fetchWithCache(url: string, options: RequestInit = {}, ttl = 300000): Promise<Response> {
+  const cacheKey = createCacheKey(url, options);
+  const cached = cache.get(cacheKey);
+
+  if (cached && Date.now() - cached.timestamp < ttl) {
+    return cached.response.clone();
+  }
+
+  const response = await fetch(url, options);
+
+  if (response.ok && response.status < 300) {
+    cache.set(cacheKey, {
+      response: response.clone(),
+      timestamp: Date.now(),
+    });
+  }
+
+  return response;
+}
+
+function createCacheKey(url: string, options: RequestInit): string {
+  const relevantOptions = {
+    credentials: options.credentials,
+    headers: options.headers,
+  };
+
+  return `GET:${url}:${JSON.stringify(relevantOptions)}`;
+}
+
 export const logoutUser = async (): Promise<KeyValue | undefined> => {
   try {
     const res: Response = await apiFetch("/api/logout", {
@@ -47,7 +78,9 @@ export async function refreshToken(): Promise<Response | { ok: false }> {
 export async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
   const localUrl = url.startsWith("http") ? url : BACKEND_URL + url;
 
-  const res = await fetch(localUrl, {
+  const fetchMethod = !options || options.method === "GET" ? fetchWithCache : fetch;
+
+  const res = await fetchMethod(localUrl, {
     credentials: "include",
     ...options,
   });

@@ -178,7 +178,7 @@ const App: React.FC = () => {
 
   const setRetryRows = (newRows: Row[], wasFalse: boolean, index: number, row: Row, updatedRow: Row) => {
     if (redoErrors && !row.isRetry) {
-      if (wasFalse && (updatedRow.isCorrect || row.aiCorrect)) {
+      if (wasFalse && (updatedRow.isCorrect || row.aiCorrect) && rows?.[index + 1]?.isRetry) {
         newRows.splice(index + 1, 3);
       } else if (!row.isRetry && updatedRow.isCorrect === false && !rows?.[index + 1]?.isRetry) {
         const retryRow = { ...updatedRow, userInput: "", feedback: null, isRetry: true };

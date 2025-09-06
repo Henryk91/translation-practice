@@ -224,7 +224,7 @@ export const TextAreaWrapper = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  margin-top: 50px;
+  margin-top: 10px;
   width: 100%;
 
   // margin: 5px 0px 5px 0;

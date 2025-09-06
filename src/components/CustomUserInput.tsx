@@ -26,38 +26,44 @@ const CustomUserInput: React.FC<CustomUserInputProps> = ({
 }) => {
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
 
-  const handleTextSubmit = (): void => {
+  const generateSentences = () => {
     let textToSplit = text;
     if (!text && selectedLevel) {
       textToSplit = levelSentences[selectedLevel] as string;
       setText(textToSplit);
     }
     const sentences = selectedLevel === "Own Sentences" ? splitSentences(textToSplit) : splitAndShuffle(textToSplit);
-    setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+    return sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null }));
+  };
+
+  const handleTextSubmit = (): void => {
+    const sentences = generateSentences();
+    setRows(sentences);
   };
 
   const initTranslatedSentences = async () => {
     setLoadingTranslation(true);
-    const originalSentences = rows.map((row) => row.sentence).join(" ");
+    const sentences = !rows?.length ? generateSentences() : rows;
+    const originalSentences = sentences.map((row) => row.sentence).join(" ");
     const response = await translateSentence(originalSentences);
     const translatedSentences = splitSentences(response);
-    const updated = rows.map((row, i) => {
+    const updated = sentences.map((row, i) => {
       row.translation = translatedSentences[i];
       return row;
     });
-
     setRows(updated);
     setLoadingTranslation(false);
   };
 
   const handleTextClear = (): void => {
     setText("");
+    setRows([]);
   };
 
   if (selectedLevel !== "Own Sentences") return <></>;
   return (
     <TextAreaWrapper>
-      {selectedLevel === "Own Sentences" && (
+      {selectedLevel === "Own Sentences" && !rows.length && (
         <TextArea
           placeholder="Enter English sentences here (make sure they end on a full stop or question mark) then click the paper plane to create the translation rows."
           value={text}
@@ -68,13 +74,17 @@ const CustomUserInput: React.FC<CustomUserInputProps> = ({
       <TextAreaButtonWrapper>
         {selectedLevel === "Own Sentences" && (
           <>
-            <MenuButton onClick={handleTextSubmit}>
-              <FontAwesomeIcon icon={faPaperPlane} />
-            </MenuButton>
-            <MenuButton onClick={handleTextClear}>
-              <FontAwesomeIcon icon={faTrash} />
-            </MenuButton>
-            <MenuButton onClick={initTranslatedSentences} disabled={loadingTranslation || rows.length === 0}>
+            {rows.length ? (
+              <MenuButton onClick={handleTextClear}>
+                <FontAwesomeIcon icon={faTrash} />
+              </MenuButton>
+            ) : (
+              <MenuButton onClick={handleTextSubmit}>
+                <FontAwesomeIcon icon={faPaperPlane} />
+              </MenuButton>
+            )}
+
+            <MenuButton onClick={initTranslatedSentences} disabled={loadingTranslation || text === ""}>
               <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
               <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
             </MenuButton>

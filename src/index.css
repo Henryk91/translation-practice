@@ -220,7 +220,6 @@ button:disabled {
 }
 
 .grow-box {
-  display: grid;
   overflow: hidden;
   animation: grow 0.4s ease forwards;
 }
@@ -240,9 +239,9 @@ button:disabled {
 
 @keyframes grow {
   from {
-    grid-template-rows: 0fr;
+    height: 0px;
   }
   to {
-    grid-template-rows: 1fr;
+    height: 100px;
   }
 }

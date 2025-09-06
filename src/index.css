@@ -218,3 +218,31 @@ button:disabled {
   margin: 10px;
   font-size: 20px;
 }
+
+.grow-box {
+  display: grid;
+  overflow: hidden;
+  animation: grow 0.4s ease forwards;
+}
+
+.grow-box .grow-box-content {
+  overflow: hidden;
+}
+
+.grow-box-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  max-height: fit-content;
+  overflow: hidden;
+}
+
+@keyframes grow {
+  from {
+    grid-template-rows: 0fr;
+  }
+  to {
+    grid-template-rows: 1fr;
+  }
+}

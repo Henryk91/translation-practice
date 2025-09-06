@@ -9,7 +9,7 @@ import {
   translateSentence,
 } from "./helpers/requests";
 import { Dict } from "styled-components/dist/types";
-import { GlobalStyle, Container, Table, TableRow, MenuButton, SpeechContainer, TextInput } from "./helpers/style";
+import { GlobalStyle, Container, Table, TableRow } from "./helpers/style";
 import { Row } from "./helpers/types";
 import {
   focusNextInput,
@@ -24,9 +24,8 @@ import {
 import SideBar from "./components/SideBar";
 import Header from "./components/Header";
 import TranslationArea from "./components/TranslationArea";
-import { faArrowLeft, faArrowRight, faSyncAlt } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CustomUserInput from "./components/CustomUserInput";
+import SettingsRow, { QuickLevelChange } from "./components/SettingsRow";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
@@ -46,6 +45,7 @@ const App: React.FC = () => {
   const [showLevels, setShowLevels] = useState<boolean>(true);
   const [redoErrors, setRedoErrors] = useState<boolean>(false);
   const [useMic, setUseMic] = useState<boolean>(false);
+  const [isComplete, setIsComplete] = useState<boolean>(false);
 
   const [text, setText] = useState<string>("");
   const [mode, setMode] = useState<"easy" | "hard">("easy");
@@ -247,6 +247,9 @@ const App: React.FC = () => {
     setRetryRows(newRows, wasFalse, index, row, updatedRow);
     if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
     setRows(newRows);
+
+    const isComplete = newRows.every((row) => row.feedback);
+    setIsComplete(isComplete);
   };
 
   const configSetRedoErrors = (redoErrors: boolean) => {
@@ -403,8 +406,6 @@ const App: React.FC = () => {
         />
         <Container className="main-page">
           <Header
-            redoErrors={redoErrors}
-            setRedoErrors={configSetRedoErrors}
             handleLevelChange={handleLevelChange}
             handleSubLevelChange={handleSubLevelChange}
             selectedLevel={selectedLevel}
@@ -413,15 +414,6 @@ const App: React.FC = () => {
             selectedSubLevel={selectedSubLevel}
             mode={mode}
             setMode={setMode}
-            setShuffleSentences={setShuffleSentences}
-            shuffleSentences={shuffleSentences}
-            setShouldSave={setShouldSave}
-            shouldSave={shouldSave}
-            hasGapFill={hasGapFill}
-            useGapFill={useGapFill}
-            configUseGapFill={configUseGapFill}
-            setUseMic={setUseMic}
-            useMic={useMic}
           />
           <CustomUserInput
             selectedLevel={selectedLevel}
@@ -452,42 +444,28 @@ const App: React.FC = () => {
                 ))}
                 <br />
               </Table>
-
-              <div style={{ display: "flex", justifyContent: "center", flexDirection: "column" }}>
-                {useMic && (
-                  <SpeechContainer>
-                    <TextInput id="interim-text" />
-                  </SpeechContainer>
-                )}
-                <div style={{ display: "flex", justifyContent: "center", flexDirection: "row" }}>
-                  <MenuButton
-                    disabled={!subLevels}
-                    style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
-                    onClick={() => {
-                      nextExercise(true);
-                    }}
-                  >
-                    <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowLeft} />
-                    Prev Exercise
-                  </MenuButton>
-                  <MenuButton
-                    onClick={() => clickSentenceAgain(rows)}
-                    style={{ color: shuffleSentences ? "green" : "red" }}
-                  >
-                    <FontAwesomeIcon icon={faSyncAlt} />
-                    <div style={{ fontSize: "12px", color: "white" }}>Again</div>
-                  </MenuButton>
-                  <MenuButton
-                    disabled={!subLevels}
-                    style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
-                    onClick={() => {
-                      nextExercise();
-                    }}
-                  >
-                    Next Exercise <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowRight} />
-                  </MenuButton>
-                </div>
-              </div>
+              <SettingsRow
+                setShuffleSentences={setShuffleSentences}
+                shuffleSentences={shuffleSentences}
+                setShouldSave={setShouldSave}
+                shouldSave={shouldSave}
+                hasGapFill={hasGapFill}
+                useGapFill={useGapFill}
+                configUseGapFill={configUseGapFill}
+                setUseMic={setUseMic}
+                useMic={useMic}
+                redoErrors={redoErrors}
+                setRedoErrors={configSetRedoErrors}
+              />
+              <QuickLevelChange
+                isComplete={isComplete}
+                useMic={useMic}
+                subLevels={subLevels}
+                nextExercise={nextExercise}
+                setUseMic={setUseMic}
+                shuffleSentences={shuffleSentences}
+                clickSentenceAgain={() => clickSentenceAgain(rows)}
+              />
             </>
           )}
         </Container>

@@ -26,6 +26,7 @@ import Header from "./components/Header";
 import TranslationArea from "./components/TranslationArea";
 import CustomUserInput from "./components/CustomUserInput";
 import SettingsRow, { QuickLevelChange } from "./components/SettingsRow";
+import PageHeader from "./components/PageHeader";
 
 const App: React.FC = () => {
   const initialLevelDict = useMemo(() => {
@@ -423,51 +424,51 @@ const App: React.FC = () => {
             rows={rows}
             levelSentences={levelSentences}
           />
-          {rows.length > 0 && (
-            <>
-              <Table>
-                {rows.map((row, idx) => (
-                  <TableRow key={idx}>
-                    <TranslationArea
-                      {...{
-                        idx,
-                        row,
-                        handleInputChange,
-                        inputRef: inputRefs.current[idx],
-                        handleTranslate,
-                        handleAiCheck,
-                        useGapFill,
-                        shiftButtonDown,
-                      }}
-                    />
-                  </TableRow>
-                ))}
-                <br />
-              </Table>
-              <SettingsRow
-                setShuffleSentences={setShuffleSentences}
-                shuffleSentences={shuffleSentences}
-                setShouldSave={setShouldSave}
-                shouldSave={shouldSave}
-                hasGapFill={hasGapFill}
-                useGapFill={useGapFill}
-                configUseGapFill={configUseGapFill}
-                setUseMic={setUseMic}
-                useMic={useMic}
-                redoErrors={redoErrors}
-                setRedoErrors={configSetRedoErrors}
-              />
-              <QuickLevelChange
-                isComplete={isComplete}
-                useMic={useMic}
-                subLevels={subLevels}
-                nextExercise={nextExercise}
-                setUseMic={setUseMic}
-                shuffleSentences={shuffleSentences}
-                clickSentenceAgain={() => clickSentenceAgain(rows)}
-              />
-            </>
-          )}
+          <>
+            <Table>
+              <PageHeader selectedLevel={selectedLevel} selectedSubLevel={selectedSubLevel} />
+              {rows.map((row, idx) => (
+                <TableRow key={idx}>
+                  <TranslationArea
+                    {...{
+                      idx,
+                      row,
+                      handleInputChange,
+                      inputRef: inputRefs.current[idx],
+                      handleTranslate,
+                      handleAiCheck,
+                      useGapFill,
+                      shiftButtonDown,
+                    }}
+                  />
+                </TableRow>
+              ))}
+              <br />
+            </Table>
+            <SettingsRow
+              setShuffleSentences={setShuffleSentences}
+              shuffleSentences={shuffleSentences}
+              setShouldSave={setShouldSave}
+              shouldSave={shouldSave}
+              hasGapFill={hasGapFill}
+              useGapFill={useGapFill}
+              configUseGapFill={configUseGapFill}
+              setUseMic={setUseMic}
+              useMic={useMic}
+              redoErrors={redoErrors}
+              setRedoErrors={configSetRedoErrors}
+            />
+            <QuickLevelChange
+              isComplete={isComplete}
+              useMic={useMic}
+              subLevels={subLevels}
+              nextExercise={nextExercise}
+              setUseMic={setUseMic}
+              shuffleSentences={shuffleSentences}
+              clickSentenceAgain={() => clickSentenceAgain(rows)}
+            />
+          </>
+          {/* )} */}
         </Container>
       </section>
     </>

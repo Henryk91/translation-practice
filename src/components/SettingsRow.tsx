@@ -1,5 +1,5 @@
 import React from "react";
-import { MenuButton, SpeechContainer, TextAreaButtonWrapper, TextInput } from "../helpers/style";
+import { MenuButton, SettingsButtonWrapper, SpeechContainer, TextInput } from "../helpers/style";
 import {
   faSyncAlt,
   faSave,
@@ -45,8 +45,13 @@ export const SettingsRow: React.FC<SettingsRowProps> = ({
   const recognition = useSpeechRecognition("de-DE", useMic, setUseMic);
   const seeFeature = localStorage.getItem("userId") === "68988da2b947c4d46023d679";
   return (
-    <TextAreaButtonWrapper>
-      <>
+    <SettingsButtonWrapper>
+      {useMic && (
+        <SpeechContainer>
+          <TextInput id="interim-text" />
+        </SpeechContainer>
+      )}
+      <div style={{ display: "flex" }}>
         <MenuButton
           onClick={() => setShuffleSentences(!shuffleSentences)}
           style={{ color: shuffleSentences ? "green" : "red" }}
@@ -93,8 +98,8 @@ export const SettingsRow: React.FC<SettingsRowProps> = ({
             <div style={{ fontSize: "12px", color: "white" }}>Use Mic</div>
           </MenuButton>
         )}
-      </>
-    </TextAreaButtonWrapper>
+      </div>
+    </SettingsButtonWrapper>
   );
 };
 
@@ -141,11 +146,6 @@ export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({
   return (
     <div className="grow-box">
       <div className="grow-box-content">
-        {useMic && (
-          <SpeechContainer>
-            <TextInput id="interim-text" />
-          </SpeechContainer>
-        )}
         <div style={{ display: "flex", justifyContent: "center", flexDirection: "row" }}>
           <MenuButton
             disabled={!subLevels}

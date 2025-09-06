@@ -71,7 +71,7 @@ export const HeaderStyle = styled.div`
   width: -webkit-fill-available;
   background-color: rgba(20, 23, 34, 255);
   height: 80px;
-  padding: 0px 10px 0px 10px;
+  padding: 5px 10px 5px 10px;
   @media (max-width: 600px) {
     flex-direction: column;
     height: fit-content;
@@ -178,7 +178,7 @@ export const TableRow = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
+  // overflow: hidden;
   padding-top: 3px;
   padding-bottom: 3px;
 `;
@@ -205,6 +205,15 @@ export const FeedBackTableCell = styled.div`
 
 export const TextAreaButtonWrapper = styled.div`
   display: flex;
+  Button {
+    margin: 5px;
+  }
+`;
+
+export const SettingsButtonWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
   Button {
     margin: 5px;
   }
@@ -280,4 +289,16 @@ export const SubLevelOptionItem = styled.div`
 
 export const SpeechContainer = styled.div`
   margin: 15px;
+`;
+
+export const SelectedHeader = styled.div`
+  text-align: left;
+  padding: 15px;
+  margin: 5px 0px 5px 0px;
+  border: 3px solid rgba(20, 23, 34, 255);
+  height: fit-content;
+  width: 50%;
+  @media (max-width: 600px) {
+    width: 90%;
+  }
 `;

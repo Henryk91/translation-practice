@@ -70,18 +70,18 @@ const SideBar: React.FC<SideBarProps> = ({
       <LevelSelect>
         <div className="sidebar-menu">
           <MenuButton className="login-button" onClick={clickLogin}>
-            <FontAwesomeIcon icon={loggedIn ? faDoorOpen : faUser} size="lg" />
+            <FontAwesomeIcon icon={loggedIn ? faDoorOpen : faUser} />
             <div style={{ fontSize: "12px", color: "white" }}>{loggedIn ? "Log Out" : "Log In"}</div>
           </MenuButton>
-          <p style={{ borderBottom: "1px solid #333", paddingBottom: "10px", fontSize: "20px" }}>
+          <div className="level-info">
             Levels Selected: <br />
             <span style={{ color: "green" }}>
               {selectedLevel ? `${selectedLevel} ${levelScoreText(selectedLevel)}` : ""} {}
             </span>
-          </p>
+          </div>
           <span style={{ minWidth: "50px" }}>
             <label htmlFor="toggle" className="sidebar-menu-button1 menu-button">
-              <FontAwesomeIcon icon={faBars} size="lg" />
+              <FontAwesomeIcon icon={faBars} />
             </label>
           </span>
         </div>
@@ -99,7 +99,6 @@ const SideBar: React.FC<SideBarProps> = ({
           Select Sub Level
         </MenuButton>
       </LevelSelect>
-      {subLevels && !showLevels && <p id="sub-level-label">Sub Levels:</p>}
       <div
         style={{
           height: "-webkit-fill-available",

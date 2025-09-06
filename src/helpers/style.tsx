@@ -57,11 +57,7 @@ export const SideMenu = styled.div`
 
 export const Image = styled.img`
   border-radius: 5px;
-  height: -webkit-fill-available;
-  height: 60px;
-  @media (max-width: 600px) {
-    height: 60px;
-  }
+  height: 45px;
 `;
 export const HeaderStyle = styled.div`
   display: flex;
@@ -138,7 +134,7 @@ export const Button = styled.button`
   display: flex;
   justify-content: center;
 
-  font-size: 30px;
+  font-size: 24px;
   border-radius: 100%;
   padding: 10px;
   color: black;
@@ -155,7 +151,7 @@ export const MenuButton = styled.button`
   width: fit-content;
   min-width: 60px;
   white-space: nowrap;
-  font-size: 30px;
+  font-size: 24px;
   &:hover {
     background-color: rgba(51, 51, 51, 0.8);
   }
@@ -267,6 +263,7 @@ export const TitleSpan = styled.span<{ $correct: boolean }>`
 export const LevelSelect = styled.div`
   transition: height 0.3s ease;
   width: -webkit-fill-available;
+  margin-bottom: 5px;
 `;
 
 export const SubLevelOptionItem = styled.div`

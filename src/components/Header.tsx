@@ -109,7 +109,7 @@ const Header: React.FC<HeaderProps> = ({
           <TitleSpan $correct={true}> German </TitleSpan>
         </div>
         <label htmlFor="toggle" className="menu-button">
-          <FontAwesomeIcon icon={faBars} size="lg" />
+          <FontAwesomeIcon icon={faBars} />
         </label>
       </div>
       <MobileMenu>

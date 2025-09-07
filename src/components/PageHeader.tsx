@@ -17,11 +17,13 @@ const PageHeader: React.FC<PageHeaderProps> = ({ selectedLevel, selectedSubLevel
               Level: <span style={{ fontWeight: "bold" }}>{selectedLevel}</span>
             </div>
             {selectedSubLevel ? (
-              <div>
+              <div style={{ margin: "10px 0px 0px" }}>
                 Sub Level: <span style={{ fontWeight: "bold" }}>{selectedSubLevel}</span>
               </div>
             ) : (
-              <h3>Please select a sub level to start</h3>
+              selectedLevel !== "Incorrect Sentences" && (
+                <h3 style={{ margin: "10px 0px 0px" }}>Please select a sub level to start</h3>
+              )
             )}
           </>
         ) : (

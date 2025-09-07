@@ -274,3 +274,21 @@ export const hasIncorrectSentences = () => {
   const hasIncorrect = localStorage.getItem(userId + "-incorrectRows");
   return !!hasIncorrect;
 };
+
+export const getScoreColorRange = (value: number, reverse = false, alpha = 1) => {
+  const v = Math.max(0, Math.min(100, value)) / 100;
+  // Swap if reversed
+  const t = !reverse ? 1 - v : v;
+
+  // Green: hsl(120, 100%, 25.1%)
+  const start = { h: 120, s: 100, l: 25.1 };
+  // Red: hsl(0, 100%, 50%)
+  const end = { h: 0, s: 100, l: 50 };
+
+  // Linear interpolation
+  const h = start.h + (end.h - start.h) * t;
+  const s = start.s + (end.s - start.s) * t;
+  const l = start.l + (end.l - start.l) * t;
+
+  return `hsl(${h}deg ${s}% ${l}% / ${alpha})`;
+};

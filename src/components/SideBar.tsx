@@ -3,7 +3,7 @@ import { LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../helper
 import { faBars, faDoorOpen, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { logoutUser } from "../helpers/requests";
-import { clearLocalScores, getLevelScoreAverage } from "../helpers/utils";
+import { clearLocalScores, getScoreColorRange, getLevelScoreAverage } from "../helpers/utils";
 import { noSubLevel } from "../data/levelSentences";
 import { Dict } from "styled-components/dist/types";
 
@@ -34,7 +34,8 @@ const SideBar: React.FC<SideBarProps> = ({
     () => (lvl: string) => {
       const subItems = Object.keys(levelSentences[lvl] || {}).length;
       const score = getLevelScoreAverage(lvl, subItems) || null;
-      return score ? `(${score}%)` : "";
+      if (!score) return <></>;
+      return <span style={{ color: getScoreColorRange(Number(score)) }}>{`(${score}%)`}</span>;
     },
     [levelSentences]
   );
@@ -45,7 +46,7 @@ const SideBar: React.FC<SideBarProps> = ({
       const localSave = localStorage.getItem(`translation-score-${selectedLevel}-${lvl}`);
       if (localSave === null) return "";
       const localSaveJson = JSON.parse(localSave);
-      return `(${localSaveJson.score}%)`;
+      return <span style={{ color: getScoreColorRange(localSaveJson.score) }}>{`(${localSaveJson.score}%)`}</span>;
     },
     [selectedLevel]
   );
@@ -55,7 +56,7 @@ const SideBar: React.FC<SideBarProps> = ({
     const hasIncorrect = localStorage.getItem(userId + "-incorrectRows");
     if (hasIncorrect) {
       const savedRows = JSON.parse(hasIncorrect);
-      return `(${savedRows.length})`;
+      return <span style={{ color: getScoreColorRange(savedRows.length, true) }}>{`(${savedRows.length})`}</span>;
     }
   };
 
@@ -100,7 +101,11 @@ const SideBar: React.FC<SideBarProps> = ({
           <div className="level-info">
             Levels Selected: <br />
             <span style={{ color: "green" }}>
-              {selectedLevel ? `${selectedLevel} ${levelScoreText(selectedLevel)}` : ""} {}
+              {selectedLevel && (
+                <>
+                  {selectedLevel} {levelScoreText(selectedLevel)}
+                </>
+              )}
             </span>
           </div>
           <span style={{ minWidth: "50px" }}>

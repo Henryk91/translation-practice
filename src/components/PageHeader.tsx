@@ -22,13 +22,13 @@ const PageHeader: React.FC<PageHeaderProps> = ({ selectedLevel, selectedSubLevel
               </div>
             ) : (
               selectedLevel !== "Incorrect Sentences" && (
-                <h3 style={{ margin: "10px 0px 0px" }}>Please select a sub level to start</h3>
+                <h3 style={{ margin: "10px 0px 0px" }}>Please select a sub level from the menu</h3>
               )
             )}
           </>
         ) : (
           <>
-            <p>Please select a Level and Sub Level from the menue to start</p>
+            <p>Please select a Level and Sub Level from the menu to start</p>
           </>
         )}
       </SelectedHeader>

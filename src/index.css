@@ -220,12 +220,7 @@ button:disabled {
 }
 
 .grow-box {
-  overflow: hidden;
   animation: grow 0.4s ease forwards;
-}
-
-.grow-box .grow-box-content {
-  overflow: hidden;
 }
 
 .grow-box-content {
@@ -233,15 +228,13 @@ button:disabled {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  max-height: fit-content;
-  overflow: hidden;
 }
 
 @keyframes grow {
   from {
-    height: 0px;
+    max-height: 0px;
   }
   to {
-    height: 100px;
+    max-height: 170px;
   }
 }

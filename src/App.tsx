@@ -289,6 +289,7 @@ const App: React.FC = () => {
   };
 
   const clickSentenceAgain = (rows: Row[]) => {
+    setIsComplete(false);
     if (noSubLevel.includes(selectedLevel as string)) {
       loadIncorrectSentences();
       return;
@@ -450,10 +451,8 @@ const App: React.FC = () => {
             />
             <QuickLevelChange
               isComplete={isComplete}
-              useMic={useMic}
               subLevels={subLevels}
               nextExercise={nextExercise}
-              setUseMic={setUseMic}
               shuffleSentences={shuffleSentences}
               clickSentenceAgain={() => clickSentenceAgain(rows)}
             />

@@ -12,7 +12,7 @@ import {
   faArrowRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { focusNextInput } from "../helpers/utils";
+import { focusNextInput, getScoreColorRange } from "../helpers/utils";
 import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 
 interface SettingsRowProps {
@@ -125,8 +125,6 @@ export const RedoThreeIcon: React.FC<{ count: number }> = ({ count }) => {
 };
 
 interface QuickLevelChangeProps {
-  setUseMic: (val: boolean) => void;
-  useMic: boolean;
   isComplete: boolean;
   shuffleSentences: boolean;
   subLevels: string[] | undefined;
@@ -135,16 +133,27 @@ interface QuickLevelChangeProps {
 }
 
 export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({
-  useMic,
   subLevels,
   nextExercise,
   clickSentenceAgain,
   shuffleSentences,
   isComplete,
 }) => {
+  const subLevelScoreText = () => {
+    const storedLevel = localStorage.getItem("selectedLevel");
+    const storedSubLevel = localStorage.getItem("selectedSubLevel") || null;
+    if (!storedLevel || !storedSubLevel) return;
+    const localSave = localStorage.getItem(`translation-score-${storedLevel}-${storedSubLevel}`);
+    if (localSave === "null" || localSave === null) return;
+    const localSaveJson = JSON.parse(localSave);
+    return <span style={{ color: getScoreColorRange(localSaveJson.score) }}>{`(${localSaveJson.score}%)`}</span>;
+  };
+
   if (!isComplete) return <></>;
+  const score = subLevelScoreText();
   return (
     <div className="grow-box">
+      {score && <div style={{ fontSize: "25px", paddingBottom: "5px" }}>Score: {score}</div>}
       <div className="grow-box-content">
         <div style={{ display: "flex", justifyContent: "center", flexDirection: "row" }}>
           <MenuButton

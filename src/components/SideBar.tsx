@@ -3,32 +3,42 @@ import { LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../helper
 import { faBars, faDoorOpen, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { logoutUser } from "../helpers/requests";
-import { clearLocalScores } from "../helpers/utils";
+import { clearLocalScores, getLevelScoreAverage } from "../helpers/utils";
 import { noSubLevel } from "../data/levelSentences";
+import { Dict } from "styled-components/dist/types";
 
 interface SideBarProps {
   selectedLevel: string | undefined;
   levels: string[];
-  levelScoreText: (level: string) => string;
   subLevels: string[] | undefined;
   selectedSubLevel: string | undefined;
   handleLevelChange: (level: string) => void;
   handleSubLevelChange: (subLevel: string) => void;
   showLevels: boolean;
   setShowLevels: (show: boolean) => void;
+  levelSentences: Dict;
 }
 
 const SideBar: React.FC<SideBarProps> = ({
   selectedLevel,
   levels,
-  levelScoreText,
   subLevels,
   selectedSubLevel,
   handleLevelChange,
   handleSubLevelChange,
   showLevels,
   setShowLevels,
+  levelSentences,
 }) => {
+  const levelScoreText = useMemo(
+    () => (lvl: string) => {
+      const subItems = Object.keys(levelSentences[lvl] || {}).length;
+      const score = getLevelScoreAverage(lvl, subItems) || null;
+      return score ? `(${score}%)` : "";
+    },
+    [levelSentences]
+  );
+
   const subLevelScoreText = useMemo(
     () => (lvl: string) => {
       if (!selectedLevel) return "";
@@ -39,6 +49,20 @@ const SideBar: React.FC<SideBarProps> = ({
     },
     [selectedLevel]
   );
+
+  const getIncorectSentenceCount = () => {
+    const userId = localStorage.getItem("userId") ?? "unknown";
+    const hasIncorrect = localStorage.getItem(userId + "-incorrectRows");
+    if (hasIncorrect) {
+      const savedRows = JSON.parse(hasIncorrect);
+      return `(${savedRows.length})`;
+    }
+  };
+
+  const levelInfo = (lvl: string) => {
+    if (lvl !== "Incorrect Sentences") return levelScoreText(lvl);
+    return getIncorectSentenceCount();
+  };
 
   const loggedIn = localStorage.getItem("userId");
 
@@ -117,7 +141,7 @@ const SideBar: React.FC<SideBarProps> = ({
                 key={lvl}
                 style={{ color: selectedLevel === lvl ? "green" : "" }}
               >
-                <span style={{ textAlign: "left" }}>{lvl}</span> <span>{levelScoreText(lvl)}</span>
+                <span style={{ textAlign: "left" }}>{lvl}</span> <span>{levelInfo(lvl)}</span>
               </SubLevelOptionItem>
             ))}
           </>

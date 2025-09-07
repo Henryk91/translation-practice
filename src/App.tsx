@@ -13,7 +13,6 @@ import { GlobalStyle, Container, Table, TableRow } from "./helpers/style";
 import { Row } from "./helpers/types";
 import {
   focusNextInput,
-  getLevelScoreAverage,
   splitAndShuffle,
   updateRowFeedback,
   updateScore,
@@ -354,15 +353,6 @@ const App: React.FC = () => {
     initScores();
   }, [getTranslateSentence]);
 
-  const levelScoreText = useMemo(
-    () => (lvl: string) => {
-      const subItems = Object.keys(levelSentences[lvl] || {}).length;
-      const score = getLevelScoreAverage(lvl, subItems) || null;
-      return score ? `(${score}%)` : "";
-    },
-    [levelSentences]
-  );
-
   useEffect(() => {
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key === "Shift") {
@@ -397,7 +387,7 @@ const App: React.FC = () => {
         <SideBar
           selectedLevel={selectedLevel}
           levels={levels}
-          levelScoreText={levelScoreText}
+          levelSentences={levelSentences}
           subLevels={subLevels}
           selectedSubLevel={selectedSubLevel}
           handleLevelChange={handleLevelChange}

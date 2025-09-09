@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { settingsActions } from "../store/settings-slice";
 
 // Type for constructor
 type SpeechRecognitionCtor = new () => SpeechRecognition;
@@ -27,7 +29,8 @@ export const reactInsertAtCursor = (element: HTMLInputElement | HTMLTextAreaElem
   element.dispatchEvent(new Event("input", { bubbles: true }));
 };
 
-export function useSpeechRecognition(lang = "de-DE", start: boolean, setUseMic: (val: boolean) => void) {
+export function useSpeechRecognition(lang = "de-DE", start: boolean) {
+  const dispatch = useDispatch();
   const recRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
@@ -68,7 +71,7 @@ export function useSpeechRecognition(lang = "de-DE", start: boolean, setUseMic: 
     recRef.current = rec;
 
     rec.onend = () => {
-      setUseMic(false);
+      dispatch(settingsActions.setUseMic(false));
       // if (keepRunning.current || start) rec.start();
     };
 
@@ -80,7 +83,7 @@ export function useSpeechRecognition(lang = "de-DE", start: boolean, setUseMic: 
       }
       recRef.current = null;
     };
-  }, [lang, start, setUseMic]);
+  }, [lang, start, dispatch]);
 
   return recRef;
 }

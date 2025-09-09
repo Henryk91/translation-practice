@@ -3,28 +3,27 @@ import { HeaderStyle, Label, MobileMenu, Select, Image, TitleSpan } from "../hel
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SubLevelOption } from "../helpers/subLevel";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store";
+import { settingsActions } from "../store/settings-slice";
 
 interface HeaderProps {
   handleLevelChange: (level: string) => void;
   handleSubLevelChange: (subLevel: string) => void;
-  selectedLevel: string | undefined;
-  levels: string[];
-  subLevels: string[] | undefined;
-  selectedSubLevel: string | undefined;
-  mode: string;
-  setMode: (mode: "easy" | "hard") => void;
 }
 
-const Header: React.FC<HeaderProps> = ({
-  handleLevelChange,
-  handleSubLevelChange,
-  selectedLevel,
-  levels,
-  subLevels,
-  selectedSubLevel,
-  mode,
-  setMode,
-}) => {
+const Header: React.FC<HeaderProps> = ({ handleLevelChange, handleSubLevelChange }) => {
+  const dispatch = useDispatch();
+  const settings = useSelector((state: RootState) => state.settings.settings);
+  const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
+  const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
+  const subLevels = useSelector((state: RootState) => state.ui.subLevels);
+  const levels = useSelector((state: RootState) => state.ui.levels);
+
+  const setMode = (mode: string) => {
+    dispatch(settingsActions.setMode(JSON.parse(mode)));
+  };
+
   const eventHandleSubLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
     handleSubLevelChange(e.target.value);
   };
@@ -68,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({
         {selectedLevel !== "Own Sentences" && (
           <>
             <Label>Mode:</Label>
-            <Select value={mode} onChange={(e: any) => setMode(e.target.value)}>
+            <Select value={settings.mode} onChange={(e: any) => setMode(e.target.value)}>
               <option value="easy">Easy</option>
               <option value="hard">Hard</option>
             </Select>

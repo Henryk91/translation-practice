@@ -26,8 +26,20 @@ import TranslationArea from "./components/TranslationArea";
 import CustomUserInput from "./components/CustomUserInput";
 import SettingsRow, { QuickLevelChange } from "./components/SettingsRow";
 import PageHeader from "./components/PageHeader";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "./store";
+import { uiActions } from "./store/ui-slice";
+import { settingsActions } from "./store/settings-slice";
 
 const App: React.FC = () => {
+  const dispatch = useDispatch();
+  const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
+  const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
+  const subLevels = useSelector((state: RootState) => state.ui.subLevels);
+  const levels = useSelector((state: RootState) => state.ui.levels);
+  const settings = useSelector((state: RootState) => state.settings.settings);
+  const { shouldSave, shuffleSentences, redoErrors, mode, useGapFill } = settings;
+
   const initialLevelDict = useMemo(() => {
     const defaultVal = { "Own Sentences": "" };
     if (hasIncorrectSentences()) return { "Incorrect Sentences": "", ...defaultVal };
@@ -35,23 +47,11 @@ const App: React.FC = () => {
   }, []);
 
   const [levelSentences, setLevelSentences] = useState<Dict>(initialLevelDict);
-  const [levels, setLevels] = useState<string[]>(["By Level"]);
-  const [subLevels, setSubLevels] = useState<string[] | undefined>();
   const hasInit = useRef(false);
-  const [shouldSave, setShouldSave] = useState<boolean>(true);
-  const [useGapFill, setUseGapFill] = useState<boolean>(true);
-  const [shuffleSentences, setShuffleSentences] = useState<boolean>(true);
-  const [hasGapFill, setHasGapFill] = useState<boolean>(true);
-  const [showLevels, setShowLevels] = useState<boolean>(true);
-  const [redoErrors, setRedoErrors] = useState<boolean>(false);
-  const [useMic, setUseMic] = useState<boolean>(false);
-  const [isComplete, setIsComplete] = useState<boolean>(false);
 
   const [text, setText] = useState<string>("");
-  const [mode, setMode] = useState<"easy" | "hard">("easy");
   const [rows, setRows] = useState<Row[]>([]);
-  const [selectedLevel, setSelectedLevel] = useState<string>();
-  const [selectedSubLevel, setSelectedSubLevel] = useState<string | undefined>();
+
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [shiftButtonDown, setShiftButtonDown] = useState<boolean>(false);
   const [altButtonDown, setAltButtonDown] = useState<boolean>(false);
@@ -86,33 +86,33 @@ const App: React.FC = () => {
 
   const handleLevelChange = (level: string): void => {
     const text = level ? levelSentences[level] : "";
-    setSelectedLevel(level);
+    dispatch(uiActions.setLevel({ level: level }));
 
     if (level) localStorage.setItem("selectedLevel", level);
     if (level === "Incorrect Sentences") {
-      setSubLevels(undefined);
-      setSelectedSubLevel(undefined);
+      dispatch(uiActions.setSubLevels(undefined));
+      dispatch(uiActions.setSubLevel({ subLevel: undefined }));
       localStorage.removeItem("selectedSubLevel");
       return;
     }
 
     if (typeof text === "string") {
       const sentences = splitAndShuffle(text);
-      setSubLevels([]);
+      dispatch(uiActions.setSubLevels(undefined));
 
       setText(text);
       setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
     } else if (typeof text === "object") {
       setText("");
       setRows([]);
-      setSubLevels(text);
-      setSelectedSubLevel(undefined);
+      dispatch(uiActions.setSubLevels(text));
+      dispatch(uiActions.setSubLevel({ subLevel: undefined }));
       localStorage.removeItem("selectedSubLevel");
     }
   };
 
   const handleSubLevelChange = (subLevel: string): void => {
-    setSelectedSubLevel(subLevel);
+    dispatch(uiActions.setSubLevel({ subLevel: subLevel }));
     localStorage.setItem("selectedSubLevel", subLevel);
   };
 
@@ -130,10 +130,10 @@ const App: React.FC = () => {
       if (data) {
         const newLevelSentences = { ...initialLevelDict, ...data };
         setLevelSentences(newLevelSentences);
-        setLevels(Object.keys(newLevelSentences));
+        dispatch(uiActions.setLevels(Object.keys(newLevelSentences)));
       }
     });
-  }, [initialLevelDict]);
+  }, [initialLevelDict, dispatch]);
 
   const setSentenceWithTranslation = useCallback(
     async (shuffleSentence: Boolean): Promise<void> => {
@@ -155,9 +155,9 @@ const App: React.FC = () => {
 
       const sentences = shuffleSentence ? shuffleRow(rows) : rows;
       setRows(sentences);
-      setHasGapFill(hasGapFill);
+      dispatch(settingsActions.setHasGapFill(hasGapFill));
     },
-    [selectedLevel, selectedSubLevel]
+    [selectedLevel, selectedSubLevel, dispatch]
   );
 
   const redoSentences = (rows: Row[]) => {
@@ -249,17 +249,7 @@ const App: React.FC = () => {
     setRows(newRows);
 
     const isComplete = newRows.every((row) => row.feedback);
-    setIsComplete(isComplete);
-  };
-
-  const configSetRedoErrors = (redoErrors: boolean) => {
-    setRedoErrors(redoErrors);
-    localStorage.setItem("redoErrors", JSON.stringify(redoErrors));
-  };
-
-  const configUseGapFill = () => {
-    setUseGapFill(!useGapFill);
-    localStorage.setItem("useGapFill", JSON.stringify(!useGapFill));
+    dispatch(settingsActions.setRedoErrors(isComplete));
   };
 
   const nextExercise = (previous?: boolean) => {
@@ -289,7 +279,7 @@ const App: React.FC = () => {
   };
 
   const clickSentenceAgain = (rows: Row[]) => {
-    setIsComplete(false);
+    dispatch(settingsActions.setRedoErrors(false));
     if (noSubLevel.includes(selectedLevel as string)) {
       loadIncorrectSentences();
       return;
@@ -311,34 +301,34 @@ const App: React.FC = () => {
     const storedLevel = localStorage.getItem("selectedLevel");
     const storedSubLevel = localStorage.getItem("selectedSubLevel") || null;
     if (storedLevel) {
-      setSelectedLevel(storedLevel);
+      dispatch(uiActions.setLevel({ level: storedLevel }));
       if (storedLevel === "Incorrect Sentences") {
-        setSubLevels(undefined);
-        setSelectedSubLevel(undefined);
+        dispatch(uiActions.setSubLevels(undefined));
+        dispatch(uiActions.setSubLevel({ subLevel: undefined }));
         localStorage.removeItem("selectedSubLevel");
         return;
       }
       const text = levelSentences[storedLevel];
       if (typeof text === "object") {
-        setSubLevels(text);
-        setShowLevels(false);
+        dispatch(uiActions.setSubLevels(text));
+        dispatch(settingsActions.setShowLevels(false));
       }
 
       const redoErrors = localStorage.getItem("redoErrors");
       if (redoErrors !== null) {
-        setRedoErrors(JSON.parse(redoErrors));
+        dispatch(settingsActions.setRedoErrors(JSON.parse(redoErrors)));
       }
 
       const useGapFill = localStorage.getItem("useGapFill");
       if (useGapFill !== null) {
-        setUseGapFill(JSON.parse(useGapFill));
+        dispatch(settingsActions.setUseGapFill(JSON.parse(useGapFill)));
       }
       if (typeof text === "string") setText(text);
     }
     if (storedSubLevel) {
-      setSelectedSubLevel(storedSubLevel);
+      dispatch(uiActions.setSubLevel({ subLevel: storedSubLevel }));
     }
-  }, [levels, levelSentences, setUseGapFill, setRedoErrors, setShowLevels]);
+  }, [levels, levelSentences, dispatch]);
 
   useEffect(() => {
     if (hasInit.current) return; // skip second call in development
@@ -383,32 +373,15 @@ const App: React.FC = () => {
     <>
       <GlobalStyle />
       <section style={{ display: "flex" }}>
-        {/* For menu show hide  */}
         <input type="checkbox" id="toggle" hidden></input>
         <SideBar
-          selectedLevel={selectedLevel}
-          levels={levels}
           levelSentences={levelSentences}
-          subLevels={subLevels}
-          selectedSubLevel={selectedSubLevel}
           handleLevelChange={handleLevelChange}
           handleSubLevelChange={handleSubLevelChange}
-          showLevels={showLevels}
-          setShowLevels={setShowLevels}
         />
         <Container className="main-page">
-          <Header
-            handleLevelChange={handleLevelChange}
-            handleSubLevelChange={handleSubLevelChange}
-            selectedLevel={selectedLevel}
-            levels={levels}
-            subLevels={subLevels}
-            selectedSubLevel={selectedSubLevel}
-            mode={mode}
-            setMode={setMode}
-          />
+          <Header handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
           <CustomUserInput
-            selectedLevel={selectedLevel}
             setText={setText}
             text={text}
             setRows={setRows}
@@ -417,7 +390,7 @@ const App: React.FC = () => {
           />
           <>
             <Table>
-              <PageHeader selectedLevel={selectedLevel} selectedSubLevel={selectedSubLevel} />
+              <PageHeader />
               {rows.map((row, idx) => (
                 <TableRow key={idx}>
                   <TranslationArea
@@ -436,28 +409,9 @@ const App: React.FC = () => {
               ))}
               <br />
             </Table>
-            <SettingsRow
-              setShuffleSentences={setShuffleSentences}
-              shuffleSentences={shuffleSentences}
-              setShouldSave={setShouldSave}
-              shouldSave={shouldSave}
-              hasGapFill={hasGapFill}
-              useGapFill={useGapFill}
-              configUseGapFill={configUseGapFill}
-              setUseMic={setUseMic}
-              useMic={useMic}
-              redoErrors={redoErrors}
-              setRedoErrors={configSetRedoErrors}
-            />
-            <QuickLevelChange
-              isComplete={isComplete}
-              subLevels={subLevels}
-              nextExercise={nextExercise}
-              shuffleSentences={shuffleSentences}
-              clickSentenceAgain={() => clickSentenceAgain(rows)}
-            />
+            <SettingsRow />
+            <QuickLevelChange nextExercise={nextExercise} clickSentenceAgain={() => clickSentenceAgain(rows)} />
           </>
-          {/* )} */}
         </Container>
       </section>
     </>

@@ -1,12 +1,12 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { SelectedHeader, TableRow } from "../helpers/style";
+import { RootState } from "../store";
 
-interface PageHeaderProps {
-  selectedLevel: string | undefined;
-  selectedSubLevel: string | undefined;
-}
+const PageHeader = () => {
+  const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
+  const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
 
-const PageHeader: React.FC<PageHeaderProps> = ({ selectedLevel, selectedSubLevel }) => {
   if (selectedLevel === "Own Sentences") return <></>;
   return (
     <TableRow>

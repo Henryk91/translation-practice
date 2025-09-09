@@ -6,30 +6,28 @@ import { logoutUser } from "../helpers/requests";
 import { clearLocalScores, getScoreColorRange, getLevelScoreAverage } from "../helpers/utils";
 import { noSubLevel } from "../data/levelSentences";
 import { Dict } from "styled-components/dist/types";
+import { settingsActions } from "../store/settings-slice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store";
 
 interface SideBarProps {
-  selectedLevel: string | undefined;
-  levels: string[];
-  subLevels: string[] | undefined;
-  selectedSubLevel: string | undefined;
   handleLevelChange: (level: string) => void;
   handleSubLevelChange: (subLevel: string) => void;
-  showLevels: boolean;
-  setShowLevels: (show: boolean) => void;
   levelSentences: Dict;
 }
 
-const SideBar: React.FC<SideBarProps> = ({
-  selectedLevel,
-  levels,
-  subLevels,
-  selectedSubLevel,
-  handleLevelChange,
-  handleSubLevelChange,
-  showLevels,
-  setShowLevels,
-  levelSentences,
-}) => {
+const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChange, levelSentences }) => {
+  const dispatch = useDispatch();
+  const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
+  const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
+  const subLevels = useSelector((state: RootState) => state.ui.subLevels);
+  const levels = useSelector((state: RootState) => state.ui.levels);
+  const { showLevels } = useSelector((state: RootState) => state.settings.settings);
+
+  const setShowLevels = (val: boolean) => {
+    dispatch(settingsActions.setShowLevels(val));
+  };
+
   const levelScoreText = useMemo(
     () => (lvl: string) => {
       const subItems = Object.keys(levelSentences[lvl] || {}).length;

@@ -14,36 +14,40 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { focusNextInput, getScoreColorRange } from "../helpers/utils";
 import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store";
+import { settingsActions } from "../store/settings-slice";
 
-interface SettingsRowProps {
-  setShuffleSentences: (shuffle: boolean) => void;
-  shuffleSentences: boolean;
-  setShouldSave: (shouldSave: boolean) => void;
-  shouldSave: boolean;
-  hasGapFill: boolean;
-  useGapFill: boolean;
-  configUseGapFill: () => void;
-  redoErrors: boolean;
-  setRedoErrors: (val: boolean) => void;
-  setUseMic: (val: boolean) => void;
-  useMic: boolean;
-}
+export const SettingsRow = () => {
+  const dispatch = useDispatch();
+  const settings = useSelector((state: RootState) => state.settings.settings);
+  const { shouldSave, shuffleSentences, useMic, useGapFill, hasGapFill, redoErrors } = settings;
 
-export const SettingsRow: React.FC<SettingsRowProps> = ({
-  setShuffleSentences,
-  shuffleSentences,
-  setShouldSave,
-  shouldSave,
-  hasGapFill,
-  useGapFill,
-  configUseGapFill,
-  redoErrors,
-  setRedoErrors,
-  setUseMic,
-  useMic,
-}) => {
-  const recognition = useSpeechRecognition("de-DE", useMic, setUseMic);
+  const setRedoErrors = (redoErrors: boolean) => {
+    dispatch(settingsActions.setRedoErrors(redoErrors));
+    localStorage.setItem("redoErrors", JSON.stringify(redoErrors));
+  };
+
+  const configUseGapFill = () => {
+    dispatch(settingsActions.setUseGapFill(!settings.useGapFill));
+    localStorage.setItem("useGapFill", JSON.stringify(!settings.useGapFill));
+  };
+
+  const setUseMic = (val: boolean) => {
+    dispatch(settingsActions.setUseMic(val));
+  };
+
+  const recognition = useSpeechRecognition("de-DE", useMic);
   const seeFeature = localStorage.getItem("userId") === "68988da2b947c4d46023d679";
+
+  const setShouldSave = (val: boolean) => {
+    dispatch(settingsActions.setShouldSave(val));
+  };
+
+  const setShuffleSentences = (val: boolean) => {
+    dispatch(settingsActions.setShuffleSentences(val));
+  };
+
   return (
     <SettingsButtonWrapper>
       {useMic && (
@@ -125,20 +129,15 @@ export const RedoThreeIcon: React.FC<{ count: number }> = ({ count }) => {
 };
 
 interface QuickLevelChangeProps {
-  isComplete: boolean;
-  shuffleSentences: boolean;
-  subLevels: string[] | undefined;
   nextExercise: (previous?: boolean) => void;
   clickSentenceAgain: () => void;
 }
 
-export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({
-  subLevels,
-  nextExercise,
-  clickSentenceAgain,
-  shuffleSentences,
-  isComplete,
-}) => {
+export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({ nextExercise, clickSentenceAgain }) => {
+  const subLevels = useSelector((state: RootState) => state.ui.subLevels);
+  const settings = useSelector((state: RootState) => state.settings.settings);
+  const { shuffleSentences, isComplete } = settings;
+
   const subLevelScoreText = () => {
     const storedLevel = localStorage.getItem("selectedLevel");
     const storedSubLevel = localStorage.getItem("selectedSubLevel") || null;

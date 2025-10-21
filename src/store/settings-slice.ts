@@ -53,7 +53,7 @@ const settingsSlice = createSlice({
       state.settings.useMic = actions.payload;
     },
     setIsComplete(state, actions) {
-      state.settings.useMic = actions.payload;
+      state.settings.isComplete = actions.payload;
     },
     setMode(state, actions) {
       state.settings.mode = actions.payload;

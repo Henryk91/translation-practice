@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { initialLevelDict, noSubLevel } from "./data/levelSentences";
+import { incorrectSentenceCount, initialLevelDict, noSubLevel } from "./data/levelSentences";
 import {
   confirmTranslationCheck,
   getLevels,
@@ -61,7 +61,7 @@ const App: React.FC = () => {
     if (alreadySaved) {
       const savedRows = JSON.parse(alreadySaved);
       const shuffle = shuffleSentences ? shuffleRow(savedRows) : savedRows;
-      const items = shuffle.length > 20 ? shuffle.slice(0, 20) : shuffle;
+      const items = shuffle.length > incorrectSentenceCount ? shuffle.slice(0, incorrectSentenceCount) : shuffle;
       const newRows = items.map((row: Row) => {
         delete row.isCorrect;
         delete row.aiCorrect;
@@ -242,7 +242,7 @@ const App: React.FC = () => {
     setRows(newRows);
 
     const isComplete = newRows.every((row) => row.feedback);
-    dispatch(settingsActions.setRedoErrors(isComplete));
+    dispatch(settingsActions.setIsComplete(isComplete));
   };
 
   const nextExercise = (previous?: boolean) => {
@@ -273,6 +273,7 @@ const App: React.FC = () => {
 
   const clickSentenceAgain = (rows: Row[]) => {
     dispatch(settingsActions.setRedoErrors(false));
+    dispatch(settingsActions.setIsComplete(false));
     if (noSubLevel.includes(selectedLevel as string)) {
       loadIncorrectSentences();
       return;

@@ -1,6 +1,6 @@
-import React, { useMemo, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { noSubLevel } from "./data/levelSentences";
+import { initialLevelDict, noSubLevel } from "./data/levelSentences";
 import {
   confirmTranslationCheck,
   getLevels,
@@ -18,7 +18,6 @@ import {
   updateScore,
   checkLogin,
   initScores,
-  hasIncorrectSentences,
 } from "./helpers/utils";
 import SideBar from "./components/SideBar";
 import Header from "./components/Header";
@@ -39,12 +38,6 @@ const App: React.FC = () => {
   const levels = useSelector((state: RootState) => state.ui.levels);
   const settings = useSelector((state: RootState) => state.settings.settings);
   const { shouldSave, shuffleSentences, redoErrors, mode, useGapFill } = settings;
-
-  const initialLevelDict = useMemo(() => {
-    const defaultVal = { "Own Sentences": "" };
-    if (hasIncorrectSentences()) return { "Incorrect Sentences": "", ...defaultVal };
-    return defaultVal;
-  }, []);
 
   const [levelSentences, setLevelSentences] = useState<Dict>(initialLevelDict);
   const hasInit = useRef(false);
@@ -133,7 +126,7 @@ const App: React.FC = () => {
         dispatch(uiActions.setLevels(Object.keys(newLevelSentences)));
       }
     });
-  }, [initialLevelDict, dispatch]);
+  }, [dispatch]);
 
   const setSentenceWithTranslation = useCallback(
     async (shuffleSentence: Boolean): Promise<void> => {
@@ -390,7 +383,7 @@ const App: React.FC = () => {
           />
           <>
             <Table>
-              <PageHeader />
+              <PageHeader sentenceCount={rows.length} />
               {rows.map((row, idx) => (
                 <TableRow key={idx}>
                   <TranslationArea

@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { SelectedHeader, TableRow } from "../helpers/style";
 import { RootState } from "../store";
 
-const PageHeader = () => {
+const PageHeader = ({ sentenceCount }: { sentenceCount: number }) => {
   const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
   const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
 
@@ -20,9 +20,11 @@ const PageHeader = () => {
               <div style={{ margin: "10px 0px 0px" }}>
                 Sub Level: <span style={{ fontWeight: "bold" }}>{selectedSubLevel}</span>
               </div>
+            ) : selectedLevel !== "Incorrect Sentences" ? (
+              <h3 style={{ margin: "10px 0px 0px" }}>Please select a sub level from the menu</h3>
             ) : (
-              selectedLevel !== "Incorrect Sentences" && (
-                <h3 style={{ margin: "10px 0px 0px" }}>Please select a sub level from the menu</h3>
+              sentenceCount === 0 && (
+                <h3 style={{ margin: "10px 0px 0px" }}>Well Done! You have no incorrect sentences!</h3>
               )
             )}
           </>

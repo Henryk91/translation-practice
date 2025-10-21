@@ -75,10 +75,10 @@ export async function refreshToken(): Promise<Response | { ok: false }> {
   return res;
 }
 
-export async function apiFetch(url: string, options?: RequestInit): Promise<Response> {
+export async function apiFetch(url: string, options?: RequestInit, useCache = true): Promise<Response> {
   const localUrl = url.startsWith("http") ? url : BACKEND_URL + url;
 
-  const fetchMethod = !options || options.method === "GET" ? fetchWithCache : fetch;
+  const fetchMethod = (!options || options.method === "GET") && useCache ? fetchWithCache : fetch;
 
   const res = await fetchMethod(localUrl, {
     credentials: "include",
@@ -263,7 +263,7 @@ export const getIncorrectSentences = async (): Promise<KeyValue | undefined> => 
   const userId = localStorage.getItem("userId");
   if (!userId) return { ok: false };
   try {
-    const res: Response = await apiFetch("/api/incorrect-translations?corrected=false");
+    const res: Response = await apiFetch("/api/incorrect-translations?corrected=false", {}, false);
 
     if (!res.ok) {
       console.error("Error:", res);

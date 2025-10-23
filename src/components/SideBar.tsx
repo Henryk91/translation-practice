@@ -76,7 +76,7 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
       });
       return;
     }
-    window.location.assign(`https://henryk.co.za/login.html?redirect=${window.location.href}`);
+    window.location.assign(`https://practice.lingodrill.com/login.html?redirect=${window.location.href}`);
   };
 
   const handleMenuLevelClick = (name: string) => {

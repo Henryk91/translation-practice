@@ -1,7 +1,7 @@
 import { IncorrectSentences, KeyValue, NextFn } from "./types";
 import { clearLocalScores } from "./utils";
 
-const BACKEND_URL = "https://note.henryk.co.za";
+const BACKEND_URL = "https://api.lingodrill.com";
 
 const cache = new Map();
 

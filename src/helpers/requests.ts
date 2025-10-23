@@ -118,7 +118,7 @@ export function logUse(): void {
   const currentURL = window.location.href;
   if (currentURL.includes("localhost")) return;
 
-  apiFetch("/api/log?site=translation-practice")
+  apiFetch("/api/log?site=lingodrill-practice")
     .then((res: Response) => res.json())
     .then((data) => {
       console.log(data);

@@ -92,13 +92,15 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
     <SideMenu className="hidden-content">
       <LevelSelect>
         <div className="sidebar-menu">
-          <MenuButton className="login-button" onClick={clickLogin}>
-            <FontAwesomeIcon icon={loggedIn ? faDoorOpen : faUser} />
-            <div style={{ fontSize: "12px", color: "white" }}>{loggedIn ? "Log Out" : "Log In"}</div>
-          </MenuButton>
-          <div className="level-info">
+          <div style={{ flex: "1" }}>
+            <MenuButton className="login-button" onClick={clickLogin}>
+              <FontAwesomeIcon icon={loggedIn ? faDoorOpen : faUser} />
+              <div style={{ fontSize: "12px", color: "white" }}>{loggedIn ? "Log Out" : "Log In"}</div>
+            </MenuButton>
+          </div>
+          <div className="level-info" style={{ flex: "3" }}>
             Levels Selected: <br />
-            <span style={{ color: "green" }}>
+            <span style={{ color: "green", fontSize: "16px" }}>
               {selectedLevel && (
                 <>
                   {selectedLevel} {levelScoreText(selectedLevel)}
@@ -106,11 +108,13 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
               )}
             </span>
           </div>
-          <span style={{ minWidth: "50px" }}>
-            <label htmlFor="toggle" className="sidebar-menu-button1 menu-button">
-              <FontAwesomeIcon icon={faBars} />
-            </label>
-          </span>
+          <div style={{ flex: "1", display: "flex", justifyContent: "center" }}>
+            <span>
+              <label htmlFor="toggle" className="sidebar-menu-button1 menu-button">
+                <FontAwesomeIcon icon={faBars} />
+              </label>
+            </span>
+          </div>
         </div>
         <MenuButton
           style={{ fontSize: "15px", backgroundColor: showLevels ? "rgba(51, 51, 51, 0.9)" : "" }}

@@ -5,8 +5,8 @@ export const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     background-color: rgba(10,12,19,255);
-    color: rgba(255, 255, 255, 0.8);
-    font-family: Roboto, sans-serif;
+    color: rgb(230, 241, 255);
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     text-align: center;
   }
 `;
@@ -117,7 +117,7 @@ export const TextInput = styled.input`
   background-color: rgba(10, 12, 20, 255);
   color: #e0e0e0;
   width: -webkit-fill-available;
-  outline: 0.5px solid #333;
+  outline: 1px solid rgb(255 255 255 / 0.1);
 `;
 
 export const Button = styled.button`
@@ -186,7 +186,7 @@ export const TableRow = styled.div`
 export const TableCell = styled.div`
   vertical-align: middle;
   flex: 1;
-  margin-top: 10px;
+  // margin-top: 10px;
 
   align-items: center;
   justify-content: center;
@@ -199,7 +199,7 @@ export const FeedBackTableCell = styled.div`
   flex: 1;
   min-height: 1.2em;
   align-items: center;
-  margin-top: 10px;
+  // margin-top: 10px;
   justify-content: flex-end;
 `;
 
@@ -258,13 +258,16 @@ export const InputWrapper = styled.div`
 `;
 
 export const FeedbackSpan = styled.span<{ $correct: boolean }>`
-  color: ${(props) => (props.$correct ? "#4a9c78" : "#ec3d4c")};
+  color: ${(props) => (props.$correct ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)")};
   margin-right: 0px;
 `;
 
 export const TitleSpan = styled.span<{ $correct: boolean }>`
-  color: ${(props) => (props.$correct ? "#00ff00" : "#ff4444ff")};
+  color: ${(props) => (props.$correct ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)")};
   margin: 0px 0px 0px 0px;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
+  font-weight: bolder;
 `;
 
 export const LevelSelect = styled.div`
@@ -295,7 +298,8 @@ export const SelectedHeader = styled.div`
   text-align: left;
   padding: 15px;
   margin: 5px 0px 5px 0px;
-  border: 3px solid rgba(20, 23, 34, 255);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 12px;
   height: fit-content;
   width: 50%;
   @media (max-width: 600px) {

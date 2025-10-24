@@ -21,10 +21,12 @@ button:disabled {
   width: 50%;
   flex-direction: column;
   font-size: 1.1em;
-  background-color: rgba(20, 23, 34, 255);
+  background-color: rgba(20, 23, 34, 0.5);
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 12px;
+  border: 1px solid rgb(255 255 255 / 0.1);
   text-align: left;
+  color: rgb(230, 241, 255);
 }
 @media (max-aspect-ratio: 10/10) and (max-width: 700px) {
   .translation-area {
@@ -49,7 +51,7 @@ button:disabled {
   height: var(--size, 100px);
   border-radius: 50%;
   border: none;
-  background: #3498db;
+  background: hsl(158, 60%, 48%);
   color: #fff;
   font-size: 14px;
   cursor: pointer;
@@ -71,7 +73,7 @@ button:disabled {
   padding: var(--ring, 4px);
 
   /* Arc color based on hue */
-  background: conic-gradient(hsl(var(--h) 90% 45%) var(--progress, 0deg), transparent 0);
+  background: conic-gradient(hsl(var(--h) 80% 62%) var(--progress, 0deg), transparent 0);
 
   -webkit-mask: radial-gradient(
     farthest-side,
@@ -236,5 +238,20 @@ button:disabled {
   }
   to {
     max-height: 170px;
+  }
+}
+
+.level-button-active {
+  color: rgb(11, 15, 20) !important;
+  background-color: rgba(49, 196, 141, 1) !important;
+  &:hover {
+    background-color: rgba(49, 196, 141, 0.8) !important;
+  }
+}
+.level-button-inactive {
+  color: #e0e0e0 !important;
+  background-color: rgb(51, 51, 51, 0.5) !important;
+  &:hover {
+    background-color: rgba(51, 51, 51, 0.8) !important;
   }
 }

@@ -76,7 +76,7 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
     <div className="translation-area" onFocus={handleFocus} onBlur={handleBlur}>
       <TableCell style={{ justifyContent: "space-between" }}>
         <span>{idx + 1}. </span>
-        <span style={{ width: "-webkit-fill-available" }}>{row.sentence}</span>
+        <span style={{ width: "-webkit-fill-available", color: "rgb(159 179 200)" }}>{row.sentence}</span>
       </TableCell>
       <TableCell key={`${idx}-input`} className="input-cell">
         <InputWrapper>
@@ -125,7 +125,7 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
               disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
               style={
                 {
-                  color: row.aiCorrect === false ? "red" : "gray",
+                  color: row.aiCorrect === false ? "rgba(236, 80, 80, 1)" : "gray",
                   "--duration": `${getTimerDuration(row.sentence)}s`,
                 } as React.CSSProperties
               }

@@ -279,11 +279,10 @@ export const getScoreColorRange = (value: number, reverse = false, alpha = 1) =>
   const v = Math.max(0, Math.min(100, value)) / 100;
   // Swap if reversed
   const t = !reverse ? 1 - v : v;
-
-  // Green: hsl(120, 100%, 25.1%)
-  const start = { h: 120, s: 100, l: 25.1 };
-  // Red: hsl(0, 100%, 50%)
-  const end = { h: 0, s: 100, l: 50 };
+  // Green: hsl(158, 60%, 48%)
+  const start = { h: 158, s: 60, l: 48 };
+  // Red: hsl(0, 80%, 62%)
+  const end = { h: 0, s: 80, l: 62 };
 
   // Linear interpolation
   const h = start.h + (end.h - start.h) * t;

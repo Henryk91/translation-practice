@@ -58,12 +58,15 @@ export const SettingsRow = () => {
       <div style={{ display: "flex" }}>
         <MenuButton
           onClick={() => setShuffleSentences(!shuffleSentences)}
-          style={{ color: shuffleSentences ? "green" : "red" }}
+          style={{ color: shuffleSentences ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
         >
           <FontAwesomeIcon icon={faSyncAlt} />
           <div style={{ fontSize: "12px", color: "white" }}>Shuffle</div>
         </MenuButton>
-        <MenuButton onClick={() => setShouldSave(!shouldSave)} style={{ color: shouldSave ? "green" : "red" }}>
+        <MenuButton
+          onClick={() => setShouldSave(!shouldSave)}
+          style={{ color: shouldSave ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
+        >
           <FontAwesomeIcon icon={faSave} />
           <div style={{ fontSize: "12px", color: "white" }}>Save</div>
         </MenuButton>
@@ -71,7 +74,7 @@ export const SettingsRow = () => {
         <MenuButton
           disabled={!hasGapFill}
           onClick={() => configUseGapFill()}
-          style={{ color: useGapFill && hasGapFill ? "red" : "currentcolor" }}
+          style={{ color: useGapFill && hasGapFill ? "rgba(236, 80, 80, 1)" : "currentcolor" }}
         >
           <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
           <div style={{ fontSize: "12px", color: "white" }}>Gap Fill</div>
@@ -80,7 +83,7 @@ export const SettingsRow = () => {
         <MenuButton
           disabled={!hasGapFill}
           onClick={() => setRedoErrors(!redoErrors)}
-          style={{ color: redoErrors ? "green" : "red", padding: "1px" }}
+          style={{ color: redoErrors ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)", padding: "1px" }}
         >
           <RedoThreeIcon count={redoErrors ? 3 : 1} />
           <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Error Retry</div>
@@ -96,7 +99,7 @@ export const SettingsRow = () => {
               }
               setUseMic(!useMic);
             }}
-            style={{ color: useMic ? "green" : "red", padding: "1px" }}
+            style={{ color: useMic ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)", padding: "1px" }}
           >
             <FontAwesomeIcon icon={useMic ? faMicrophoneSlash : faMicrophone} />
             <div style={{ fontSize: "12px", color: "white" }}>Use Mic</div>
@@ -162,10 +165,13 @@ export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({ nextExercise
               nextExercise(true);
             }}
           >
-            <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowLeft} />
+            <FontAwesomeIcon style={{ color: "rgba(49, 196, 141, 1)", fontSize: "25px" }} icon={faArrowLeft} />
             Prev Exercise
           </MenuButton>
-          <MenuButton onClick={() => clickSentenceAgain()} style={{ color: shuffleSentences ? "green" : "red" }}>
+          <MenuButton
+            onClick={() => clickSentenceAgain()}
+            style={{ color: shuffleSentences ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
+          >
             <FontAwesomeIcon icon={faSyncAlt} />
             <div style={{ fontSize: "12px", color: "white" }}>Again</div>
           </MenuButton>
@@ -176,7 +182,8 @@ export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({ nextExercise
               nextExercise();
             }}
           >
-            Next Exercise <FontAwesomeIcon style={{ color: "green", fontSize: "25px" }} icon={faArrowRight} />
+            Next Exercise{" "}
+            <FontAwesomeIcon style={{ color: "rgba(49, 196, 141, 1)", fontSize: "25px" }} icon={faArrowRight} />
           </MenuButton>
         </div>
       </div>

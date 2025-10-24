@@ -100,7 +100,7 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
           </div>
           <div className="level-info" style={{ flex: "3" }}>
             Levels Selected: <br />
-            <span style={{ color: "green", fontSize: "16px" }}>
+            <span style={{ color: "rgba(49, 196, 141, 1)", fontSize: "16px" }}>
               {selectedLevel && (
                 <>
                   {selectedLevel} {levelScoreText(selectedLevel)}
@@ -117,14 +117,16 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
           </div>
         </div>
         <MenuButton
-          style={{ fontSize: "15px", backgroundColor: showLevels ? "rgba(51, 51, 51, 0.9)" : "" }}
+          className={showLevels ? "level-button-active" : "level-button-inactive"}
+          style={{ fontSize: "15px" }}
           onClick={() => setShowLevels(true)}
         >
           Select Level
         </MenuButton>
         <MenuButton
+          className={!showLevels ? "level-button-active" : "level-button-inactive"}
           disabled={!!selectedLevel && noSubLevel.includes(selectedLevel)}
-          style={{ fontSize: "15px", backgroundColor: !showLevels ? "rgba(51, 51, 51, 0.9)" : "" }}
+          style={{ fontSize: "15px" }}
           onClick={() => setShowLevels(false)}
         >
           Select Sub Level
@@ -146,7 +148,7 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
                   handleMenuLevelClick(lvl);
                 }}
                 key={lvl}
-                style={{ color: selectedLevel === lvl ? "green" : "" }}
+                style={{ color: selectedLevel === lvl ? "rgba(49, 196, 141, 1)" : "" }}
               >
                 <span style={{ textAlign: "left" }}>{lvl}</span> <span>{levelInfo(lvl)}</span>
               </SubLevelOptionItem>
@@ -160,7 +162,7 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
                 <SubLevelOptionItem
                   onClick={() => handleSubLevelChange(lvl as any)}
                   style={{
-                    color: selectedSubLevel === lvl ? "green" : "",
+                    color: selectedSubLevel === lvl ? "rgba(49, 196, 141, 1)" : "",
                   }}
                 >
                   <span style={{ textAlign: "left" }}>{lvl}</span> <span>{subLevelScoreText(lvl)}</span>

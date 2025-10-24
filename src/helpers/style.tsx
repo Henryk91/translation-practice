@@ -264,7 +264,7 @@ export const FeedbackSpan = styled.span<{ $correct: boolean }>`
 
 export const TitleSpan = styled.span<{ $correct: boolean }>`
   color: ${(props) => (props.$correct ? "#00ff00" : "#ff4444ff")};
-  margin: 0px 5px 0px 5px;
+  margin: 0px 0px 0px 0px;
 `;
 
 export const LevelSelect = styled.div`

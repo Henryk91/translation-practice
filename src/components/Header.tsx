@@ -37,8 +37,14 @@ const Header: React.FC<HeaderProps> = ({ handleLevelChange, handleSubLevelChange
       <div className="image-wrapper">
         <Image src={process.env.PUBLIC_URL + "/logo192.png"} alt="App Logo" />
         <div style={{ display: "flex", flexDirection: "row", width: "fit-content" }}>
-          <TitleSpan $correct={false}>Translate</TitleSpan> <span>to</span>{" "}
-          <TitleSpan $correct={true}> German </TitleSpan>
+          <span> </span>
+          <TitleSpan style={{ marginLeft: "5px" }} $correct={true}>
+            Lingo
+          </TitleSpan>
+          <TitleSpan style={{ marginRight: "5px" }} $correct={false}>
+            Drill:
+          </TitleSpan>{" "}
+          <span style={{ color: "white" }}> German</span>
         </div>
         <label htmlFor="toggle" className="menu-button">
           <FontAwesomeIcon icon={faBars} />

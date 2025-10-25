@@ -81,7 +81,7 @@
   flex: 1; /* Take remaining space */
   display: flex;
   flex-direction: column;
-  padding: 10px;
+  /* padding: 10px; */
   overflow-y: auto; /* Enable scrolling */
 }
 
@@ -106,13 +106,13 @@
 }
 
 .chat-bubble.bot {
-  background-color: #444654; /* Bot message color */
+  background-color: rgba(20, 23, 34, 255); /* Bot message color */
   color: white; /* Bot message text color */
   align-self: flex-start; /* Align bot messages to the left */
 }
 
 .chat-bubble.user {
-  background-color: #5b3fd3; /* User message color */
+  background-color: rgba(49, 196, 141, 1); /* User message color */
   color: white; /* User message text color */
   align-self: flex-end; /* Align user messages to the right */
   margin-left: auto; /* Push user messages to the right */
@@ -122,32 +122,45 @@
   display: flex;
   align-items: center;
   padding: 10px;
-  border-top: 1px solid #ccc; /* Optional border for separation */
-  background-color: #3a3a3c; /* Input area background color */
+  /* background-color: #3a3a3c; */
+  background-color: rgba(20, 23, 34, 0.5);
+
+  border: 1px solid rgb(255 255 255 / 0.1);
 }
 
 .chat-textarea {
   flex: 1;
-  border-radius: 20px;
+  border-radius: 12px;
   border: none;
   padding: 10px;
   margin-right: 10px;
   resize: none; /* Disable resizing */
   font-size: medium;
+
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: rgba(10, 12, 20, 255);
+  color: #e0e0e0;
+  width: -webkit-fill-available;
+  outline: 1px solid rgb(255 255 255 / 0.1);
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
 }
 
 .chat-button {
   padding: 10px 20px;
   border: none;
-  border-radius: 20px;
-  background-color: #5b3fd3; /* Button color */
+  border-radius: 12px;
+  border-radius: 4px;
   background-color: rgba(49, 196, 141, 1); /* Button color */
   color: white; /* Button text color */
   cursor: pointer;
 }
 
 .chat-button:hover {
-  background-color: #4a2cb1; /* Darker button color on hover */
+  background-color: rgba(49, 196, 141, 0.4); /* Darker button color on hover */
 }
 
 /* New styles for the language level selector */

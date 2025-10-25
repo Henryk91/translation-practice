@@ -14,7 +14,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel }) =>
   const [currentSentence, setCurrentSentence] = useState<Sentence | null>(null);
   const [userInput, setUserInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [checkPunctuation, setCheckPunctuation] = useState<boolean>(false);
+  const [checkPunctuation] = useState<boolean>(false);
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
   const [sentences, setSentences] = useState<Sentence[]>([]);
 

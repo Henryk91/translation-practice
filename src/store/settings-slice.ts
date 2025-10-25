@@ -9,6 +9,7 @@ interface SettingsState {
   redoErrors: boolean;
   useMic: boolean;
   isComplete: boolean;
+  chatUi: boolean;
   mode: "easy" | "hard";
 }
 
@@ -21,6 +22,7 @@ const settings: SettingsState = {
   redoErrors: false,
   useMic: false,
   isComplete: false,
+  chatUi: false,
   mode: "easy",
 };
 const initialState: { settings: SettingsState } = {
@@ -57,6 +59,9 @@ const settingsSlice = createSlice({
     },
     setMode(state, actions) {
       state.settings.mode = actions.payload;
+    },
+    setChatUi(state, actions) {
+      state.settings.chatUi = actions.payload;
     },
   },
 });

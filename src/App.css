@@ -69,3 +69,117 @@
 .height100 {
   height: 100%;
 }
+
+.app {
+  display: flex;
+  flex-direction: column;
+  /*height: 100vh;  Full height of the viewport */
+  height: 90vh; /* Full height of the viewport */
+}
+
+.chat-container {
+  flex: 1; /* Take remaining space */
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  overflow-y: auto; /* Enable scrolling */
+}
+
+.chat-button-container {
+  display: flex;
+}
+
+.messages {
+  flex: 1; /* Take remaining space in the chat container */
+  overflow-y: auto; /* Enable scrolling */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center messages */
+}
+
+.chat-bubble {
+  max-width: 70%;
+  margin: 5px;
+  padding: 10px;
+  border-radius: 15px;
+  line-height: 1.5;
+}
+
+.chat-bubble.bot {
+  background-color: #444654; /* Bot message color */
+  color: white; /* Bot message text color */
+  align-self: flex-start; /* Align bot messages to the left */
+}
+
+.chat-bubble.user {
+  background-color: #5b3fd3; /* User message color */
+  color: white; /* User message text color */
+  align-self: flex-end; /* Align user messages to the right */
+  margin-left: auto; /* Push user messages to the right */
+}
+
+.translation-input {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-top: 1px solid #ccc; /* Optional border for separation */
+  background-color: #3a3a3c; /* Input area background color */
+}
+
+.chat-textarea {
+  flex: 1;
+  border-radius: 20px;
+  border: none;
+  padding: 10px;
+  margin-right: 10px;
+  resize: none; /* Disable resizing */
+  font-size: medium;
+}
+
+.chat-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  background-color: #5b3fd3; /* Button color */
+  background-color: rgba(49, 196, 141, 1); /* Button color */
+  color: white; /* Button text color */
+  cursor: pointer;
+}
+
+.chat-button:hover {
+  background-color: #4a2cb1; /* Darker button color on hover */
+}
+
+/* New styles for the language level selector */
+.chat-select {
+  padding: 10px;
+  -webkit-appearance: none; /* Removes native appearance */
+  border: none;
+  border-radius: 20px;
+  background-color: #5b3fd3; /* Same color as buttons */
+  color: white; /* Text color */
+  cursor: pointer;
+  margin-left: 10px; /* Spacing from label */
+  transition: background-color 0.3s; /* Smooth transition */
+}
+
+.chat-select:hover {
+  background-color: #4a2cb1; /* Darker color on hover */
+}
+
+.toggle-container {
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  color: white; /* Checkbox label color */
+  margin-bottom: 10px;
+}
+@media (max-aspect-ratio: 10/10) and (max-width: 700px) {
+  .translation-input {
+    flex-direction: column;
+  }
+  .chat-textarea {
+    width: -webkit-fill-available;
+    margin-bottom: 10px;
+  }
+}

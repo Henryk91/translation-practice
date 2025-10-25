@@ -10,6 +10,7 @@ import {
   faMicrophone,
   faArrowLeft,
   faArrowRight,
+  faComments,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { focusNextInput, getScoreColorRange } from "../helpers/utils";
@@ -21,7 +22,7 @@ import { settingsActions } from "../store/settings-slice";
 export const SettingsRow = () => {
   const dispatch = useDispatch();
   const settings = useSelector((state: RootState) => state.settings.settings);
-  const { shouldSave, shuffleSentences, useMic, useGapFill, hasGapFill, redoErrors } = settings;
+  const { shouldSave, shuffleSentences, useMic, useGapFill, hasGapFill, redoErrors, chatUi } = settings;
 
   const setRedoErrors = (redoErrors: boolean) => {
     dispatch(settingsActions.setRedoErrors(redoErrors));
@@ -35,6 +36,9 @@ export const SettingsRow = () => {
 
   const setUseMic = (val: boolean) => {
     dispatch(settingsActions.setUseMic(val));
+  };
+  const setChatUi = (val: boolean) => {
+    dispatch(settingsActions.setChatUi(val));
   };
 
   const recognition = useSpeechRecognition("de-DE", useMic);
@@ -87,6 +91,10 @@ export const SettingsRow = () => {
         >
           <RedoThreeIcon count={redoErrors ? 3 : 1} />
           <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Error Retry</div>
+        </MenuButton>
+        <MenuButton onClick={() => setChatUi(!chatUi)} style={{ color: "rgba(49, 196, 141, 1)", padding: "1px" }}>
+          <FontAwesomeIcon icon={faComments} />
+          <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Use Chat</div>
         </MenuButton>
         {seeFeature && (
           <MenuButton

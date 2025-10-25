@@ -29,6 +29,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./store";
 import { uiActions } from "./store/ui-slice";
 import { settingsActions } from "./store/settings-slice";
+import Chat from "./Chat";
 
 const App: React.FC = () => {
   const dispatch = useDispatch();
@@ -37,17 +38,22 @@ const App: React.FC = () => {
   const subLevels = useSelector((state: RootState) => state.ui.subLevels);
   const levels = useSelector((state: RootState) => state.ui.levels);
   const settings = useSelector((state: RootState) => state.settings.settings);
-  const { shouldSave, shuffleSentences, redoErrors, mode, useGapFill } = settings;
+  const { shouldSave, shuffleSentences, redoErrors, mode, useGapFill, chatUi } = settings;
 
   const [levelSentences, setLevelSentences] = useState<Dict>(initialLevelDict);
   const hasInit = useRef(false);
 
   const [text, setText] = useState<string>("");
   const [rows, setRows] = useState<Row[]>([]);
+  const [initialSentences, setInitialSentences] = useState<any[]>([]);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [shiftButtonDown, setShiftButtonDown] = useState<boolean>(false);
   const [altButtonDown, setAltButtonDown] = useState<boolean>(false);
+
+  const setChatUi = (val: boolean) => {
+    dispatch(settingsActions.setChatUi(val));
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number): void => {
     const value = e.target.value;
@@ -95,6 +101,8 @@ const App: React.FC = () => {
 
       setText(text);
       setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+      console.log("sentences", sentences);
+      setInitialSentences(sentences.map((r: any) => ({ en: r.sentence, de: r.translation })));
     } else if (typeof text === "object") {
       setText("");
       setRows([]);
@@ -148,6 +156,7 @@ const App: React.FC = () => {
 
       const sentences = shuffleSentence ? shuffleRow(rows) : rows;
       setRows(sentences);
+      setInitialSentences(sentences.map((r: any) => ({ en: r.sentence, de: r.translation })));
       dispatch(settingsActions.setHasGapFill(hasGapFill));
     },
     [selectedLevel, selectedSubLevel, dispatch]
@@ -382,30 +391,38 @@ const App: React.FC = () => {
             rows={rows}
             levelSentences={levelSentences}
           />
-          <>
-            <Table>
-              <PageHeader sentenceCount={rows.length} />
-              {rows.map((row, idx) => (
-                <TableRow key={idx}>
-                  <TranslationArea
-                    {...{
-                      idx,
-                      row,
-                      handleInputChange,
-                      inputRef: inputRefs.current[idx],
-                      handleTranslate,
-                      handleAiCheck,
-                      useGapFill,
-                      shiftButtonDown,
-                    }}
-                  />
-                </TableRow>
-              ))}
-              <br />
-            </Table>
-            <SettingsRow />
-            <QuickLevelChange nextExercise={nextExercise} clickSentenceAgain={() => clickSentenceAgain(rows)} />
-          </>
+          {chatUi ? (
+            <Chat
+              initialSentences={initialSentences}
+              hideChat={() => setChatUi(false)}
+              nextLevel={() => nextExercise()}
+            />
+          ) : (
+            <>
+              <Table>
+                <PageHeader sentenceCount={rows.length} />
+                {rows.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TranslationArea
+                      {...{
+                        idx,
+                        row,
+                        handleInputChange,
+                        inputRef: inputRefs.current[idx],
+                        handleTranslate,
+                        handleAiCheck,
+                        useGapFill,
+                        shiftButtonDown,
+                      }}
+                    />
+                  </TableRow>
+                ))}
+                <br />
+              </Table>
+              <SettingsRow />
+              <QuickLevelChange nextExercise={nextExercise} clickSentenceAgain={() => clickSentenceAgain(rows)} />
+            </>
+          )}
         </Container>
       </section>
     </>

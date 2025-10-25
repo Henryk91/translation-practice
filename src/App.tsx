@@ -393,6 +393,7 @@ const App: React.FC = () => {
           />
           {chatUi ? (
             <Chat
+              level={selectedSubLevel}
               initialSentences={initialSentences}
               hideChat={() => setChatUi(false)}
               nextLevel={() => nextExercise()}

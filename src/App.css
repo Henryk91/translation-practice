@@ -192,6 +192,7 @@
     flex-direction: column;
   }
   .chat-textarea {
+    margin-right: 0px;
     width: -webkit-fill-available;
     margin-bottom: 10px;
   }

@@ -5,12 +5,13 @@ type Message = { text: string; type: "bot" | "user" };
 type Sentence = { en: string; de: string; [key: string]: any };
 
 interface ChatProps {
+  level?: string;
   initialSentences: Sentence[];
   hideChat: () => void;
   nextLevel: () => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel }) => {
+const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel, level }) => {
   const [currentSentence, setCurrentSentence] = useState<Sentence | null>(null);
   const [userInput, setUserInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -33,7 +34,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel }) =>
       setMessages((prevMessages: any) => [
         ...prevMessages,
         ...[
-          { text: `Bot: New Level`, type: "bot" },
+          { text: `Bot: New Level selected!\n${level}`, type: "bot" },
           { text: `Bot: ${initialSentences[0].en}`, type: "bot" },
         ],
       ]);
@@ -48,7 +49,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel }) =>
         { text: `Bot: ${initialSentences[0].en}`, type: "bot" },
       ]);
     }
-  }, [messages.length, initialSentences, sentences]);
+  }, [messages.length, initialSentences, sentences, level]);
 
   const checkTranslation = () => {
     if (!currentSentence) return;

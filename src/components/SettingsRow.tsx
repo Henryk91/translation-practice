@@ -94,7 +94,7 @@ export const SettingsRow = () => {
         </MenuButton>
         <MenuButton onClick={() => setChatUi(!chatUi)} style={{ color: "rgba(49, 196, 141, 1)", padding: "1px" }}>
           <FontAwesomeIcon icon={faComments} />
-          <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Use Chat</div>
+          <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Chat Mode</div>
         </MenuButton>
         {seeFeature && (
           <MenuButton

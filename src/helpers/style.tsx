@@ -153,6 +153,10 @@ export const MenuButton = styled.button`
   &:hover {
     background-color: rgba(51, 51, 51, 0.8);
   }
+  &:disabled {
+    background-color: rgba(51, 51, 51, 0.2);
+    color: rgba(57, 143, 106, 0.3) !important;
+  }
 
   margin: 5px;
 `;

@@ -1,7 +1,10 @@
+import { faCommentSlash, faLightbulb, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
+import { MenuButton } from "./helpers/style";
 
-type Message = { text: string; type: "bot" | "user" };
+type Message = { text: string; type: "bot" | "user" | "info" };
 type Sentence = { en: string; de: string; [key: string]: any };
 
 interface ChatProps {
@@ -34,8 +37,8 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel, leve
       setMessages((prevMessages: any) => [
         ...prevMessages,
         ...[
-          { text: `Bot: New Level selected!\n${level}`, type: "bot" },
-          { text: `Bot: ${initialSentences[0].en}`, type: "bot" },
+          { text: `New Level selected!\n${level}`, type: "info" },
+          { text: `${initialSentences[0].en}`, type: "bot" },
         ],
       ]);
     }
@@ -43,14 +46,21 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel, leve
     if (messages.length === 0 && initialSentences.length) {
       setMessages([
         {
-          text: "Welcome to the Language Learning App! Type your translation of the sentence below.",
-          type: "bot",
+          text: "Welcome to the Language Learning App!\n\nType your translation of the sentence below.",
+          type: "info",
         },
-        { text: `Bot: ${initialSentences[0].en}`, type: "bot" },
+        { text: `${initialSentences[0].en}`, type: "bot" },
       ]);
     }
   }, [messages.length, initialSentences, sentences, level]);
 
+  const showAnswer = () => {
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { text: `Show Answer`, type: "user" },
+      { text: `${currentSentence?.de ?? ""}`, type: "bot" },
+    ]);
+  };
   const checkTranslation = () => {
     if (!currentSentence) return;
     const correctTranslation = currentSentence.de;
@@ -72,13 +82,13 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel, leve
       const nextSentenceIndex = sentences.indexOf(currentSentence) + 1;
 
       // Add user input message before the feedback message
-      setMessages((prevMessages) => [...prevMessages, { text: `You: ${userInput}`, type: "user" }]);
+      setMessages((prevMessages) => [...prevMessages, { text: `${userInput}`, type: "user" }]);
 
       if (nextSentenceIndex < sentences.length) {
         const nextSentence = sentences[nextSentenceIndex].en;
         setCurrentSentence(sentences[nextSentenceIndex]);
         feedbackMessage = `Correct! Here's another sentence:\n\n${nextSentence}`;
-        setMessages((prevMessages) => [...prevMessages, { text: `Bot: ${feedbackMessage}`, type: "bot" }]);
+        setMessages((prevMessages) => [...prevMessages, { text: `${feedbackMessage}`, type: "bot" }]);
       } else {
         // Level completed
         feedbackMessage = `Congratulations! You've completed level. You will now move on to the next level.`;
@@ -99,12 +109,9 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel, leve
       // Add feedback message after the user's translation
       setMessages((prevMessages) => [
         ...prevMessages,
-        { text: `You: ${userInput}`, type: "user" },
-        { text: `Bot: ${feedbackMessage}`, type: "bot" },
+        { text: `${userInput}`, type: "user" },
+        { text: `${feedbackMessage}`, type: "bot" },
       ]);
-
-      // Clear user input for the next translation
-      setUserInput("");
     }
   };
 
@@ -124,12 +131,13 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel, leve
         <div className="messages">
           {messages.map((message, index) => (
             <div key={index} className={`chat-bubble ${message.type}`}>
-              <p>
+              {message.type === "bot" && <span style={{ fontWeight: "100" }}>LingoDrill</span>}
+              <p style={{ margin: "unset" }}>
                 {message.text.split("\n").map((line, i) => (
                   <span key={i}>
                     {line}
                     <br />
-                  </span> // Break lines into spans
+                  </span>
                 ))}
               </p>
             </div>
@@ -146,29 +154,22 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel, leve
               onKeyDown={handleKeyDown}
             />
             <div className="chat-button-container">
-              <button
-                className="chat-button"
-                onClick={checkTranslation}
+              <MenuButton onClick={() => hideChat()} style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}>
+                <FontAwesomeIcon icon={faCommentSlash} />
+                <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Hide Chat</div>
+              </MenuButton>
+              <MenuButton onClick={() => showAnswer()} style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}>
+                <FontAwesomeIcon icon={faLightbulb} />
+                <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Hint</div>
+              </MenuButton>
+              <MenuButton
+                onClick={() => checkTranslation()}
                 disabled={!userInput.trim() && messages.length > 0}
+                style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}
               >
-                Translate
-              </button>
-              <button
-                className="chat-button"
-                onClick={() => {
-                  setMessages((prevMessages) => [
-                    ...prevMessages,
-                    { text: `You: Show Answer`, type: "user" },
-                    { text: `Bot: ${currentSentence?.de ?? ""}`, type: "bot" },
-                  ]);
-                }}
-                style={{ marginLeft: "10px" }}
-              >
-                Show Answer
-              </button>
-              <button className="chat-button" onClick={() => hideChat()} style={{ marginLeft: "10px" }}>
-                Hide Chat
-              </button>
+                <FontAwesomeIcon icon={faPaperPlane} />
+                <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Send</div>
+              </MenuButton>
             </div>
           </div>
         )}

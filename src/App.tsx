@@ -45,7 +45,6 @@ const App: React.FC = () => {
 
   const [text, setText] = useState<string>("");
   const [rows, setRows] = useState<Row[]>([]);
-  const [initialSentences, setInitialSentences] = useState<any[]>([]);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [shiftButtonDown, setShiftButtonDown] = useState<boolean>(false);
@@ -101,8 +100,6 @@ const App: React.FC = () => {
 
       setText(text);
       setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
-      console.log("sentences", sentences);
-      setInitialSentences(sentences.map((r: any) => ({ en: r.sentence, de: r.translation })));
     } else if (typeof text === "object") {
       setText("");
       setRows([]);
@@ -156,7 +153,6 @@ const App: React.FC = () => {
 
       const sentences = shuffleSentence ? shuffleRow(rows) : rows;
       setRows(sentences);
-      setInitialSentences(sentences.map((r: any) => ({ en: r.sentence, de: r.translation })));
       dispatch(settingsActions.setHasGapFill(hasGapFill));
     },
     [selectedLevel, selectedSubLevel, dispatch]
@@ -392,12 +388,7 @@ const App: React.FC = () => {
             levelSentences={levelSentences}
           />
           {chatUi ? (
-            <Chat
-              level={selectedSubLevel}
-              initialSentences={initialSentences}
-              hideChat={() => setChatUi(false)}
-              nextLevel={() => nextExercise()}
-            />
+            <Chat initialSentences={rows} hideChat={() => setChatUi(false)} goToNextLevel={() => nextExercise()} />
           ) : (
             <>
               <Table>

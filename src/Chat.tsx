@@ -1,47 +1,47 @@
 import { faCommentSlash, faLightbulb, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
 import "./App.css";
 import { MenuButton } from "./helpers/style";
+import { Row } from "./helpers/types";
+import { RootState } from "./store";
 
 type Message = { text: string; type: "bot" | "user" | "info" };
-type Sentence = { en: string; de: string; [key: string]: any };
 
 interface ChatProps {
   level?: string;
-  initialSentences: Sentence[];
+  initialSentences: Row[];
   hideChat: () => void;
-  nextLevel: () => void;
+  goToNextLevel: () => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel, level }) => {
-  const [currentSentence, setCurrentSentence] = useState<Sentence | null>(null);
+const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel }) => {
+  const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
+  const [currentSentence, setCurrentSentence] = useState<Row | null>(initialSentences[0]);
   const [userInput, setUserInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [checkPunctuation] = useState<boolean>(false);
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
-  const [sentences, setSentences] = useState<Sentence[]>([]);
+  const sentenceRef = useRef(initialSentences);
 
-  // Effect to set sentences based on the selected level
   useEffect(() => {
-    if (sentences.length === 0 || (initialSentences[0] && sentences[0]?.en !== initialSentences[0].en)) {
-      setSentences(initialSentences);
-      setCurrentSentence(initialSentences[0]);
-    }
-    if (
-      sentences.length !== 0 &&
-      initialSentences[0] &&
-      sentences[0]?.en !== initialSentences[0].en &&
-      messages.length > 0
-    ) {
-      setMessages((prevMessages: any) => [
-        ...prevMessages,
-        ...[
-          { text: `New Level selected!\n${level}`, type: "info" },
-          { text: `${initialSentences[0].en}`, type: "bot" },
-        ],
-      ]);
-    }
+    // On Sub Level Change
+    if (sentenceRef.current === initialSentences) return;
+    sentenceRef.current = initialSentences;
+    if (!selectedSubLevel || !initialSentences?.length) return;
+    const firstSentence = initialSentences[0];
+
+    setCurrentSentence(firstSentence);
+
+    setMessages((prev: any) => [
+      ...prev,
+      { text: `New Level selected!\n${selectedSubLevel}`, type: "info" },
+      { text: `${firstSentence.sentence}`, type: "bot" },
+    ]);
+  }, [selectedSubLevel, initialSentences, currentSentence]);
+
+  useEffect(() => {
     // Add welcome message and first sentence if it's the first render
     if (messages.length === 0 && initialSentences.length) {
       setMessages([
@@ -49,21 +49,22 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel, leve
           text: "Welcome to the Language Learning App!\n\nType your translation of the sentence below.",
           type: "info",
         },
-        { text: `${initialSentences[0].en}`, type: "bot" },
+        { text: `${initialSentences[0].sentence}`, type: "bot" },
       ]);
     }
-  }, [messages.length, initialSentences, sentences, level]);
+  }, [messages.length, initialSentences]);
 
   const showAnswer = () => {
     setMessages((prevMessages) => [
       ...prevMessages,
       { text: `Show Answer`, type: "user" },
-      { text: `${currentSentence?.de ?? ""}`, type: "bot" },
+      { text: `${currentSentence?.translation ?? ""}`, type: "bot" },
     ]);
   };
+
   const checkTranslation = () => {
     if (!currentSentence) return;
-    const correctTranslation = currentSentence.de;
+    const correctTranslation = currentSentence.translation;
 
     // Normalize inputs: trim and lower case
     const normalizedUserInput = userInput.trim().toLowerCase();
@@ -79,31 +80,33 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, nextLevel, leve
     // Check if user input matches correct translation (ignoring spaces)
     let feedbackMessage: string;
     if (finalUserInput === finalCorrectTranslation) {
-      const nextSentenceIndex = sentences.indexOf(currentSentence) + 1;
+      const nextSentenceIndex = initialSentences.indexOf(currentSentence) + 1;
 
       // Add user input message before the feedback message
       setMessages((prevMessages) => [...prevMessages, { text: `${userInput}`, type: "user" }]);
 
-      if (nextSentenceIndex < sentences.length) {
-        const nextSentence = sentences[nextSentenceIndex].en;
-        setCurrentSentence(sentences[nextSentenceIndex]);
+      if (nextSentenceIndex < initialSentences.length) {
+        const nextSentence = initialSentences[nextSentenceIndex].sentence;
+        setCurrentSentence(initialSentences[nextSentenceIndex]);
         feedbackMessage = `Correct! Here's another sentence:\n\n${nextSentence}`;
         setMessages((prevMessages) => [...prevMessages, { text: `${feedbackMessage}`, type: "bot" }]);
       } else {
         // Level completed
         feedbackMessage = `Congratulations! You've completed level. You will now move on to the next level.`;
-        nextLevel();
+        goToNextLevel();
       }
       setUserInput("");
     } else {
       const userWords = normalizedUserInput.split(" ");
       const correctWords = finalCorrectTranslation.split(" ");
-      const feedbackWords = correctWords.map((word, index) => (userWords[index] === word ? word : "___")).join(" ");
+      const feedbackWords = correctWords
+        .map((word: string, index: number) => (userWords[index] === word ? word : "___"))
+        .join(" ");
 
       if (userInput.trim() === "") {
         feedbackMessage = "You didn't enter any translation. Try again.";
       } else {
-        feedbackMessage = `Incorrect. You got: ${feedbackWords}.\n\nTry again:\n${currentSentence.en}`;
+        feedbackMessage = `Incorrect. You got: ${feedbackWords}.\n\nTry again:\n${currentSentence.sentence}`;
       }
 
       // Add feedback message after the user's translation

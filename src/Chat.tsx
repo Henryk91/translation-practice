@@ -1,13 +1,12 @@
 import { faCommentSlash, faLightbulb, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState, useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import "./App.css";
 import { MenuButton } from "./helpers/style";
 import { Row } from "./helpers/types";
 import { RootState } from "./store";
-
-type Message = { text: string; type: "bot" | "user" | "info" };
+import { chatActions } from "./store/chat-slice";
 
 interface ChatProps {
   level?: string;
@@ -17,13 +16,15 @@ interface ChatProps {
 }
 
 const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel }) => {
+  const dispatch = useDispatch();
   const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
-  const [currentSentence, setCurrentSentence] = useState<Row | null>(initialSentences[0]);
+  const messages = useSelector((state: RootState) => state.chat.mesages);
+  const currentSentence = useSelector((state: RootState) => state.chat.currentSentence);
   const [userInput, setUserInput] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
   const [checkPunctuation] = useState<boolean>(false);
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
   const sentenceRef = useRef(initialSentences);
+  const sentInitMessage = useRef(false);
 
   useEffect(() => {
     // On Sub Level Change
@@ -32,34 +33,39 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel }
     if (!selectedSubLevel || !initialSentences?.length) return;
     const firstSentence = initialSentences[0];
 
-    setCurrentSentence(firstSentence);
-
-    setMessages((prev: any) => [
-      ...prev,
-      { text: `New Level selected!\n${selectedSubLevel}`, type: "info" },
-      { text: `${firstSentence.sentence}`, type: "bot" },
-    ]);
-  }, [selectedSubLevel, initialSentences, currentSentence]);
+    dispatch(chatActions.setCurrentSentence(firstSentence));
+    dispatch(
+      chatActions.addMessages([
+        { text: `New Level selected!\n${selectedSubLevel}`, type: "info" },
+        { text: `${firstSentence.sentence}`, type: "bot" },
+      ])
+    );
+  }, [selectedSubLevel, initialSentences, currentSentence, dispatch]);
 
   useEffect(() => {
     // Add welcome message and first sentence if it's the first render
-    if (messages.length === 0 && initialSentences.length) {
-      setMessages([
-        {
-          text: "Welcome to the Language Learning App!\n\nType your translation of the sentence below.",
-          type: "info",
-        },
-        { text: `${initialSentences[0].sentence}`, type: "bot" },
-      ]);
+    if (messages.length === 0 && initialSentences.length && !sentInitMessage.current) {
+      sentInitMessage.current = true;
+      dispatch(
+        chatActions.addMessages([
+          {
+            text: "Welcome to the Language Learning App!\n\nType your translation of the sentence below.",
+            type: "info",
+          },
+          { text: `${initialSentences[0].sentence}`, type: "bot" },
+        ])
+      );
+      dispatch(chatActions.setCurrentSentence(initialSentences[0]));
     }
-  }, [messages.length, initialSentences]);
+  }, [messages, initialSentences, dispatch, sentInitMessage]);
 
   const showAnswer = () => {
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { text: `Show Answer`, type: "user" },
-      { text: `${currentSentence?.translation ?? ""}`, type: "bot" },
-    ]);
+    dispatch(
+      chatActions.addMessages([
+        { text: `Show Answer`, type: "user" },
+        { text: `${currentSentence?.translation ?? ""}`, type: "bot" },
+      ])
+    );
   };
 
   const checkTranslation = () => {
@@ -83,13 +89,13 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel }
       const nextSentenceIndex = initialSentences.indexOf(currentSentence) + 1;
 
       // Add user input message before the feedback message
-      setMessages((prevMessages) => [...prevMessages, { text: `${userInput}`, type: "user" }]);
+      dispatch(chatActions.addMessage({ text: `${userInput}`, type: "user" }));
 
       if (nextSentenceIndex < initialSentences.length) {
         const nextSentence = initialSentences[nextSentenceIndex].sentence;
-        setCurrentSentence(initialSentences[nextSentenceIndex]);
+        dispatch(chatActions.setCurrentSentence(initialSentences[nextSentenceIndex]));
         feedbackMessage = `Correct! Here's another sentence:\n\n${nextSentence}`;
-        setMessages((prevMessages) => [...prevMessages, { text: `${feedbackMessage}`, type: "bot" }]);
+        dispatch(chatActions.addMessage({ text: `${feedbackMessage}`, type: "bot" }));
       } else {
         // Level completed
         feedbackMessage = `Congratulations! You've completed level. You will now move on to the next level.`;
@@ -110,11 +116,12 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel }
       }
 
       // Add feedback message after the user's translation
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { text: `${userInput}`, type: "user" },
-        { text: `${feedbackMessage}`, type: "bot" },
-      ]);
+      dispatch(
+        chatActions.addMessages([
+          { text: `${userInput}`, type: "user" },
+          { text: `${feedbackMessage}`, type: "bot" },
+        ])
+      );
     }
   };
 

@@ -4,7 +4,6 @@ import { Row } from "../helpers/types";
 import { faSyncAlt, faPaperPlane, faTrash, faLanguage } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { splitAndShuffle, splitSentences } from "../helpers/utils";
-import { Dict } from "styled-components/dist/types";
 import { translateSentence } from "../helpers/requests";
 import { useSelector } from "react-redux";
 import { RootState } from "../store";
@@ -14,11 +13,11 @@ interface CustomUserInputProps {
   text: string;
   setRows: (value: React.SetStateAction<Row[]>) => void;
   rows: any[];
-  levelSentences: Dict;
 }
 
-const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text, setRows, rows, levelSentences }) => {
+const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text, setRows, rows }) => {
   const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
+  const levelSentences = useSelector((state: RootState) => state.ui.levelSentences);
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
 
   const generateSentences = () => {

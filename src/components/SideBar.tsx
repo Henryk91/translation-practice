@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { logoutUser } from "../helpers/requests";
 import { clearLocalScores, getScoreColorRange, getLevelScoreAverage } from "../helpers/utils";
 import { noSubLevel } from "../data/levelSentences";
-import { Dict } from "styled-components/dist/types";
 import { settingsActions } from "../store/settings-slice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
@@ -13,15 +12,15 @@ import { RootState } from "../store";
 interface SideBarProps {
   handleLevelChange: (level: string) => void;
   handleSubLevelChange: (subLevel: string) => void;
-  levelSentences: Dict;
 }
 
-const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChange, levelSentences }) => {
+const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChange }) => {
   const dispatch = useDispatch();
   const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
   const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
   const subLevels = useSelector((state: RootState) => state.ui.subLevels);
   const levels = useSelector((state: RootState) => state.ui.levels);
+  const levelSentences = useSelector((state: RootState) => state.ui.levelSentences);
   const { showLevels } = useSelector((state: RootState) => state.settings.settings);
 
   const setShowLevels = (val: boolean) => {

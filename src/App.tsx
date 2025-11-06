@@ -8,7 +8,6 @@ import {
   logUse,
   translateSentence,
 } from "./helpers/requests";
-import { Dict } from "styled-components/dist/types";
 import { GlobalStyle, Container, Table, TableRow } from "./helpers/style";
 import { Row } from "./helpers/types";
 import {
@@ -18,6 +17,8 @@ import {
   updateScore,
   checkLogin,
   initScores,
+  parseUrlParams,
+  updateUrl,
 } from "./helpers/utils";
 import SideBar from "./components/SideBar";
 import Header from "./components/Header";
@@ -30,18 +31,22 @@ import { RootState } from "./store";
 import { uiActions } from "./store/ui-slice";
 import { settingsActions } from "./store/settings-slice";
 import Chat from "./Chat";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const App: React.FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
   const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
   const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
   const subLevels = useSelector((state: RootState) => state.ui.subLevels);
   const levels = useSelector((state: RootState) => state.ui.levels);
+  const levelSentences = useSelector((state: RootState) => state.ui.levelSentences);
   const settings = useSelector((state: RootState) => state.settings.settings);
   const { shouldSave, shuffleSentences, redoErrors, mode, useGapFill, chatUi } = settings;
-
-  const [levelSentences, setLevelSentences] = useState<Dict>(initialLevelDict);
   const hasInit = useRef(false);
+  const urlInitialized = useRef(false);
+  const pendingSubLevelFromUrl = useRef<string | null>(null);
 
   const [text, setText] = useState<string>("");
   const [rows, setRows] = useState<Row[]>([]);
@@ -91,6 +96,7 @@ const App: React.FC = () => {
       dispatch(uiActions.setSubLevels(undefined));
       dispatch(uiActions.setSubLevel({ subLevel: undefined }));
       localStorage.removeItem("selectedSubLevel");
+      updateUrl(level, undefined, navigate);
       return;
     }
 
@@ -100,18 +106,21 @@ const App: React.FC = () => {
 
       setText(text);
       setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+      updateUrl(level, undefined, navigate);
     } else if (typeof text === "object") {
       setText("");
       setRows([]);
       dispatch(uiActions.setSubLevels(text));
       dispatch(uiActions.setSubLevel({ subLevel: undefined }));
       localStorage.removeItem("selectedSubLevel");
+      updateUrl(level, undefined, navigate);
     }
   };
 
   const handleSubLevelChange = (subLevel: string): void => {
     dispatch(uiActions.setSubLevel({ subLevel: subLevel }));
     localStorage.setItem("selectedSubLevel", subLevel);
+    if (selectedLevel) updateUrl(selectedLevel, subLevel, navigate);
   };
 
   const shuffleRow = (rows: Row[]): Row[] => {
@@ -127,7 +136,7 @@ const App: React.FC = () => {
     getLevels().then((data) => {
       if (data) {
         const newLevelSentences = { ...initialLevelDict, ...data };
-        setLevelSentences(newLevelSentences);
+        dispatch(uiActions.setLevelSentences(newLevelSentences));
         dispatch(uiActions.setLevels(Object.keys(newLevelSentences)));
       }
     });
@@ -296,38 +305,127 @@ const App: React.FC = () => {
     }
   }, [selectedLevel, selectedSubLevel, shuffleSentences, setSentenceWithTranslation, loadIncorrectSentences]);
 
-  useEffect(() => {
-    const storedLevel = localStorage.getItem("selectedLevel");
-    const storedSubLevel = localStorage.getItem("selectedSubLevel") || null;
-    if (storedLevel) {
-      dispatch(uiActions.setLevel({ level: storedLevel }));
-      if (storedLevel === "Incorrect Sentences") {
-        dispatch(uiActions.setSubLevels(undefined));
-        dispatch(uiActions.setSubLevel({ subLevel: undefined }));
-        localStorage.removeItem("selectedSubLevel");
+  const loadSettingsFromLocalStorage = useCallback(() => {
+    const redoErrors = localStorage.getItem("redoErrors");
+    if (redoErrors !== null) {
+      dispatch(settingsActions.setRedoErrors(JSON.parse(redoErrors)));
+    }
+
+    const useGapFill = localStorage.getItem("useGapFill");
+    if (useGapFill !== null) {
+      dispatch(settingsActions.setUseGapFill(JSON.parse(useGapFill)));
+    }
+  }, [dispatch]);
+
+  const handleIncorrectSentencesLevel = useCallback(
+    (level: string, urlLevel: string | undefined, urlSubLevel: string | undefined) => {
+      dispatch(uiActions.setSubLevels(undefined));
+      dispatch(uiActions.setSubLevel({ subLevel: undefined }));
+      localStorage.removeItem("selectedSubLevel");
+      if (!urlLevel || urlSubLevel) updateUrl(level, undefined, navigate);
+    },
+    [dispatch, navigate]
+  );
+
+  const handleLevelWithSubLevels = useCallback(
+    (
+      level: string,
+      subLevelsArray: string[],
+      subLevelToUse: string | null,
+      urlLevel: string | undefined,
+      urlSubLevel: string | undefined
+    ) => {
+      dispatch(uiActions.setSubLevels(subLevelsArray));
+      dispatch(settingsActions.setShowLevels(false));
+
+      if (!subLevelToUse) {
+        // No sublevel specified, just set the level
+        if (level && !urlLevel) updateUrl(level, undefined, navigate);
         return;
       }
-      const text = levelSentences[storedLevel];
-      if (typeof text === "object") {
-        dispatch(uiActions.setSubLevels(text));
-        dispatch(settingsActions.setShowLevels(false));
-      }
 
-      const redoErrors = localStorage.getItem("redoErrors");
-      if (redoErrors !== null) {
-        dispatch(settingsActions.setRedoErrors(JSON.parse(redoErrors)));
-      }
+      // Validate and set sublevel from URL
+      if (subLevelsArray.includes(subLevelToUse)) {
+        pendingSubLevelFromUrl.current = subLevelToUse;
+        dispatch(uiActions.setSubLevel({ subLevel: subLevelToUse }));
+        localStorage.setItem("selectedSubLevel", subLevelToUse);
 
-      const useGapFill = localStorage.getItem("useGapFill");
-      if (useGapFill !== null) {
-        dispatch(settingsActions.setUseGapFill(JSON.parse(useGapFill)));
+        const urlHasChanged = !urlLevel || !urlSubLevel || urlLevel !== level || urlSubLevel !== subLevelToUse;
+        if (urlHasChanged) updateUrl(level, subLevelToUse, navigate);
+      } else {
+        // Invalid sublevel in URL, remove it
+        console.warn(`Sublevel "${subLevelToUse}" not found in level "${level}". Available sublevels:`, subLevelsArray);
+        if (urlSubLevel) updateUrl(level, undefined, navigate);
       }
-      if (typeof text === "string") setText(text);
+    },
+    [dispatch, navigate]
+  );
+
+  const handleLevelWithStringContent = useCallback(
+    (level: string, content: string, urlLevel: string | undefined) => {
+      setText(content);
+      if (level && !urlLevel) updateUrl(level, undefined, navigate);
+    },
+    [navigate]
+  );
+
+  // Read from URL on initial load
+  useEffect(() => {
+    if (urlInitialized.current || !levels.length || Object.keys(levelSentences).length === 0) return;
+
+    const { level: urlLevel, subLevel: urlSubLevel } = parseUrlParams(location.pathname);
+    const levelFromStorage = localStorage.getItem("selectedLevel");
+    const subLevelFromStorage = localStorage.getItem("selectedSubLevel");
+
+    // Prefer URL params over localStorage
+    const levelToUse = urlLevel || levelFromStorage;
+    const subLevelToUse = urlSubLevel || subLevelFromStorage || null;
+
+    if (!levelToUse || !levels.includes(levelToUse)) return;
+
+    urlInitialized.current = true;
+    dispatch(uiActions.setLevel({ level: levelToUse }));
+    localStorage.setItem("selectedLevel", levelToUse);
+
+    // Handle special case: Incorrect Sentences
+    if (levelToUse === "Incorrect Sentences") {
+      handleIncorrectSentencesLevel(levelToUse, urlLevel, urlSubLevel);
+      loadSettingsFromLocalStorage();
+      return;
     }
-    if (storedSubLevel) {
-      dispatch(uiActions.setSubLevel({ subLevel: storedSubLevel }));
+
+    // Handle level content (either object with sublevels or string)
+    const levelContent = levelSentences[levelToUse];
+    if (typeof levelContent === "object" && Array.isArray(levelContent)) {
+      handleLevelWithSubLevels(levelToUse, levelContent, subLevelToUse, urlLevel, urlSubLevel);
+    } else if (typeof levelContent === "string") {
+      handleLevelWithStringContent(levelToUse, levelContent, urlLevel);
     }
-  }, [levels, levelSentences, dispatch]);
+
+    loadSettingsFromLocalStorage();
+  }, [
+    levels,
+    levelSentences,
+    dispatch,
+    location.pathname,
+    navigate,
+    handleIncorrectSentencesLevel,
+    handleLevelWithSubLevels,
+    handleLevelWithStringContent,
+    loadSettingsFromLocalStorage,
+  ]);
+
+  // Set sublevel from URL after sublevels are loaded
+  useEffect(() => {
+    if (pendingSubLevelFromUrl.current && subLevels && subLevels.length > 0) {
+      const subLevelToSet = pendingSubLevelFromUrl.current;
+      if (subLevels.includes(subLevelToSet) && selectedSubLevel !== subLevelToSet) {
+        dispatch(uiActions.setSubLevel({ subLevel: subLevelToSet }));
+        localStorage.setItem("selectedSubLevel", subLevelToSet);
+      }
+      pendingSubLevelFromUrl.current = null;
+    }
+  }, [subLevels, selectedSubLevel, dispatch]);
 
   useEffect(() => {
     if (hasInit.current) return; // skip second call in development
@@ -373,20 +471,10 @@ const App: React.FC = () => {
       <GlobalStyle />
       <section style={{ display: "flex" }}>
         <input type="checkbox" id="toggle" hidden></input>
-        <SideBar
-          levelSentences={levelSentences}
-          handleLevelChange={handleLevelChange}
-          handleSubLevelChange={handleSubLevelChange}
-        />
+        <SideBar handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
         <Container className="main-page">
           <Header handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
-          <CustomUserInput
-            setText={setText}
-            text={text}
-            setRows={setRows}
-            rows={rows}
-            levelSentences={levelSentences}
-          />
+          <CustomUserInput setText={setText} text={text} setRows={setRows} rows={rows} />
           {chatUi ? (
             <Chat initialSentences={rows} hideChat={() => setChatUi(false)} goToNextLevel={() => nextExercise()} />
           ) : (

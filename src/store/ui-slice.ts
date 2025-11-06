@@ -1,4 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { Dict } from "styled-components/dist/types";
+import { initialLevelDict } from "../data/levelSentences";
 
 interface Notification {
   message: any;
@@ -12,6 +14,7 @@ interface UiState {
   subLevelSelected?: string;
   levels: string[];
   subLevels?: string[];
+  levelSentences: Dict;
 }
 
 const initialState: UiState = {
@@ -19,6 +22,7 @@ const initialState: UiState = {
   levelSelected: undefined,
   subLevelSelected: undefined,
   levels: [],
+  levelSentences: initialLevelDict,
 };
 
 const uiSlice = createSlice({
@@ -43,6 +47,9 @@ const uiSlice = createSlice({
     },
     setLevels(state, actions) {
       state.levels = actions.payload;
+    },
+    setLevelSentences(state, actions) {
+      state.levelSentences = actions.payload;
     },
   },
 });

@@ -197,6 +197,13 @@ button:disabled {
   #toggle:checked ~ .hidden-content {
     transform: translateX(0);
   }
+
+  /* Hide feedback button when menu is open */
+  #toggle:checked ~ * [data-feedback-button] {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
 }
 
 .sidebar-menu {

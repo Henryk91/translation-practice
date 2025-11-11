@@ -26,6 +26,7 @@ import TranslationArea from "./components/TranslationArea";
 import CustomUserInput from "./components/CustomUserInput";
 import SettingsRow, { QuickLevelChange } from "./components/SettingsRow";
 import PageHeader from "./components/PageHeader";
+import FeedbackButton from "./components/FeedbackButton";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./store";
 import { uiActions } from "./store/ui-slice";
@@ -469,6 +470,7 @@ const App: React.FC = () => {
   return (
     <>
       <GlobalStyle />
+      <FeedbackButton />
       <section style={{ display: "flex" }}>
         <input type="checkbox" id="toggle" hidden></input>
         <SideBar handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
@@ -497,6 +499,8 @@ const App: React.FC = () => {
                     />
                   </TableRow>
                 ))}
+                <br />
+                <br />
                 <br />
               </Table>
               <SettingsRow />

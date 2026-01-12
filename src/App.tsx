@@ -590,7 +590,7 @@ const App: React.FC = () => {
         <SideBar handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
         <Container className="main-page">
           <Header handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
-          <StickyProgressBar rows={allRows} />
+          <StickyProgressBar rows={allRows} subLevel={selectedSubLevel} />
           <CustomUserInput
             setText={setText}
             text={text}

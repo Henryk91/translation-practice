@@ -5,12 +5,34 @@ import { Row } from "../helpers/types";
 const StickyWrapper = styled.div`
   position: sticky;
   top: 0;
-  z-index: 900;
+  z-index: 50;
   width: 100%;
   background-color: rgb(10, 12, 19);
   padding: 5px 0 0 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+`;
+
+const CenteredTitle = styled.div`
+  color: rgba(49, 196, 141, 1);
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+  width: fit-content;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  padding: 2px 10px;
+  border: 1px solid rgba(49, 196, 141, 0.3);
+  border-radius: 20px;
+  margin-bottom: 2px;
+  background: rgba(49, 196, 141, 0.05);
+
+  @media (max-width: 600px) {
+    font-size: 9px;
+    padding: 1px 8px;
+  }
 `;
 
 const BarWrapper = styled.div`
@@ -50,9 +72,10 @@ const PercentageText = styled.span`
 
 interface StickyProgressBarProps {
   rows: Row[];
+  subLevel?: string;
 }
 
-const StickyProgressBar: React.FC<StickyProgressBarProps> = ({ rows }) => {
+const StickyProgressBar: React.FC<StickyProgressBarProps> = ({ rows, subLevel }) => {
   if (!rows || rows.length === 0) return null;
 
   const getStatus = (row: Row) => {
@@ -66,6 +89,7 @@ const StickyProgressBar: React.FC<StickyProgressBarProps> = ({ rows }) => {
 
   return (
     <StickyWrapper>
+      {subLevel && <CenteredTitle>{subLevel}</CenteredTitle>}
       <BarWrapper>
         <BlocksContainer>
           {rows.map((row, index) => (

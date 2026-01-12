@@ -187,6 +187,17 @@ export const TableRow = styled.div`
   padding-bottom: 3px;
 `;
 
+export const StickyHeaderRow = styled(TableRow)`
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: rgba(10, 12, 19, 1);
+  padding-bottom: 15px;
+  @media (min-width: 600px) {
+    margin: 0px 15px 15px 15px;
+  }
+`;
+
 export const TableCell = styled.div`
   vertical-align: middle;
   flex: 1;
@@ -309,4 +320,20 @@ export const SelectedHeader = styled.div`
   @media (max-width: 600px) {
     width: 90%;
   }
+`;
+
+export const ProgressBarContainer = styled.div`
+  width: 100%;
+  background-color: rgb(32, 34, 44);
+  border-radius: 8px;
+  height: 10px;
+  margin-top: 15px;
+  overflow: hidden;
+`;
+
+export const ProgressBarFill = styled.div<{ $width: number }>`
+  height: 100%;
+  background-color: rgba(49, 196, 141, 1);
+  transition: width 0.3s ease-in-out;
+  width: ${(props) => props.$width}%;
 `;

@@ -26,6 +26,7 @@ import TranslationArea from "./components/TranslationArea";
 import CustomUserInput from "./components/CustomUserInput";
 import SettingsRow, { QuickLevelChange } from "./components/SettingsRow";
 import PageHeader from "./components/PageHeader";
+import StickyProgressBar from "./components/StickyProgressBar";
 import FeedbackButton from "./components/FeedbackButton";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./store";
@@ -476,6 +477,7 @@ const App: React.FC = () => {
         <SideBar handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
         <Container className="main-page">
           <Header handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
+          {!chatUi && <StickyProgressBar completed={rows.filter((r) => r.feedback).length} total={rows.length} />}
           <CustomUserInput setText={setText} text={text} setRows={setRows} rows={rows} />
           {chatUi ? (
             <Chat initialSentences={rows} hideChat={() => setChatUi(false)} goToNextLevel={() => nextExercise()} />

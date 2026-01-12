@@ -11,11 +11,12 @@ import { RootState } from "../store";
 interface CustomUserInputProps {
   setText: (text: string) => void;
   text: string;
-  setRows: (value: React.SetStateAction<Row[]>) => void;
-  rows: any[];
+  setAllRows: (value: React.SetStateAction<Row[]>) => void;
+  rows: Row[];
+  setCurrentBatchIndex: (index: number) => void;
 }
 
-const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text, setRows, rows }) => {
+const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text, setAllRows, rows, setCurrentBatchIndex }) => {
   const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
   const levelSentences = useSelector((state: RootState) => state.ui.levelSentences);
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
@@ -27,12 +28,20 @@ const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text, setRow
       setText(textToSplit);
     }
     const sentences = selectedLevel === "Own Sentences" ? splitSentences(textToSplit) : splitAndShuffle(textToSplit);
-    return sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null }));
+    return sentences.map((sentence, idx) => ({
+      sentence,
+      userInput: "",
+      translation: "",
+      feedback: null,
+      id: `custom-${idx}-${Date.now()}`,
+      batchId: Math.floor(idx / 10), // Using 10 as BATCH_SIZE
+    }));
   };
 
   const handleTextSubmit = (): void => {
     const sentences = generateSentences();
-    setRows(sentences);
+    setAllRows(sentences);
+    setCurrentBatchIndex(0);
   };
 
   const initTranslatedSentences = async () => {
@@ -45,13 +54,14 @@ const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text, setRow
       row.translation = translatedSentences[i];
       return row;
     });
-    setRows(updated);
+    setAllRows(updated);
     setLoadingTranslation(false);
   };
 
   const handleTextClear = (): void => {
     setText("");
-    setRows([]);
+    setAllRows([]);
+    setCurrentBatchIndex(0);
   };
 
   if (selectedLevel !== "Own Sentences") return <></>;

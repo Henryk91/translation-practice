@@ -13,6 +13,8 @@ export interface Row {
   isCorrect?: boolean;
   aiCorrect?: boolean;
   isRetry?: boolean;
+  batchId?: number;
+  id: string;
 }
 
 export interface IncorrectRow extends Row {

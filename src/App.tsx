@@ -50,7 +50,10 @@ const App: React.FC = () => {
   const urlInitialized = useRef(false);
   const pendingSubLevelFromUrl = useRef<string | null>(null);
 
+  const BATCH_SIZE = 10;
   const [text, setText] = useState<string>("");
+  const [allRows, setAllRows] = useState<Row[]>([]);
+  const [currentBatchIndex, setCurrentBatchIndex] = useState<number>(0);
   const [rows, setRows] = useState<Row[]>([]);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -63,7 +66,9 @@ const App: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number): void => {
     const value = e.target.value;
+    const rowId = rows[index].id;
     setRows((current) => current.map((r, idx) => (idx === index ? { ...r, userInput: value } : r)));
+    setAllRows((current) => current.map((r) => (r.id === rowId ? { ...r, userInput: value } : r)));
   };
 
   const loadIncorrectSentences = useCallback(() => {
@@ -74,20 +79,23 @@ const App: React.FC = () => {
       const savedRows = JSON.parse(alreadySaved);
       const shuffle = shuffleSentences ? shuffleRow(savedRows) : savedRows;
       const items = shuffle.length > incorrectSentenceCount ? shuffle.slice(0, incorrectSentenceCount) : shuffle;
-      const newRows = items.map((row: Row) => {
+      const newRows = items.map((row: Row, idx: number) => {
         delete row.isCorrect;
         delete row.aiCorrect;
         delete row.isRetry;
         return {
           ...row,
+          id: `incorrect-${idx}-${Date.now()}`,
+          batchId: Math.floor(idx / BATCH_SIZE),
           feedback: null,
           userInput: "",
           isLoading: undefined,
         };
       });
-      setRows(newRows);
+      setAllRows(newRows);
+      setCurrentBatchIndex(0);
     }
-  }, [shuffleSentences]);
+  }, [shuffleSentences, BATCH_SIZE]);
 
   const handleLevelChange = (level: string): void => {
     const text = level ? levelSentences[level] : "";
@@ -107,7 +115,16 @@ const App: React.FC = () => {
       dispatch(uiActions.setSubLevels(undefined));
 
       setText(text);
-      setRows(sentences.map((sentence) => ({ sentence, userInput: "", translation: "", feedback: null })));
+      const sentencesWithIds = sentences.map((sentence, idx) => ({
+        sentence,
+        userInput: "",
+        translation: "",
+        feedback: null,
+        id: `level-${idx}-${Date.now()}`,
+        batchId: Math.floor(idx / BATCH_SIZE),
+      }));
+      setAllRows(sentencesWithIds);
+      setCurrentBatchIndex(0);
       updateUrl(level, undefined, navigate);
     } else if (typeof text === "object") {
       setText("");
@@ -151,7 +168,7 @@ const App: React.FC = () => {
 
       const hasGapFill =
         translatedSentences[0].translation.includes("{") && translatedSentences[0].translation.includes("}");
-      const rows = translatedSentences.map((item: Row) => {
+      const rowsWithMetadata = translatedSentences.map((item: Row, idx: number) => {
         if (hasGapFill) {
           item.gapTranslation = item.translation;
           item.translation = item.translation.replaceAll("{", "").replaceAll("}", "");
@@ -162,18 +179,28 @@ const App: React.FC = () => {
         return item;
       });
 
-      const sentences = shuffleSentence ? shuffleRow(rows) : rows;
-      setRows(sentences);
+      const sentences = shuffleSentence ? shuffleRow(rowsWithMetadata) : rowsWithMetadata;
+      const finalSentences = sentences.map((row: Row, idx: number) => ({
+        ...row,
+        id: `sublevel-${idx}-${Date.now()}`,
+        batchId: Math.floor(idx / BATCH_SIZE),
+      }));
+
+      setAllRows(finalSentences);
+      setCurrentBatchIndex(0);
       dispatch(settingsActions.setHasGapFill(hasGapFill));
     },
     [selectedLevel, selectedSubLevel, dispatch]
   );
 
   const redoSentences = (rows: Row[]) => {
-    const filteredRows = rows.filter((row: Row) => !row.isRetry);
-    const cleanRows = filteredRows.map((row: Row) => {
+    const filteredRows = allRows.filter((row: Row) => !row.isRetry);
+    const cleanRows = filteredRows.map((row: Row, idx: number) => {
+      const { id, batchId, ...rest } = row;
       return {
-        ...row,
+        ...rest,
+        id: `redo-${idx}-${Date.now()}`,
+        batchId: Math.floor(idx / BATCH_SIZE),
         feedback: null,
         userInput: "",
         isLoading: undefined,
@@ -182,18 +209,43 @@ const App: React.FC = () => {
       };
     });
     const sentences = shuffleSentences ? shuffleRow(cleanRows) : cleanRows;
-    setRows(sentences);
+    setAllRows(sentences);
+    setCurrentBatchIndex(0);
   };
 
   const setRetryRows = (newRows: Row[], wasFalse: boolean, index: number, row: Row, updatedRow: Row) => {
     if (redoErrors && !row.isRetry) {
+      const globalIndex = allRows.findIndex((r) => r.id === row.id);
+      if (globalIndex === -1) return;
+
       if (wasFalse && (updatedRow.isCorrect || row.aiCorrect) && rows?.[index + 1]?.isRetry) {
+        // Remove retry rows from current batch
         newRows.splice(index + 1, 3);
+        // Remove retry rows from allRows
+        setAllRows((current) => {
+          const updated = [...current];
+          updated.splice(globalIndex + 1, 3);
+          return updated;
+        });
       } else if (!row.isRetry && updatedRow.isCorrect === false && !rows?.[index + 1]?.isRetry) {
-        const retryRow = { ...updatedRow, userInput: "", feedback: null, isRetry: true };
-        delete retryRow.aiCorrect;
-        delete retryRow.isCorrect;
-        newRows.splice(index + 1, 0, retryRow, retryRow, retryRow);
+        // Add retry rows to current batch
+        const retryRowTemplate = { ...updatedRow, userInput: "", feedback: null, isRetry: true, batchId: row.batchId };
+        delete (retryRowTemplate as any).aiCorrect;
+        delete (retryRowTemplate as any).isCorrect;
+
+        const retryRows = [
+          { ...retryRowTemplate, id: `${row.id}-retry-1` },
+          { ...retryRowTemplate, id: `${row.id}-retry-2` },
+          { ...retryRowTemplate, id: `${row.id}-retry-3` },
+        ];
+
+        newRows.splice(index + 1, 0, ...retryRows);
+        // Add retry rows to allRows
+        setAllRows((current) => {
+          const updated = [...current];
+          updated.splice(globalIndex + 1, 0, ...retryRows);
+          return updated;
+        });
       }
     }
   };
@@ -222,10 +274,15 @@ const App: React.FC = () => {
     );
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
 
+    // Update allRows with the main change first
+    setAllRows((current) => current.map((r) => (r.id === row.id ? updatedRow : r)));
+
+    // Then handle retry rows (which updates both newRows and allRows)
     setRetryRows(newRows, wasFalse, index, row, updatedRow);
 
     setRows(newRows);
-    if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
+
+    if (shouldSave) updateScore(allRows, selectedLevel, selectedSubLevel);
     if (isTranslationCorrect) {
       focusNextInput(lastInput);
     } else {
@@ -253,12 +310,37 @@ const App: React.FC = () => {
     const updatedRow = updateRowFeedback(mode, row, translated, row.aiCorrect);
     const newRows = rows.map((r, i) => (i === index ? updatedRow : r));
 
+    // Update allRows with the main change first
+    setAllRows((current) => current.map((r) => (r.id === row.id ? updatedRow : r)));
+
+    // Then handle retry rows (which updates both newRows and allRows)
     setRetryRows(newRows, wasFalse, index, row, updatedRow);
-    if (shouldSave) updateScore(newRows, selectedLevel, selectedSubLevel);
+
+    if (shouldSave) updateScore(allRows, selectedLevel, selectedSubLevel);
     setRows(newRows);
 
-    const isComplete = newRows.every((row) => row.feedback);
-    dispatch(settingsActions.setIsComplete(isComplete));
+    const currentBatchComplete = newRows.every((row) => row.feedback);
+    dispatch(settingsActions.setIsComplete(currentBatchComplete));
+  };
+
+  const handleNextBatch = (previous?: boolean) => {
+    if (previous) {
+      // For backward navigation, always go to previous exercise
+      nextExercise(true);
+      return;
+    }
+
+    const maxBatchId = allRows.length > 0 ? Math.max(...allRows.map((r) => r.batchId || 0)) : 0;
+    const hasMoreBatches = currentBatchIndex < maxBatchId;
+
+    if (hasMoreBatches) {
+      // Move to next batch
+      setCurrentBatchIndex(currentBatchIndex + 1);
+      dispatch(settingsActions.setIsComplete(false));
+    } else {
+      // All batches complete, go to next exercise
+      nextExercise();
+    }
   };
 
   const nextExercise = (previous?: boolean) => {
@@ -290,6 +372,7 @@ const App: React.FC = () => {
   const clickSentenceAgain = (rows: Row[]) => {
     dispatch(settingsActions.setRedoErrors(false));
     dispatch(settingsActions.setIsComplete(false));
+    setCurrentBatchIndex(0);
     if (noSubLevel.includes(selectedLevel as string)) {
       loadIncorrectSentences();
       return;
@@ -306,6 +389,16 @@ const App: React.FC = () => {
       setSentenceWithTranslation(shuffleSentences);
     }
   }, [selectedLevel, selectedSubLevel, shuffleSentences, setSentenceWithTranslation, loadIncorrectSentences]);
+
+  // Sync current batch with rows
+  useEffect(() => {
+    if (allRows.length > 0) {
+      const currentBatch = allRows.filter((r) => r.batchId === currentBatchIndex);
+      setRows(currentBatch);
+    } else {
+      setRows([]);
+    }
+  }, [allRows, currentBatchIndex]);
 
   const loadSettingsFromLocalStorage = useCallback(() => {
     const redoErrors = localStorage.getItem("redoErrors");
@@ -477,8 +570,14 @@ const App: React.FC = () => {
         <SideBar handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
         <Container className="main-page">
           <Header handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
-          {!chatUi && <StickyProgressBar rows={rows} />}
-          <CustomUserInput setText={setText} text={text} setRows={setRows} rows={rows} />
+          {!chatUi && <StickyProgressBar rows={allRows} />}
+          <CustomUserInput
+            setText={setText}
+            text={text}
+            setAllRows={setAllRows}
+            rows={rows}
+            setCurrentBatchIndex={setCurrentBatchIndex}
+          />
           {chatUi ? (
             <Chat initialSentences={rows} hideChat={() => setChatUi(false)} goToNextLevel={() => nextExercise()} />
           ) : (
@@ -486,7 +585,7 @@ const App: React.FC = () => {
               <Table>
                 <PageHeader sentenceCount={rows.length} />
                 {rows.map((row, idx) => (
-                  <TableRow key={idx}>
+                  <TableRow key={row.id}>
                     <TranslationArea
                       {...{
                         idx,
@@ -506,7 +605,13 @@ const App: React.FC = () => {
                 <br />
               </Table>
               <SettingsRow />
-              <QuickLevelChange nextExercise={nextExercise} clickSentenceAgain={() => clickSentenceAgain(rows)} />
+              <QuickLevelChange
+                nextExercise={handleNextBatch}
+                clickSentenceAgain={() => clickSentenceAgain(rows)}
+                hasMoreBatches={
+                  currentBatchIndex < (allRows.length > 0 ? Math.max(...allRows.map((r: Row) => r.batchId || 0)) : 0)
+                }
+              />
             </>
           )}
         </Container>

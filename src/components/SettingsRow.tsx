@@ -142,9 +142,14 @@ export const RedoThreeIcon: React.FC<{ count: number }> = ({ count }) => {
 interface QuickLevelChangeProps {
   nextExercise: (previous?: boolean) => void;
   clickSentenceAgain: () => void;
+  hasMoreBatches: boolean;
 }
 
-export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({ nextExercise, clickSentenceAgain }) => {
+export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({
+  nextExercise,
+  clickSentenceAgain,
+  hasMoreBatches,
+}) => {
   const subLevels = useSelector((state: RootState) => state.ui.subLevels);
   const settings = useSelector((state: RootState) => state.settings.settings);
   const { shuffleSentences, isComplete } = settings;
@@ -161,6 +166,8 @@ export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({ nextExercise
 
   if (!isComplete) return <></>;
   const score = subLevelScoreText();
+  const nextButtonLabel = hasMoreBatches ? "Next Batch" : "Next Exercise";
+
   return (
     <div className="grow-box">
       {score && <div style={{ fontSize: "25px", paddingBottom: "5px" }}>Score: {score}</div>}
@@ -190,7 +197,7 @@ export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({ nextExercise
               nextExercise();
             }}
           >
-            Next Exercise{" "}
+            {nextButtonLabel}{" "}
             <FontAwesomeIcon style={{ color: "rgba(49, 196, 141, 1)", fontSize: "25px" }} icon={faArrowRight} />
           </MenuButton>
         </div>

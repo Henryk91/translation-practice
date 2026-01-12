@@ -300,15 +300,18 @@ export const LevelSelect = styled.div`
   margin-bottom: 5px;
 `;
 
-export const SubLevelOptionItem = styled.div`
+export const SubLevelOptionItem = styled.div<{ $active?: boolean }>`
   margin-top: 5px;
   padding: 8px;
-  // min-width: 300px;
-  // border-bottom: 1px solid #333;
-  border-radius: 5px;
-  background: rgba(20, 23, 34, 255);
+  border-radius: 8px;
+  background: ${(props) => (props.$active ? "rgba(49, 196, 141, 0.15)" : "rgba(20, 23, 34, 255)")};
+  border: 1px solid ${(props) => (props.$active ? "rgba(49, 196, 141, 0.4)" : "rgba(255, 255, 255, 0.05)")};
+  transition: all 0.2s ease;
+  cursor: pointer;
+
   &:hover {
-    background: rgba(20, 23, 34, 0.4);
+    background: ${(props) => (props.$active ? "rgba(49, 196, 141, 0.2)" : "rgba(255, 255, 255, 0.05)")};
+    border-color: ${(props) => (props.$active ? "rgba(49, 196, 141, 0.6)" : "rgba(255, 255, 255, 0.1)")};
   }
   justify-content: space-between;
   display: flex;

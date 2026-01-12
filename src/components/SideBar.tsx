@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../helpers/style";
 import Tooltip from "./Tooltip";
-import { faBars, faDoorOpen, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faChevronLeft, faChevronRight, faDoorOpen, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { logoutUser } from "../helpers/requests";
 import { clearLocalScores, getScoreColorRange, getLevelScoreAverage } from "../helpers/utils";
@@ -120,25 +120,43 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
             </span>
           </div>
         </div>
-        <Tooltip text="View all available main levels">
-          <MenuButton
-            className={showLevels ? "level-button-active" : "level-button-inactive"}
-            style={{ fontSize: "15px" }}
-            onClick={() => setShowLevels(true)}
+        {showLevels ? (
+          <div style={{ padding: "15px 10px", textAlign: "center", width: "100%", borderTop: "1px solid #333" }}>
+            <h3 style={{ margin: 0, color: "rgba(49, 196, 141, 1)", fontSize: "18px" }}>Select Your Level</h3>
+            <p style={{ margin: "5px 0 0", fontSize: "13px", color: "#888" }}>Step 1: Choose a language proficiency</p>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              width: "100%",
+              padding: "15px 10px",
+              borderTop: "1px solid #333",
+            }}
           >
-            Select Level
-          </MenuButton>
-        </Tooltip>
-        <Tooltip text="View the specific tasks within your selected level">
-          <MenuButton
-            className={!showLevels ? "level-button-active" : "level-button-inactive"}
-            disabled={!!selectedLevel && noSubLevel.includes(selectedLevel)}
-            style={{ fontSize: "15px" }}
-            onClick={() => setShowLevels(false)}
-          >
-            Select Sub Level
-          </MenuButton>
-        </Tooltip>
+            <Tooltip text="Back to level selection">
+              <MenuButton
+                onClick={() => setShowLevels(true)}
+                style={{
+                  fontSize: "14px",
+                  padding: "8px 12px",
+                  marginRight: "15px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <FontAwesomeIcon icon={faChevronLeft} />
+                Back
+              </MenuButton>
+            </Tooltip>
+            <div style={{ textAlign: "left" }}>
+              <h3 style={{ margin: 0, color: "rgba(49, 196, 141, 1)", fontSize: "16px" }}>{selectedLevel}</h3>
+              <p style={{ margin: 0, fontSize: "13px", color: "#888" }}>Step 2: Select a sub-level</p>
+            </div>
+          </div>
+        )}
       </LevelSelect>
       <div
         style={{
@@ -150,17 +168,76 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
       >
         {showLevels && (
           <>
-            {levels.map((lvl) => (
-              <SubLevelOptionItem
-                onClick={() => {
-                  handleMenuLevelClick(lvl);
-                }}
-                key={lvl}
-                style={{ color: selectedLevel === lvl ? "rgba(49, 196, 141, 1)" : "" }}
-              >
-                <span style={{ textAlign: "left" }}>{lvl}</span> <span>{levelInfo(lvl)}</span>
-              </SubLevelOptionItem>
-            ))}
+            <div
+              style={{
+                padding: "10px 10px 5px",
+                textAlign: "left",
+                fontSize: "12px",
+                color: "#888",
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+              }}
+            >
+              Language Proficiency
+            </div>
+            {levels
+              .filter((lvl) => !noSubLevel.includes(lvl))
+              .map((lvl) => (
+                <SubLevelOptionItem
+                  onClick={() => {
+                    handleMenuLevelClick(lvl);
+                  }}
+                  key={lvl}
+                  $active={selectedLevel === lvl}
+                  style={{ color: selectedLevel === lvl ? "rgba(49, 196, 141, 1)" : "" }}
+                >
+                  <div
+                    style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}
+                  >
+                    <span style={{ textAlign: "left" }}>{lvl}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span>{levelInfo(lvl)}</span>
+                      <FontAwesomeIcon icon={faChevronRight} style={{ fontSize: "12px", opacity: 0.5 }} />
+                    </div>
+                  </div>
+                </SubLevelOptionItem>
+              ))}
+
+            <div
+              style={{
+                padding: "20px 10px 5px",
+                textAlign: "left",
+                fontSize: "12px",
+                color: "#888",
+                fontWeight: "bold",
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+              }}
+            >
+              Personal Practice
+            </div>
+            {levels
+              .filter((lvl) => noSubLevel.includes(lvl))
+              .map((lvl) => (
+                <SubLevelOptionItem
+                  onClick={() => {
+                    handleMenuLevelClick(lvl);
+                  }}
+                  key={lvl}
+                  $active={selectedLevel === lvl}
+                  style={{ color: selectedLevel === lvl ? "rgba(49, 196, 141, 1)" : "" }}
+                >
+                  <div
+                    style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}
+                  >
+                    <span style={{ textAlign: "left" }}>{lvl}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <span>{levelInfo(lvl)}</span>
+                    </div>
+                  </div>
+                </SubLevelOptionItem>
+              ))}
           </>
         )}
         {subLevels && !showLevels && (
@@ -169,11 +246,17 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
               <label key={lvl} htmlFor="toggle" style={{ textAlign: "left" }}>
                 <SubLevelOptionItem
                   onClick={() => handleSubLevelChange(lvl as any)}
+                  $active={selectedSubLevel === lvl}
                   style={{
                     color: selectedSubLevel === lvl ? "rgba(49, 196, 141, 1)" : "",
                   }}
                 >
-                  <span style={{ textAlign: "left" }}>{lvl}</span> <span>{subLevelScoreText(lvl)}</span>
+                  <div
+                    style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}
+                  >
+                    <span style={{ textAlign: "left" }}>{lvl}</span>
+                    <span>{subLevelScoreText(lvl)}</span>
+                  </div>
                 </SubLevelOptionItem>
               </label>
             ))}

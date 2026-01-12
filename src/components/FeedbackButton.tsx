@@ -13,12 +13,11 @@ const FeedbackButtonWrapper = styled.div<{ $isMenuOpen: boolean; $isChatMode: bo
   right: 20px;
   z-index: 999;
   @media (max-width: 600px) {
-    bottom: ${(props) => (props.$isChatMode ? "15px" : "80px")};
-    left: ${(props) => (props.$isChatMode ? "auto" : "15px")};
-    right: ${(props) => (props.$isChatMode ? "15px" : "auto")};
+    bottom: 80px;
+    left: 15px;
     transition: opacity 0.3s ease, visibility 0.3s ease;
     opacity: ${(props) => (props.$isMenuOpen ? 0 : 1)};
-    visibility: ${(props) => (props.$isMenuOpen ? "hidden" : "visible")};
+    visibility: ${(props) => (props.$isMenuOpen || props.$isChatMode ? "hidden" : "visible")};
     pointer-events: ${(props) => (props.$isMenuOpen ? "none" : "auto")};
   }
 `;

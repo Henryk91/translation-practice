@@ -164,10 +164,6 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel }
               onKeyDown={handleKeyDown}
             />
             <div className="chat-button-container">
-              <MenuButton onClick={() => hideChat()} style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}>
-                <FontAwesomeIcon icon={faCommentSlash} />
-                <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Hide Chat</div>
-              </MenuButton>
               <MenuButton onClick={() => showAnswer()} style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}>
                 <FontAwesomeIcon icon={faLightbulb} />
                 <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Hint</div>
@@ -179,6 +175,10 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel }
               >
                 <FontAwesomeIcon icon={faPaperPlane} />
                 <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Send</div>
+              </MenuButton>
+              <MenuButton onClick={() => hideChat()} style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}>
+                <FontAwesomeIcon icon={faCommentSlash} />
+                <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Hide Chat</div>
               </MenuButton>
             </div>
           </div>

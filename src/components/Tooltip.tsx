@@ -78,6 +78,7 @@ const Tooltip: React.FC<TooltipProps> = ({ text, children }) => {
   const [position, setPosition] = useState<"top" | "bottom">("top");
   const [align, setAlign] = useState<"center" | "left" | "right">("center");
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const calculatePosition = (element: HTMLElement) => {
     const rect = element.getBoundingClientRect();
@@ -120,22 +121,29 @@ const Tooltip: React.FC<TooltipProps> = ({ text, children }) => {
     setShow(false);
   };
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleTouchStart = (e: React.TouchEvent) => {
     const target = e.currentTarget as HTMLElement;
     calculatePosition(target);
 
-    if (!window.matchMedia("(hover: hover)").matches) {
-      setShow((prev) => !prev);
+    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = setTimeout(() => {
+      setShow(true);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         setShow(false);
       }, 3000);
-    }
+    }, 600); // 600ms hold delay
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+    setShow(false);
   };
 
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
     };
   }, []);
 
@@ -151,9 +159,17 @@ const Tooltip: React.FC<TooltipProps> = ({ text, children }) => {
         if (child.props.onMouseLeave) child.props.onMouseLeave(e);
         handleMouseLeave();
       },
-      onClick: (e: any) => {
-        if (child.props.onClick) child.props.onClick(e);
-        handleClick(e);
+      onTouchStart: (e: any) => {
+        if (child.props.onTouchStart) child.props.onTouchStart(e);
+        handleTouchStart(e);
+      },
+      onTouchEnd: (e: any) => {
+        if (child.props.onTouchEnd) child.props.onTouchEnd(e);
+        handleTouchEnd();
+      },
+      onTouchMove: (e: any) => {
+        if (child.props.onTouchMove) child.props.onTouchMove(e);
+        if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
       },
       style: {
         ...child.props.style,
@@ -173,9 +189,13 @@ const Tooltip: React.FC<TooltipProps> = ({ text, children }) => {
     return (
       <div
         style={{ position: "relative", display: "inline-flex", verticalAlign: "middle" }}
-        onMouseEnter={(e) => handleMouseEnter(e)}
+        onMouseEnter={(e: any) => handleMouseEnter(e)}
         onMouseLeave={handleMouseLeave}
-        onClick={(e) => handleClick(e)}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={() => {
+          if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+        }}
       >
         {children}
         <TooltipContainer $show={show} $position={position} $align={align}>

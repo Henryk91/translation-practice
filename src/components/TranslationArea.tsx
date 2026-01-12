@@ -4,6 +4,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { TableCell, InputWrapper, FeedBackTableCell, FeedbackSpan, Button } from "../helpers/style";
 import { Row } from "../helpers/types";
 import { focusNextInput } from "../helpers/utils";
+import Tooltip from "./Tooltip";
 import InputSwitcher from "./InputSwitcher";
 
 interface TranslationAreaProps {
@@ -106,32 +107,36 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
         </div>
         <div>
           {shouldShowCheck(row) ? (
-            <Button
-              onClick={() => handleTranslate(idx, lastEdited)}
-              disabled={row.isLoading || !row.userInput}
-              className={hasFocus && !row.isCorrect ? "timer-btn animate" : ""}
-              style={{ "--duration": `${getTimerDuration(row.sentence)}s` } as React.CSSProperties}
-            >
-              <FontAwesomeIcon
-                className={row.isLoading || !row.userInput ? "checkButtonDisabled" : "checkButtonEnabled"}
-                icon={row.isLoading ? faSpinner : faPaperPlane}
-                spin={row.isLoading}
-              />
-            </Button>
+            <Tooltip text="Submit your answer and check for errors">
+              <Button
+                onClick={() => handleTranslate(idx, lastEdited)}
+                disabled={row.isLoading || !row.userInput}
+                className={hasFocus && !row.isCorrect ? "timer-btn animate" : ""}
+                style={{ "--duration": `${getTimerDuration(row.sentence)}s` } as React.CSSProperties}
+              >
+                <FontAwesomeIcon
+                  className={row.isLoading || !row.userInput ? "checkButtonDisabled" : "checkButtonEnabled"}
+                  icon={row.isLoading ? faSpinner : faPaperPlane}
+                  spin={row.isLoading}
+                />
+              </Button>
+            </Tooltip>
           ) : (
-            <Button
-              className={hasFocus ? "timer-btn animate" : ""}
-              onClick={() => handleAiCheck(idx, lastEdited)}
-              disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
-              style={
-                {
-                  color: row.aiCorrect === false ? "rgba(236, 80, 80, 1)" : "gray",
-                  "--duration": `${getTimerDuration(row.sentence)}s`,
-                } as React.CSSProperties
-              }
-            >
-              <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />{" "}
-            </Button>
+            <Tooltip text="Get AI feedback on your translation for more nuance">
+              <Button
+                className={hasFocus ? "timer-btn animate" : ""}
+                onClick={() => handleAiCheck(idx, lastEdited)}
+                disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
+                style={
+                  {
+                    color: row.aiCorrect === false ? "rgba(236, 80, 80, 1)" : "gray",
+                    "--duration": `${getTimerDuration(row.sentence)}s`,
+                  } as React.CSSProperties
+                }
+              >
+                <FontAwesomeIcon icon={row.isLoading ? faSpinner : faBrain} spin={row.isLoading} />{" "}
+              </Button>
+            </Tooltip>
           )}
         </div>
       </FeedBackTableCell>

@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../helpers/style";
+import Tooltip from "./Tooltip";
 import { faBars, faDoorOpen, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { logoutUser } from "../helpers/requests";
@@ -92,10 +93,12 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
       <LevelSelect>
         <div className="sidebar-menu">
           <div style={{ flex: "1" }}>
-            <MenuButton className="login-button" onClick={clickLogin}>
-              <FontAwesomeIcon icon={loggedIn ? faDoorOpen : faUser} />
-              <div style={{ fontSize: "12px", color: "white" }}>{loggedIn ? "Log Out" : "Log In"}</div>
-            </MenuButton>
+            <Tooltip text={loggedIn ? "Log Out of your account" : "Log In to save your progress"}>
+              <MenuButton className="login-button" onClick={clickLogin}>
+                <FontAwesomeIcon icon={loggedIn ? faDoorOpen : faUser} />
+                <div style={{ fontSize: "12px", color: "white" }}>{loggedIn ? "Log Out" : "Log In"}</div>
+              </MenuButton>
+            </Tooltip>
           </div>
           <div className="level-info" style={{ flex: "3" }}>
             Levels Selected: <br />
@@ -109,27 +112,33 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
           </div>
           <div style={{ flex: "1", display: "flex", justifyContent: "center" }}>
             <span>
-              <label htmlFor="toggle" className="sidebar-menu-button1 menu-button">
-                <FontAwesomeIcon icon={faBars} />
-              </label>
+              <Tooltip text="Close side menu">
+                <label htmlFor="toggle" className="sidebar-menu-button1 menu-button">
+                  <FontAwesomeIcon icon={faBars} />
+                </label>
+              </Tooltip>
             </span>
           </div>
         </div>
-        <MenuButton
-          className={showLevels ? "level-button-active" : "level-button-inactive"}
-          style={{ fontSize: "15px" }}
-          onClick={() => setShowLevels(true)}
-        >
-          Select Level
-        </MenuButton>
-        <MenuButton
-          className={!showLevels ? "level-button-active" : "level-button-inactive"}
-          disabled={!!selectedLevel && noSubLevel.includes(selectedLevel)}
-          style={{ fontSize: "15px" }}
-          onClick={() => setShowLevels(false)}
-        >
-          Select Sub Level
-        </MenuButton>
+        <Tooltip text="View all available main levels">
+          <MenuButton
+            className={showLevels ? "level-button-active" : "level-button-inactive"}
+            style={{ fontSize: "15px" }}
+            onClick={() => setShowLevels(true)}
+          >
+            Select Level
+          </MenuButton>
+        </Tooltip>
+        <Tooltip text="View the specific tasks within your selected level">
+          <MenuButton
+            className={!showLevels ? "level-button-active" : "level-button-inactive"}
+            disabled={!!selectedLevel && noSubLevel.includes(selectedLevel)}
+            style={{ fontSize: "15px" }}
+            onClick={() => setShowLevels(false)}
+          >
+            Select Sub Level
+          </MenuButton>
+        </Tooltip>
       </LevelSelect>
       <div
         style={{

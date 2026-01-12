@@ -16,7 +16,7 @@ export const Container = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
   height: 100vh;
   overflow-y: scroll;
   width: -webkit-fill-available;
@@ -41,7 +41,7 @@ export const SideMenu = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 0;
-  overflow-y: scroll;
+  overflow: visible;
   overscroll-behavior: contain;
   height: 100vh;
   width: 500px;
@@ -357,7 +357,7 @@ export const CollapsibleWrapper = styled.div<{ $isOpen: boolean }>`
 `;
 export const VerticalCollapsibleWrapper = styled.div<{ $isOpen: boolean }>`
   width: 100%;
-  overflow: hidden;
+  overflow: ${(props) => (props.$isOpen ? "visible" : "hidden")};
   max-height: ${(props) => (props.$isOpen ? "500px" : "0px")};
   opacity: ${(props) => (props.$isOpen ? "1" : "0")};
   transition: max-height 0.4s ease-out, opacity 0.3s ease;

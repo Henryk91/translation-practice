@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./App.css";
 import { MenuButton } from "./helpers/style";
+import Tooltip from "./components/Tooltip";
 import { Row } from "./helpers/types";
 import { RootState } from "./store";
 import { chatActions } from "./store/chat-slice";
@@ -177,22 +178,28 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
               onKeyDown={handleKeyDown}
             />
             <div className="chat-button-container">
-              <MenuButton onClick={() => showAnswer()} style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}>
-                <FontAwesomeIcon icon={faLightbulb} />
-                <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Hint</div>
-              </MenuButton>
-              <MenuButton
-                onClick={() => checkTranslation()}
-                disabled={!userInput.trim() && messages.length > 0}
-                style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}
-              >
-                <FontAwesomeIcon icon={faPaperPlane} />
-                <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Send</div>
-              </MenuButton>
-              <MenuButton onClick={() => hideChat()} style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}>
-                <FontAwesomeIcon icon={faCommentSlash} />
-                <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Hide Chat</div>
-              </MenuButton>
+              <Tooltip text="Show the correct translation for this sentence">
+                <MenuButton onClick={() => showAnswer()} style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}>
+                  <FontAwesomeIcon icon={faLightbulb} />
+                  <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Hint</div>
+                </MenuButton>
+              </Tooltip>
+              <Tooltip text="Submit your translation and check if it's correct">
+                <MenuButton
+                  onClick={() => checkTranslation()}
+                  disabled={!userInput.trim() && messages.length > 0}
+                  style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}
+                >
+                  <FontAwesomeIcon icon={faPaperPlane} />
+                  <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Send</div>
+                </MenuButton>
+              </Tooltip>
+              <Tooltip text="Leave chat mode and return to the main exercise view">
+                <MenuButton onClick={() => hideChat()} style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}>
+                  <FontAwesomeIcon icon={faCommentSlash} />
+                  <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Hide Chat</div>
+                </MenuButton>
+              </Tooltip>
             </div>
           </div>
         )}

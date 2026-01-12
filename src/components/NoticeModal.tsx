@@ -2,6 +2,7 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
+import Tooltip from "./Tooltip";
 
 const ModalOverlay = styled.div<{ $isOpen: boolean }>`
   display: ${(props) => (props.$isOpen ? "flex" : "none")};
@@ -79,7 +80,9 @@ const NoticeModal: React.FC<NoticeModalProps> = ({ isOpen, onClose, title, messa
         </IconWrapper>
         <Title>{title}</Title>
         <Message>{message}</Message>
-        <CloseButton onClick={onClose}>Understood</CloseButton>
+        <Tooltip text="Close this notice">
+          <CloseButton onClick={onClose}>Understood</CloseButton>
+        </Tooltip>
       </ModalContent>
     </ModalOverlay>
   );

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
+import Tooltip from "./Tooltip";
 
 const ModalOverlay = styled.div<{ $isOpen: boolean }>`
   display: ${(props) => (props.$isOpen ? "flex" : "none")};
@@ -219,9 +220,11 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
       <ModalContent onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>Send Feedback</ModalTitle>
-          <CloseButton onClick={handleClose} disabled={isSubmitting}>
-            <FontAwesomeIcon icon={faTimes} />
-          </CloseButton>
+          <Tooltip text="Close this window">
+            <CloseButton onClick={handleClose} disabled={isSubmitting}>
+              <FontAwesomeIcon icon={faTimes} />
+            </CloseButton>
+          </Tooltip>
         </ModalHeader>
         <Form onSubmit={handleSubmit}>
           <FormGroup>
@@ -258,10 +261,12 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
           </FormGroup>
           {error && <ErrorMessage>{error}</ErrorMessage>}
           {success && <SuccessMessage>Thank you! Your feedback has been sent.</SuccessMessage>}
-          <SubmitButton type="submit" disabled={isSubmitting}>
-            <FontAwesomeIcon icon={faPaperPlane} />
-            {isSubmitting ? "Sending..." : "Send Feedback"}
-          </SubmitButton>
+          <Tooltip text="Submit your message to the developers">
+            <SubmitButton type="submit" disabled={isSubmitting}>
+              <FontAwesomeIcon icon={faPaperPlane} />
+              {isSubmitting ? "Sending..." : "Send Feedback"}
+            </SubmitButton>
+          </Tooltip>
         </Form>
       </ModalContent>
     </ModalOverlay>
@@ -269,4 +274,3 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
 };
 
 export default FeedbackModal;
-

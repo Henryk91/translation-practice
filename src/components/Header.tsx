@@ -1,5 +1,6 @@
 import React from "react";
 import { HeaderStyle, Label, MobileMenu, Select, Image, TitleSpan } from "../helpers/style";
+import Tooltip from "./Tooltip";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SubLevelOption } from "../helpers/subLevel";
@@ -46,9 +47,11 @@ const Header: React.FC<HeaderProps> = ({ handleLevelChange, handleSubLevelChange
           </TitleSpan>{" "}
           <span style={{ color: "white" }}> German</span>
         </div>
-        <label htmlFor="toggle" className="menu-button">
-          <FontAwesomeIcon icon={faBars} />
-        </label>
+        <Tooltip text="Open side menu">
+          <label htmlFor="toggle" className="menu-button">
+            <FontAwesomeIcon icon={faBars} />
+          </label>
+        </Tooltip>
       </div>
       <MobileMenu>
         <Label>Level:</Label>

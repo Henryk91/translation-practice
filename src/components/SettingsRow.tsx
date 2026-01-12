@@ -18,6 +18,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NoticeModal from "./NoticeModal";
 import FeedbackModal from "./FeedbackModal";
+import Tooltip from "./Tooltip";
 import { focusNextInput, getScoreColorRange } from "../helpers/utils";
 import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 import { useDispatch, useSelector } from "react-redux";
@@ -103,86 +104,93 @@ export const SettingsRow = () => {
         </SpeechContainer>
       )}
       <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
-        <MenuButton
-          onClick={() => setShowAdvanced(!showAdvanced)}
-          title={tooltips.settings}
-          style={{ color: showAdvanced ? "rgba(236, 80, 80, 1)" : "rgba(49, 196, 141, 1)" }}
-        >
-          <FontAwesomeIcon icon={showAdvanced ? faTimes : faCog} />
-          <div style={{ fontSize: "12px" }}>{showAdvanced ? "Close" : "Settings"}</div>
-        </MenuButton>
+        <Tooltip text={tooltips.settings}>
+          <MenuButton
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            style={{ color: showAdvanced ? "rgba(236, 80, 80, 1)" : "rgba(49, 196, 141, 1)" }}
+          >
+            <FontAwesomeIcon icon={showAdvanced ? faTimes : faCog} />
+            <div style={{ fontSize: "12px" }}>{showAdvanced ? "Close" : "Settings"}</div>
+          </MenuButton>
+        </Tooltip>
 
-        <MenuButton
-          onClick={() => dispatch(settingsActions.setNav(!showNav))}
-          title={tooltips.nav}
-          style={{ color: showNav ? "rgba(49, 196, 141, 1)" : "white" }}
-        >
-          <FontAwesomeIcon icon={faCompass} />
-          <div style={{ fontSize: "12px" }}>Nav</div>
-        </MenuButton>
+        <Tooltip text={tooltips.nav}>
+          <MenuButton
+            onClick={() => dispatch(settingsActions.setNav(!showNav))}
+            style={{ color: showNav ? "rgba(49, 196, 141, 1)" : "white" }}
+          >
+            <FontAwesomeIcon icon={faCompass} />
+            <div style={{ fontSize: "12px" }}>Nav</div>
+          </MenuButton>
+        </Tooltip>
 
-        <MenuButton
-          onClick={() => setChatUi(!chatUi)}
-          title={tooltips.chat}
-          style={{ color: "rgba(49, 196, 141, 1)", padding: "1px" }}
-        >
-          <FontAwesomeIcon icon={faComments} />
-          <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Chat Mode</div>
-        </MenuButton>
+        <Tooltip text={tooltips.chat}>
+          <MenuButton onClick={() => setChatUi(!chatUi)} style={{ color: "rgba(49, 196, 141, 1)", padding: "1px" }}>
+            <FontAwesomeIcon icon={faComments} />
+            <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Chat Mode</div>
+          </MenuButton>
+        </Tooltip>
 
-        <MenuButton
-          onClick={handleMicClick}
-          title={tooltips.mic}
-          style={{ color: useMic ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)", padding: "1px" }}
-        >
-          <FontAwesomeIcon icon={useMic ? faMicrophoneSlash : faMicrophone} />
-          <div style={{ fontSize: "12px", color: "white" }}>Use Mic</div>
-        </MenuButton>
+        <Tooltip text={tooltips.mic}>
+          <MenuButton
+            onClick={handleMicClick}
+            style={{ color: useMic ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)", padding: "1px" }}
+          >
+            <FontAwesomeIcon icon={useMic ? faMicrophoneSlash : faMicrophone} />
+            <div style={{ fontSize: "12px", color: "white" }}>Use Mic</div>
+          </MenuButton>
+        </Tooltip>
 
-        <MenuButton onClick={() => setShowFeedbackModal(true)} title={tooltips.feedback} style={{ color: "white" }}>
-          <FontAwesomeIcon icon={faCommentDots} />
-          <div style={{ fontSize: "12px" }}>Feedback</div>
-        </MenuButton>
+        <Tooltip text={tooltips.feedback}>
+          <MenuButton onClick={() => setShowFeedbackModal(true)} style={{ color: "white" }}>
+            <FontAwesomeIcon icon={faCommentDots} />
+            <div style={{ fontSize: "12px" }}>Feedback</div>
+          </MenuButton>
+        </Tooltip>
       </div>
 
       <VerticalCollapsibleWrapper $isOpen={showAdvanced}>
         <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", padding: "5px 0" }}>
-          <MenuButton
-            onClick={() => setShuffleSentences(!shuffleSentences)}
-            title={tooltips.shuffle}
-            style={{ color: shuffleSentences ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
-          >
-            <FontAwesomeIcon icon={faSyncAlt} />
-            <div style={{ fontSize: "12px", color: "white" }}>Shuffle</div>
-          </MenuButton>
+          <Tooltip text={tooltips.shuffle}>
+            <MenuButton
+              onClick={() => setShuffleSentences(!shuffleSentences)}
+              style={{ color: shuffleSentences ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
+            >
+              <FontAwesomeIcon icon={faSyncAlt} />
+              <div style={{ fontSize: "12px", color: "white" }}>Shuffle</div>
+            </MenuButton>
+          </Tooltip>
 
-          <MenuButton
-            onClick={() => setShouldSave(!shouldSave)}
-            title={tooltips.save}
-            style={{ color: shouldSave ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
-          >
-            <FontAwesomeIcon icon={faSave} />
-            <div style={{ fontSize: "12px", color: "white" }}>Save</div>
-          </MenuButton>
+          <Tooltip text={tooltips.save}>
+            <MenuButton
+              onClick={() => setShouldSave(!shouldSave)}
+              style={{ color: shouldSave ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
+            >
+              <FontAwesomeIcon icon={faSave} />
+              <div style={{ fontSize: "12px", color: "white" }}>Save</div>
+            </MenuButton>
+          </Tooltip>
 
-          <MenuButton
-            disabled={!hasGapFill}
-            onClick={() => configUseGapFill()}
-            title={tooltips.gapFill}
-            style={{ color: useGapFill && hasGapFill ? "rgba(236, 80, 80, 1)" : "currentcolor" }}
-          >
-            <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
-            <div style={{ fontSize: "12px", color: "white" }}>Gap Fill</div>
-          </MenuButton>
+          <Tooltip text={tooltips.gapFill}>
+            <MenuButton
+              disabled={!hasGapFill}
+              onClick={() => configUseGapFill()}
+              style={{ color: useGapFill && hasGapFill ? "rgba(236, 80, 80, 1)" : "currentcolor" }}
+            >
+              <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
+              <div style={{ fontSize: "12px", color: "white" }}>Gap Fill</div>
+            </MenuButton>
+          </Tooltip>
 
-          <MenuButton
-            onClick={() => setRedoErrors(!redoErrors)}
-            title={tooltips.errorRetry}
-            style={{ color: redoErrors ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)", padding: "1px" }}
-          >
-            <RedoThreeIcon count={redoErrors ? 3 : 1} />
-            <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Error Retry</div>
-          </MenuButton>
+          <Tooltip text={tooltips.errorRetry}>
+            <MenuButton
+              onClick={() => setRedoErrors(!redoErrors)}
+              style={{ color: redoErrors ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)", padding: "1px" }}
+            >
+              <RedoThreeIcon count={redoErrors ? 3 : 1} />
+              <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Error Retry</div>
+            </MenuButton>
+          </Tooltip>
         </div>
       </VerticalCollapsibleWrapper>
 
@@ -251,33 +259,39 @@ export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({
       <VerticalCollapsibleWrapper $isOpen={showNav || isComplete}>
         {score && isComplete && <div style={{ fontSize: "25px", paddingBottom: "10px" }}>Score: {score}</div>}
         <div style={{ display: "flex", justifyContent: "center", flexDirection: "row" }}>
-          <MenuButton
-            disabled={!subLevels}
-            style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
-            onClick={() => {
-              nextExercise(true);
-            }}
-          >
-            <FontAwesomeIcon style={{ color: "rgba(49, 196, 141, 1)", fontSize: "25px" }} icon={faArrowLeft} />
-            Prev Exercise
-          </MenuButton>
-          <MenuButton
-            onClick={() => clickSentenceAgain()}
-            style={{ color: shuffleSentences ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
-          >
-            <FontAwesomeIcon icon={faSyncAlt} />
-            <div style={{ fontSize: "12px", color: "white" }}>Again</div>
-          </MenuButton>
-          <MenuButton
-            disabled={!subLevels}
-            style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
-            onClick={() => {
-              nextExercise();
-            }}
-          >
-            {nextButtonLabel}{" "}
-            <FontAwesomeIcon style={{ color: "rgba(49, 196, 141, 1)", fontSize: "25px" }} icon={faArrowRight} />
-          </MenuButton>
+          <Tooltip text="Go to the previous exercise">
+            <MenuButton
+              disabled={!subLevels}
+              style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
+              onClick={() => {
+                nextExercise(true);
+              }}
+            >
+              <FontAwesomeIcon style={{ color: "rgba(49, 196, 141, 1)", fontSize: "25px" }} icon={faArrowLeft} />
+              Prev Exercise
+            </MenuButton>
+          </Tooltip>
+          <Tooltip text="Restart this exercise from the beginning">
+            <MenuButton
+              onClick={() => clickSentenceAgain()}
+              style={{ color: shuffleSentences ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
+            >
+              <FontAwesomeIcon icon={faSyncAlt} />
+              <div style={{ fontSize: "12px", color: "white" }}>Again</div>
+            </MenuButton>
+          </Tooltip>
+          <Tooltip text={hasMoreBatches ? "Load the next set of sentences" : "Move to the next exercise"}>
+            <MenuButton
+              disabled={!subLevels}
+              style={{ fontSize: "15px", display: "flex", alignItems: "center" }}
+              onClick={() => {
+                nextExercise();
+              }}
+            >
+              {nextButtonLabel}{" "}
+              <FontAwesomeIcon style={{ color: "rgba(49, 196, 141, 1)", fontSize: "25px" }} icon={faArrowRight} />
+            </MenuButton>
+          </Tooltip>
         </div>
       </VerticalCollapsibleWrapper>
     </NavWrapper>

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { MenuButton, TextArea, TextAreaButtonWrapper, TextAreaWrapper } from "../helpers/style";
+import Tooltip from "./Tooltip";
 import { Row } from "../helpers/types";
 import { faSyncAlt, faPaperPlane, faTrash, faLanguage } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -79,19 +80,25 @@ const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text, setAll
         {selectedLevel === "Own Sentences" && (
           <>
             {rows.length ? (
-              <MenuButton onClick={handleTextClear}>
-                <FontAwesomeIcon icon={faTrash} />
-              </MenuButton>
+              <Tooltip text="Clear your current sentences and start over">
+                <MenuButton onClick={handleTextClear}>
+                  <FontAwesomeIcon icon={faTrash} />
+                </MenuButton>
+              </Tooltip>
             ) : (
-              <MenuButton onClick={handleTextSubmit}>
-                <FontAwesomeIcon icon={faPaperPlane} />
-              </MenuButton>
+              <Tooltip text="Process these sentences and start the exercise">
+                <MenuButton onClick={handleTextSubmit}>
+                  <FontAwesomeIcon icon={faPaperPlane} />
+                </MenuButton>
+              </Tooltip>
             )}
 
-            <MenuButton onClick={initTranslatedSentences} disabled={loadingTranslation || text === ""}>
-              <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
-              <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
-            </MenuButton>
+            <Tooltip text="Automatically translate these sentences into German using AI">
+              <MenuButton onClick={initTranslatedSentences} disabled={loadingTranslation || text === ""}>
+                <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
+                <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
+              </MenuButton>
+            </Tooltip>
           </>
         )}
       </TextAreaButtonWrapper>

@@ -80,12 +80,12 @@ const App: React.FC = () => {
       const shuffle = shuffleSentences ? shuffleRow(savedRows) : savedRows;
       const items = shuffle.length > incorrectSentenceCount ? shuffle.slice(0, incorrectSentenceCount) : shuffle;
       const newRows = items.map((row: Row, idx: number) => {
-        delete row.isCorrect;
-        delete row.aiCorrect;
-        delete row.isRetry;
+        delete (row as any).isCorrect;
+        delete (row as any).aiCorrect;
+        delete (row as any).isRetry;
         return {
           ...row,
-          id: `incorrect-${idx}-${Date.now()}`,
+          id: `incorrect-${idx}`,
           batchId: Math.floor(idx / BATCH_SIZE),
           feedback: null,
           userInput: "",
@@ -120,7 +120,7 @@ const App: React.FC = () => {
         userInput: "",
         translation: "",
         feedback: null,
-        id: `level-${idx}-${Date.now()}`,
+        id: `${level}-none-${idx}`,
         batchId: Math.floor(idx / BATCH_SIZE),
       }));
       setAllRows(sentencesWithIds);
@@ -182,7 +182,7 @@ const App: React.FC = () => {
       const sentences = shuffleSentence ? shuffleRow(rowsWithMetadata) : rowsWithMetadata;
       const finalSentences = sentences.map((row: Row, idx: number) => ({
         ...row,
-        id: `sublevel-${idx}-${Date.now()}`,
+        id: `${selectedLevel}-${selectedSubLevel}-${idx}`,
         batchId: Math.floor(idx / BATCH_SIZE),
       }));
 
@@ -199,7 +199,7 @@ const App: React.FC = () => {
       const { id, batchId, ...rest } = row;
       return {
         ...rest,
-        id: `redo-${idx}-${Date.now()}`,
+        id: `redo-${idx}`,
         batchId: Math.floor(idx / BATCH_SIZE),
         feedback: null,
         userInput: "",
@@ -322,6 +322,28 @@ const App: React.FC = () => {
     const currentBatchComplete = newRows.every((row) => row.feedback);
     dispatch(settingsActions.setIsComplete(currentBatchComplete));
   };
+
+  const handleChatCorrect = useCallback(
+    (row: Row, userInput: string) => {
+      const updatedRow = updateRowFeedback(mode, { ...row, userInput }, row.translation, true);
+
+      // Update allRows first to ensure progress bar has latest data
+      setAllRows((current) => {
+        const next = current.map((r) => (r.id === row.id ? updatedRow : r));
+        if (shouldSave) updateScore(next, selectedLevel, selectedSubLevel);
+        return next;
+      });
+
+      // Update rows (current batch)
+      setRows((current) => {
+        const next = current.map((r) => (r.id === row.id ? updatedRow : r));
+        const currentBatchComplete = next.every((r) => r.feedback);
+        dispatch(settingsActions.setIsComplete(currentBatchComplete));
+        return next;
+      });
+    },
+    [mode, shouldSave, selectedLevel, selectedSubLevel, dispatch]
+  );
 
   const handleNextBatch = (previous?: boolean) => {
     if (previous) {
@@ -570,7 +592,7 @@ const App: React.FC = () => {
         <SideBar handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
         <Container className="main-page">
           <Header handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
-          {!chatUi && <StickyProgressBar rows={allRows} />}
+          <StickyProgressBar rows={allRows} />
           <CustomUserInput
             setText={setText}
             text={text}
@@ -579,7 +601,12 @@ const App: React.FC = () => {
             setCurrentBatchIndex={setCurrentBatchIndex}
           />
           {chatUi ? (
-            <Chat initialSentences={rows} hideChat={() => setChatUi(false)} goToNextLevel={() => nextExercise()} />
+            <Chat
+              initialSentences={rows}
+              hideChat={() => setChatUi(false)}
+              goToNextLevel={() => handleNextBatch()}
+              onCorrect={handleChatCorrect}
+            />
           ) : (
             <>
               <Table>

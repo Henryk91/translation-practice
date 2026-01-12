@@ -13,9 +13,10 @@ interface ChatProps {
   initialSentences: Row[];
   hideChat: () => void;
   goToNextLevel: () => void;
+  onCorrect: (row: Row, userInput: string) => void;
 }
 
-const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel }) => {
+const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, onCorrect }) => {
   const dispatch = useDispatch();
   const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
   const messages = useSelector((state: RootState) => state.chat.mesages);
@@ -23,41 +24,41 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel }
   const [userInput, setUserInput] = useState<string>("");
   const [checkPunctuation] = useState<boolean>(false);
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
-  const sentenceRef = useRef(initialSentences);
   const sentInitMessage = useRef(false);
+  const subLevelRef = useRef(selectedSubLevel);
 
   useEffect(() => {
-    // On Sub Level Change
-    if (sentenceRef.current === initialSentences) return;
-    sentenceRef.current = initialSentences;
-    if (!selectedSubLevel || !initialSentences?.length) return;
-    const firstSentence = initialSentences[0];
-
-    dispatch(chatActions.setCurrentSentence(firstSentence));
-    dispatch(
-      chatActions.addMessages([
-        { text: `New Level selected!\n${selectedSubLevel}`, type: "info" },
-        { text: `${firstSentence.sentence}`, type: "bot" },
-      ])
-    );
-  }, [selectedSubLevel, initialSentences, currentSentence, dispatch]);
-
-  useEffect(() => {
-    // Add welcome message and first sentence if it's the first render
+    // Only run welcome message/first sentence if messages are empty
     if (messages.length === 0 && initialSentences.length && !sentInitMessage.current) {
       sentInitMessage.current = true;
+      const firstUncompleted = initialSentences.find((s) => !s.feedback) || initialSentences[0];
       dispatch(
         chatActions.addMessages([
           {
             text: "Welcome to the Language Learning App!\n\nType your translation of the sentence below.",
             type: "info",
           },
-          { text: `${initialSentences[0].sentence}`, type: "bot" },
+          { text: `${firstUncompleted.sentence}`, type: "bot" },
         ])
       );
-      dispatch(chatActions.setCurrentSentence(initialSentences[0]));
+      dispatch(chatActions.setCurrentSentence(firstUncompleted));
+      return;
     }
-  }, [messages, initialSentences, dispatch, sentInitMessage]);
+
+    // On Sub Level Change
+    if (selectedSubLevel !== subLevelRef.current && initialSentences?.length) {
+      subLevelRef.current = selectedSubLevel;
+      const firstUncompleted = initialSentences.find((s) => !s.feedback) || initialSentences[0];
+
+      dispatch(chatActions.setCurrentSentence(firstUncompleted));
+      dispatch(
+        chatActions.addMessages([
+          { text: `New Level selected!\n${selectedSubLevel}`, type: "info" },
+          { text: `${firstUncompleted.sentence}`, type: "bot" },
+        ])
+      );
+    }
+  }, [selectedSubLevel, initialSentences, messages.length, dispatch]);
 
   const showAnswer = () => {
     dispatch(
@@ -86,20 +87,32 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel }
     // Check if user input matches correct translation (ignoring spaces)
     let feedbackMessage: string;
     if (finalUserInput === finalCorrectTranslation) {
-      const nextSentenceIndex = initialSentences.indexOf(currentSentence) + 1;
+      onCorrect(currentSentence, userInput);
+
+      // Find the next uncompleted sentence in the current batch, excluding the one we just finished
+      const currentIndex = initialSentences.findIndex((s) => s.id === currentSentence.id);
+      const nextUncompletedIndex = initialSentences.findIndex((s, idx) => idx > currentIndex && !s.feedback);
 
       // Add user input message before the feedback message
       dispatch(chatActions.addMessage({ text: `${userInput}`, type: "user" }));
 
-      if (nextSentenceIndex < initialSentences.length) {
-        const nextSentence = initialSentences[nextSentenceIndex].sentence;
-        dispatch(chatActions.setCurrentSentence(initialSentences[nextSentenceIndex]));
-        feedbackMessage = `Correct! Here's another sentence:\n\n${nextSentence}`;
+      if (nextUncompletedIndex !== -1) {
+        const nextSentence = initialSentences[nextUncompletedIndex];
+        dispatch(chatActions.setCurrentSentence(nextSentence));
+        feedbackMessage = `Correct! Here's another sentence:\n\n${nextSentence.sentence}`;
         dispatch(chatActions.addMessage({ text: `${feedbackMessage}`, type: "bot" }));
       } else {
-        // Level completed
-        feedbackMessage = `Congratulations! You've completed level. You will now move on to the next level.`;
-        goToNextLevel();
+        // Check if there are ANY uncompleted sentences left in the current batch (that are NOT the current one)
+        const anyOtherUncompleted = initialSentences.find((s) => !s.feedback && s.id !== currentSentence.id);
+        if (anyOtherUncompleted) {
+          dispatch(chatActions.setCurrentSentence(anyOtherUncompleted));
+          feedbackMessage = `Correct! Now try this one:\n\n${anyOtherUncompleted.sentence}`;
+          dispatch(chatActions.addMessage({ text: `${feedbackMessage}`, type: "bot" }));
+        } else {
+          // Everything in this batch is complete
+          feedbackMessage = `Congratulations! You've completed level. You will now move on to the next level.`;
+          goToNextLevel();
+        }
       }
       setUserInput("");
     } else {
@@ -136,7 +149,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel }
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   return (
-    <div className="app">
+    <div className="chat-component-wrapper">
       <div className="chat-container">
         <div className="messages">
           {messages.map((message, index) => (

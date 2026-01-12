@@ -70,11 +70,14 @@
   height: 100%;
 }
 
-.app {
+.chat-component-wrapper {
   display: flex;
   flex-direction: column;
-  /*height: 100vh;  Full height of the viewport */
-  height: 90vh; /* Full height of the viewport */
+  flex: 1;
+  width: 100%;
+  max-width: 800px;
+  height: 0; /* Let flex-grow handle it */
+  min-height: 500px;
 }
 
 .chat-container {
@@ -196,13 +199,24 @@
   color: white; /* Checkbox label color */
   margin-bottom: 10px;
 }
-@media (max-aspect-ratio: 10/10) and (max-width: 700px) {
-  .translation-input {
-    flex-direction: column;
-  }
-  .chat-textarea {
-    margin-right: 0px;
-    width: -webkit-fill-available;
-    margin-bottom: 5px;
-  }
+
+.completion-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(10, 12, 19, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  border-radius: 12px;
+}
+
+.completion-overlay h2 {
+  color: rgba(49, 196, 141, 1);
+  font-size: 2rem;
+  margin-bottom: 20px;
 }

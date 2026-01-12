@@ -32,6 +32,7 @@ import { RootState } from "./store";
 import { uiActions } from "./store/ui-slice";
 import { settingsActions } from "./store/settings-slice";
 import Chat from "./Chat";
+import NoticeModal from "./components/NoticeModal";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const App: React.FC = () => {
@@ -58,6 +59,7 @@ const App: React.FC = () => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [shiftButtonDown, setShiftButtonDown] = useState<boolean>(false);
   const [altButtonDown, setAltButtonDown] = useState<boolean>(false);
+  const [showAiNotice, setShowAiNotice] = useState<boolean>(false);
 
   const setChatUi = (val: boolean) => {
     dispatch(settingsActions.setChatUi(val));
@@ -250,6 +252,12 @@ const App: React.FC = () => {
   };
 
   const handleAiCheck = async (index: number, lastInput: HTMLInputElement | undefined): Promise<void> => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      setShowAiNotice(true);
+      return;
+    }
+
     setRows((current) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
 
     const row = rows[index];
@@ -647,6 +655,12 @@ const App: React.FC = () => {
           )}
         </Container>
       </section>
+      <NoticeModal
+        isOpen={showAiNotice}
+        onClose={() => setShowAiNotice(false)}
+        title="AI Feedback Restricted"
+        message="AI feedback functionality is currently only available for authenticated users. Please log in to your account to enable AI support for your translation sessions."
+      />
     </>
   );
 };

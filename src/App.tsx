@@ -477,7 +477,7 @@ const App: React.FC = () => {
         <SideBar handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
         <Container className="main-page">
           <Header handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
-          {!chatUi && <StickyProgressBar completed={rows.filter((r) => r.feedback).length} total={rows.length} />}
+          {!chatUi && <StickyProgressBar rows={rows} />}
           <CustomUserInput setText={setText} text={text} setRows={setRows} rows={rows} />
           {chatUi ? (
             <Chat initialSentences={rows} hideChat={() => setChatUi(false)} goToNextLevel={() => nextExercise()} />

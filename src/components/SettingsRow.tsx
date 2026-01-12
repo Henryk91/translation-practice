@@ -230,12 +230,14 @@ interface QuickLevelChangeProps {
   nextExercise: (previous?: boolean) => void;
   clickSentenceAgain: () => void;
   hasMoreBatches: boolean;
+  anySentencesAttempted: boolean;
 }
 
 export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({
   nextExercise,
   clickSentenceAgain,
   hasMoreBatches,
+  anySentencesAttempted,
 }) => {
   const subLevels = useSelector((state: RootState) => state.ui.subLevels);
   const settings = useSelector((state: RootState) => state.settings.settings);
@@ -252,7 +254,7 @@ export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({
   };
 
   const score = subLevelScoreText();
-  const nextButtonLabel = hasMoreBatches ? "Next Batch" : "Next Exercise";
+  const nextButtonLabel = !anySentencesAttempted || !hasMoreBatches ? "Next Exercise" : "Next Batch";
 
   return (
     <NavWrapper>

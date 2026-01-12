@@ -351,6 +351,13 @@ const App: React.FC = () => {
       return;
     }
 
+    // NEW LOGIC: If no sentences have been attempted yet, jump straight to the next exercise
+    const anySentencesAttempted = allRows.some((r) => r.feedback);
+    if (!anySentencesAttempted) {
+      nextExercise();
+      return;
+    }
+
     const maxBatchId = allRows.length > 0 ? Math.max(...allRows.map((r) => r.batchId || 0)) : 0;
     const hasMoreBatches = currentBatchIndex < maxBatchId;
 
@@ -634,6 +641,7 @@ const App: React.FC = () => {
                 hasMoreBatches={
                   currentBatchIndex < (allRows.length > 0 ? Math.max(...allRows.map((r: Row) => r.batchId || 0)) : 0)
                 }
+                anySentencesAttempted={allRows.some((r) => r.feedback)}
               />
             </>
           )}

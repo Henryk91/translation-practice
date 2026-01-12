@@ -16,7 +16,7 @@ export const Container = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 0;
-  overflow: visible;
+  overflow-x: hidden;
   height: 100vh;
   overflow-y: scroll;
   width: -webkit-fill-available;
@@ -41,7 +41,7 @@ export const SideMenu = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 0;
-  overflow: visible;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   height: 100vh;
   width: 500px;
@@ -169,6 +169,7 @@ export const Table = styled.div`
   height: -webkit-fill-available;
   overflow-y: scroll;
   width: -webkit-fill-available;
+  overflow-x: hidden;
   margin-top: 10px;
 `;
 

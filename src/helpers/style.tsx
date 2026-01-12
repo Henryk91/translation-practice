@@ -20,7 +20,6 @@ export const Container = styled.div`
   height: 100vh;
   overflow-y: scroll;
   width: -webkit-fill-available;
-  padding-bottom: 50px;
 
   @media (min-width: 600px) {
     height: 100vh;

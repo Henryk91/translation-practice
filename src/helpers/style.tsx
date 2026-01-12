@@ -20,6 +20,7 @@ export const Container = styled.div`
   height: 100vh;
   overflow-y: scroll;
   width: -webkit-fill-available;
+  padding-bottom: 50px;
 
   @media (min-width: 600px) {
     height: 100vh;
@@ -234,6 +235,14 @@ export const SettingsButtonWrapper = styled.div`
   }
 `;
 
+export const NavWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  Button {
+    margin: 5px;
+  }
+`;
+
 export const TextAreaWrapper = styled.div`
   display: flex;
   align-items: center;
@@ -336,4 +345,24 @@ export const ProgressBarFill = styled.div<{ $width: number }>`
   background-color: rgba(49, 196, 141, 1);
   transition: width 0.3s ease-in-out;
   width: ${(props) => props.$width}%;
+`;
+
+export const CollapsibleWrapper = styled.div<{ $isOpen: boolean }>`
+  display: flex;
+  overflow: hidden;
+  max-width: ${(props) => (props.$isOpen ? "1000px" : "0px")};
+  opacity: ${(props) => (props.$isOpen ? "1" : "0")};
+  transition: max-width 0.4s ease-out, opacity 0.3s ease;
+  flex-wrap: nowrap;
+  align-items: center;
+`;
+export const VerticalCollapsibleWrapper = styled.div<{ $isOpen: boolean }>`
+  width: 100%;
+  overflow: hidden;
+  max-height: ${(props) => (props.$isOpen ? "500px" : "0px")};
+  opacity: ${(props) => (props.$isOpen ? "1" : "0")};
+  transition: max-height 0.4s ease-out, opacity 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;

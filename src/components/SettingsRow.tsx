@@ -1,5 +1,4 @@
 import React from "react";
-import { MenuButton, SettingsButtonWrapper, SpeechContainer, TextInput } from "../helpers/style";
 import {
   faSyncAlt,
   faSave,
@@ -14,19 +13,30 @@ import {
   faCog,
   faCompass,
   faTimes,
+  faCommentDots,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NoticeModal from "./NoticeModal";
+import FeedbackModal from "./FeedbackModal";
 import { focusNextInput, getScoreColorRange } from "../helpers/utils";
 import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
 import { settingsActions } from "../store/settings-slice";
+import {
+  VerticalCollapsibleWrapper,
+  MenuButton,
+  SettingsButtonWrapper,
+  NavWrapper,
+  SpeechContainer,
+  TextInput,
+} from "../helpers/style";
 
 export const SettingsRow = () => {
   const dispatch = useDispatch();
   const [showAdvanced, setShowAdvanced] = React.useState(false);
   const [showMicNotice, setShowMicNotice] = React.useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = React.useState(false);
   const settings = useSelector((state: RootState) => state.settings.settings);
   const { shouldSave, shuffleSentences, useMic, useGapFill, hasGapFill, redoErrors, chatUi, showNav } = settings;
 
@@ -66,6 +76,7 @@ export const SettingsRow = () => {
     errorRetry: "Incorrectly answered sentences will be repeated 3 times to reinforce learning",
     chat: "Switch to an interactive chat interface for your practice",
     mic: "Use voice-to-text to answer questions verbally",
+    feedback: "Report a bug or suggest an improvement",
   };
 
   const handleMicClick = () => {
@@ -111,47 +122,6 @@ export const SettingsRow = () => {
         </MenuButton>
 
         <MenuButton
-          onClick={() => setShuffleSentences(!shuffleSentences)}
-          title={tooltips.shuffle}
-          style={{ color: shuffleSentences ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
-        >
-          <FontAwesomeIcon icon={faSyncAlt} />
-          <div style={{ fontSize: "12px", color: "white" }}>Shuffle</div>
-        </MenuButton>
-
-        {showAdvanced && (
-          <>
-            <MenuButton
-              onClick={() => setShouldSave(!shouldSave)}
-              title={tooltips.save}
-              style={{ color: shouldSave ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
-            >
-              <FontAwesomeIcon icon={faSave} />
-              <div style={{ fontSize: "12px", color: "white" }}>Save</div>
-            </MenuButton>
-
-            <MenuButton
-              disabled={!hasGapFill}
-              onClick={() => configUseGapFill()}
-              title={tooltips.gapFill}
-              style={{ color: useGapFill && hasGapFill ? "rgba(236, 80, 80, 1)" : "currentcolor" }}
-            >
-              <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
-              <div style={{ fontSize: "12px", color: "white" }}>Gap Fill</div>
-            </MenuButton>
-
-            <MenuButton
-              onClick={() => setRedoErrors(!redoErrors)}
-              title={tooltips.errorRetry}
-              style={{ color: redoErrors ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)", padding: "1px" }}
-            >
-              <RedoThreeIcon count={redoErrors ? 3 : 1} />
-              <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Error Retry</div>
-            </MenuButton>
-          </>
-        )}
-
-        <MenuButton
           onClick={() => setChatUi(!chatUi)}
           title={tooltips.chat}
           style={{ color: "rgba(49, 196, 141, 1)", padding: "1px" }}
@@ -168,7 +138,53 @@ export const SettingsRow = () => {
           <FontAwesomeIcon icon={useMic ? faMicrophoneSlash : faMicrophone} />
           <div style={{ fontSize: "12px", color: "white" }}>Use Mic</div>
         </MenuButton>
+
+        <MenuButton onClick={() => setShowFeedbackModal(true)} title={tooltips.feedback} style={{ color: "white" }}>
+          <FontAwesomeIcon icon={faCommentDots} />
+          <div style={{ fontSize: "12px" }}>Feedback</div>
+        </MenuButton>
       </div>
+
+      <VerticalCollapsibleWrapper $isOpen={showAdvanced}>
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", padding: "5px 0" }}>
+          <MenuButton
+            onClick={() => setShuffleSentences(!shuffleSentences)}
+            title={tooltips.shuffle}
+            style={{ color: shuffleSentences ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
+          >
+            <FontAwesomeIcon icon={faSyncAlt} />
+            <div style={{ fontSize: "12px", color: "white" }}>Shuffle</div>
+          </MenuButton>
+
+          <MenuButton
+            onClick={() => setShouldSave(!shouldSave)}
+            title={tooltips.save}
+            style={{ color: shouldSave ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)" }}
+          >
+            <FontAwesomeIcon icon={faSave} />
+            <div style={{ fontSize: "12px", color: "white" }}>Save</div>
+          </MenuButton>
+
+          <MenuButton
+            disabled={!hasGapFill}
+            onClick={() => configUseGapFill()}
+            title={tooltips.gapFill}
+            style={{ color: useGapFill && hasGapFill ? "rgba(236, 80, 80, 1)" : "currentcolor" }}
+          >
+            <FontAwesomeIcon icon={useGapFill && hasGapFill ? faEdit : faHighlighter} />
+            <div style={{ fontSize: "12px", color: "white" }}>Gap Fill</div>
+          </MenuButton>
+
+          <MenuButton
+            onClick={() => setRedoErrors(!redoErrors)}
+            title={tooltips.errorRetry}
+            style={{ color: redoErrors ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)", padding: "1px" }}
+          >
+            <RedoThreeIcon count={redoErrors ? 3 : 1} />
+            <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Error Retry</div>
+          </MenuButton>
+        </div>
+      </VerticalCollapsibleWrapper>
 
       <NoticeModal
         isOpen={showMicNotice}
@@ -176,6 +192,7 @@ export const SettingsRow = () => {
         title="Microphone Feature Restricted"
         message="Voice-to-text functionality is currently only available for authenticated users. Please log in to your account to enable microphone support for your translation sessions."
       />
+      <FeedbackModal isOpen={showFeedbackModal} onClose={() => setShowFeedbackModal(false)} />
     </SettingsButtonWrapper>
   );
 };
@@ -226,14 +243,13 @@ export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({
     return <span style={{ color: getScoreColorRange(localSaveJson.score) }}>{`(${localSaveJson.score}%)`}</span>;
   };
 
-  if (!isComplete && !showNav) return <></>;
   const score = subLevelScoreText();
   const nextButtonLabel = hasMoreBatches ? "Next Batch" : "Next Exercise";
 
   return (
-    <div className="grow-box">
-      {score && <div style={{ fontSize: "25px", paddingBottom: "5px" }}>Score: {score}</div>}
-      <div className="grow-box-content">
+    <NavWrapper>
+      <VerticalCollapsibleWrapper $isOpen={showNav || isComplete}>
+        {score && isComplete && <div style={{ fontSize: "25px", paddingBottom: "10px" }}>Score: {score}</div>}
         <div style={{ display: "flex", justifyContent: "center", flexDirection: "row" }}>
           <MenuButton
             disabled={!subLevels}
@@ -263,8 +279,8 @@ export const QuickLevelChange: React.FC<QuickLevelChangeProps> = ({
             <FontAwesomeIcon style={{ color: "rgba(49, 196, 141, 1)", fontSize: "25px" }} icon={faArrowRight} />
           </MenuButton>
         </div>
-      </div>
-    </div>
+      </VerticalCollapsibleWrapper>
+    </NavWrapper>
   );
 };
 

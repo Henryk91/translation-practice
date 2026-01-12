@@ -11,6 +11,7 @@ interface SettingsState {
   isComplete: boolean;
   chatUi: boolean;
   mode: "easy" | "hard";
+  showNav: boolean;
 }
 
 const settings: SettingsState = {
@@ -24,6 +25,7 @@ const settings: SettingsState = {
   isComplete: false,
   chatUi: false,
   mode: "easy",
+  showNav: false,
 };
 const initialState: { settings: SettingsState } = {
   settings,
@@ -62,6 +64,9 @@ const settingsSlice = createSlice({
     },
     setChatUi(state, actions) {
       state.settings.chatUi = actions.payload;
+    },
+    setNav(state, actions) {
+      state.settings.showNav = actions.payload;
     },
   },
 });

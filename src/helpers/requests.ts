@@ -56,23 +56,28 @@ export async function refreshToken(): Promise<Response | { ok: false }> {
   const userId = localStorage.getItem("userId");
   if (!userId) return { ok: false };
 
-  const res = await fetch(`${BACKEND_URL}/api/refresh`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: "",
-  });
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/refresh`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: "",
+    });
 
-  if (res.status === 401 && userId) {
-    localStorage.removeItem("userId");
-    const e = await res.json();
-    console.log("Error:", e?.error);
-    clearLocalScores();
-    window.location.reload();
+    if (res.status === 401 && userId) {
+      localStorage.removeItem("userId");
+      const e = await res.json();
+      console.log("Error:", e?.error);
+      clearLocalScores();
+      window.location.reload();
+    }
+    return res;
+  } catch (error) {
+    console.error("refreshToken failed:", error);
+    return { ok: false };
   }
-  return res;
 }
 
 export async function apiFetch(url: string, options?: RequestInit, useCache = true): Promise<Response> {
@@ -197,14 +202,14 @@ export const getLevels = async (): Promise<KeyValue | undefined> => {
 
 export const getSentenceWithTranslation = async (
   selectedLevel: String,
-  selectedSubLevel: String
+  selectedSubLevel: String,
 ): Promise<KeyValue | undefined> => {
   const encodedSelectedLevel = encodeURIComponent(`${selectedLevel}`);
   const encodedSelectedSubLevel = encodeURIComponent(`${selectedSubLevel}`);
 
   try {
     const res = await apiFetch(
-      `/api/saved-translation?level=${encodedSelectedLevel}&subLevel=${encodedSelectedSubLevel}`
+      `/api/saved-translation?level=${encodedSelectedLevel}&subLevel=${encodedSelectedSubLevel}`,
     );
 
     if (res?.ok) return await res.json();

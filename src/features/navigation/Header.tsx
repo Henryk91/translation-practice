@@ -1,12 +1,12 @@
 import React from "react";
-import { HeaderStyle, Label, MobileMenu, Select, Image, TitleSpan } from "../helpers/style";
-import Tooltip from "./Tooltip";
+import { HeaderStyle, Label, MobileMenu, Select, Image, TitleSpan } from "../../helpers/style";
+import Tooltip from "../../components/design-system/Tooltip";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { SubLevelOption } from "../helpers/subLevel";
+import { SubLevelOption } from "../../helpers/subLevel";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store";
-import { settingsActions } from "../store/settings-slice";
+import { RootState } from "../../store";
+import { settingsActions } from "../../store/settings-slice";
 
 interface HeaderProps {
   handleLevelChange: (level: string) => void;

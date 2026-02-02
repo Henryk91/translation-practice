@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { MenuButton, TextArea, TextAreaButtonWrapper, TextAreaWrapper } from "../helpers/style";
-import Tooltip from "./Tooltip";
-import { Row } from "../types";
+import { MenuButton, TextArea, TextAreaButtonWrapper, TextAreaWrapper } from "../../../helpers/style";
+import Tooltip from "../../../components/design-system/Tooltip";
+import { Row } from "../../../types";
 import { faSyncAlt, faPaperPlane, faTrash, faLanguage } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { splitAndShuffle, splitSentences } from "../helpers/utils";
-import { translateSentence } from "../helpers/requests";
-import { RootState } from "../store";
-import { sessionActions } from "../store/session-slice";
+import { splitAndShuffle, splitSentences } from "../../../helpers/utils";
+import { translateSentence } from "../../../helpers/requests";
+import { RootState } from "../../../store";
+import { sessionActions } from "../../../store/session-slice";
 
 interface CustomUserInputProps {
   setText: (text: string) => void;

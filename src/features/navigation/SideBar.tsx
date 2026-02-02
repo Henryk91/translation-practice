@@ -1,14 +1,15 @@
 import React, { useMemo } from "react";
-import { LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../helpers/style";
-import Tooltip from "./Tooltip";
+import Tooltip from "../../components/design-system/Tooltip";
 import { faBars, faChevronLeft, faChevronRight, faDoorOpen, faUser } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { logoutUser } from "../helpers/requests";
-import { clearLocalScores, getScoreColorRange, getLevelScoreAverage } from "../helpers/utils";
-import { noSubLevel } from "../data/levelSentences";
-import { settingsActions } from "../store/settings-slice";
+import { logoutUser } from "../../helpers/requests";
+import { LevelSelect, MenuButton, SideMenu, SubLevelOptionItem } from "../../helpers/style";
+import { getLevelScoreAverage, getScoreColorRange } from "../../helpers/score-logic";
+import { noSubLevel } from "../../data/levelSentences";
+import { settingsActions } from "../../store/settings-slice";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store";
+import { RootState } from "../../store";
+import { clearLocalScores } from "../../helpers/storage";
 
 interface SideBarProps {
   handleLevelChange: (level: string) => void;
@@ -35,7 +36,7 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
       if (!score) return <></>;
       return <span style={{ color: getScoreColorRange(Number(score)) }}>{`(${score}%)`}</span>;
     },
-    [levelSentences]
+    [levelSentences],
   );
 
   const subLevelScoreText = useMemo(
@@ -46,7 +47,7 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
       const localSaveJson = JSON.parse(localSave);
       return <span style={{ color: getScoreColorRange(localSaveJson.score) }}>{`(${localSaveJson.score}%)`}</span>;
     },
-    [selectedLevel]
+    [selectedLevel],
   );
 
   const getIncorectSentenceCount = () => {

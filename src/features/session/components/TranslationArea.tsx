@@ -2,12 +2,12 @@ import { faSpinner, faPaperPlane, faBrain } from "@fortawesome/free-solid-svg-ic
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { TableCell, InputWrapper, FeedBackTableCell, FeedbackSpan, Button } from "../helpers/style";
-import { Row } from "../types";
-import { focusNextInput } from "../helpers/utils";
-import Tooltip from "./Tooltip";
+import { TableCell, InputWrapper, FeedBackTableCell, FeedbackSpan, Button } from "../../../helpers/style";
+import { Row } from "../../../types";
+import { focusNextInput } from "../../../helpers/utils";
+import Tooltip from "../../../components/design-system/Tooltip";
 import InputSwitcher from "./InputSwitcher";
-import { sessionActions } from "../store/session-slice";
+import { sessionActions } from "../../../store/session-slice";
 
 interface TranslationAreaProps {
   idx: number;

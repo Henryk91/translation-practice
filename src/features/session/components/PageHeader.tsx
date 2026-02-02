@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { SelectedHeader, TableRow } from "../helpers/style";
-import { RootState } from "../store";
+import { SelectedHeader, TableRow } from "../../../helpers/style";
+import { RootState } from "../../../store";
 
 const PageHeader = ({ sentenceCount }: { sentenceCount: number }) => {
   const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);

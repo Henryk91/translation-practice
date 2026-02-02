@@ -1,10 +1,11 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Row } from "../types";
 import { RootState } from "../store";
 import { settingsActions } from "../store/settings-slice";
 import { sessionActions } from "../store/session-slice";
 import { shuffleArray } from "../helpers/utils";
+import { getSentenceWithTranslation } from "../helpers/requests";
 import { incorrectSentenceCount, noSubLevel } from "../data/levelSentences";
 
 export const useTranslationSession = (
@@ -151,6 +152,41 @@ export const useTranslationSession = (
       redoSentences(currentRows);
     }
   };
+
+  useEffect(() => {
+    if (!selectedLevel || !selectedSubLevel) return;
+    if (noSubLevel.includes(selectedLevel)) return;
+
+    // Check if we already have rows for this selection to avoid infinite loops or re-fetching
+    // But since this hook is used in a component that might mount/unmount, we probably want to fetch.
+    // However, useRoutingSync clears rows on change, so allRows should be empty when we switch.
+
+    getSentenceWithTranslation(selectedLevel, selectedSubLevel).then((data) => {
+      if (data) {
+        const hasGapFill = data[0].translation.includes("{") && data[0].translation.includes("}");
+        const processedRows = data.map((row, idx) => {
+          if (hasGapFill) {
+            row.gapTranslation = row.translation;
+            row.translation = row.translation.replaceAll("{", "").replaceAll("}", "");
+          }
+          return {
+            ...row,
+            userInput: "",
+            feedback: null,
+            batchId: Math.floor(idx / BATCH_SIZE),
+            id: `${selectedLevel}-${selectedSubLevel}-${idx}`, // Ensure unique IDs
+            isRetry: false,
+          };
+        });
+
+        // If shuffle is enabled, shuffle them
+        const finalRows = shuffleSentences ? shuffleRow(processedRows) : processedRows;
+
+        dispatch(sessionActions.setAllRows(finalRows));
+        dispatch(sessionActions.setCurrentBatchIndex(0));
+      }
+    });
+  }, [selectedLevel, selectedSubLevel, dispatch, BATCH_SIZE, shuffleSentences]);
 
   return {
     allRows,

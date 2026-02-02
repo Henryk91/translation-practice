@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Row } from "../types";
+import { Row } from "../../../types";
 
 const StickyWrapper = styled.div`
   position: sticky;

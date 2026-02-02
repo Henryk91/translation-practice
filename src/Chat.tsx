@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./App.css";
 import { MenuButton } from "./helpers/style";
-import Tooltip from "./components/Tooltip";
+import Tooltip from "./components/design-system/Tooltip";
 import { Row } from "./types";
 import { RootState } from "./store";
 import { chatActions } from "./store/chat-slice";

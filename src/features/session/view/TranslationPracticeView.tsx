@@ -1,34 +1,45 @@
-import React, { useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Container, Table, TableRow } from "../helpers/style";
-import Header from "./Header";
-import StickyProgressBar from "./StickyProgressBar";
-import CustomUserInput from "./CustomUserInput";
-import Chat from "../Chat";
-import PageHeader from "./PageHeader";
-import TranslationArea from "./TranslationArea";
-import SettingsRow, { QuickLevelChange } from "./SettingsRow";
-import { Row } from "../types";
-import { RootState } from "../store";
-import { settingsActions } from "../store/settings-slice";
+import React from "react";
+import { Container, Table, TableRow } from "../../../helpers/style";
+import Header from "../../navigation/Header";
+import StickyProgressBar from "../components/StickyProgressBar";
+import CustomUserInput from "../components/CustomUserInput";
+import Chat from "../../../Chat";
+import PageHeader from "../components/PageHeader";
+import TranslationArea from "../components/TranslationArea";
+import SettingsRow, { QuickLevelChange } from "../components/SettingsRow";
+import { Row } from "../../../types";
 
-interface TranslationPracticeProps {
+interface TranslationPracticeViewProps {
+  // Navigation/Configuration
   handleLevelChange: (level: string) => void;
   handleSubLevelChange: (subLevel: string) => void;
   selectedSubLevel: string | undefined;
+
+  // Input State
   setText: (text: string) => void;
   text: string;
+  inputRefs: React.MutableRefObject<Map<number, HTMLInputElement>>;
+  shiftButtonDown: boolean;
+
+  // Session State (from Redux/Container)
+  allRows: Row[];
+  currentBatchIndex: number;
+  rows: Row[];
+  chatUi: boolean;
+
+  // Actions
   handleChatCorrect: (row: Row, userInput: string) => void;
   handleNextBatch: (previous?: boolean) => void;
-  inputRefs: React.MutableRefObject<Map<number, HTMLInputElement>>;
   handleTranslate: (index: number, event: HTMLInputElement | undefined, value?: string) => Promise<void>;
   handleAiCheck: (index: number, lastInput: HTMLInputElement | undefined) => Promise<void>;
-  useGapFill: boolean;
-  shiftButtonDown: boolean;
   clickSentenceAgain: (rows: Row[]) => void;
+  setChatUi: (val: boolean) => void;
+
+  // Settings
+  useGapFill: boolean;
 }
 
-const TranslationPractice: React.FC<TranslationPracticeProps> = ({
+const TranslationPracticeView: React.FC<TranslationPracticeViewProps> = ({
   handleLevelChange,
   handleSubLevelChange,
   selectedSubLevel,
@@ -42,21 +53,12 @@ const TranslationPractice: React.FC<TranslationPracticeProps> = ({
   useGapFill,
   shiftButtonDown,
   clickSentenceAgain,
+  allRows,
+  currentBatchIndex,
+  rows,
+  chatUi,
+  setChatUi,
 }) => {
-  const dispatch = useDispatch();
-
-  // Redux Selectors
-  const { allRows, currentBatchIndex } = useSelector((state: RootState) => state.session);
-  const { chatUi } = useSelector((state: RootState) => state.settings.settings);
-
-  // Derived State
-  const rows = useMemo(() => {
-    return allRows.filter((r) => r.batchId === currentBatchIndex);
-  }, [allRows, currentBatchIndex]);
-
-  // Actions
-  const setChatUi = (val: boolean) => dispatch(settingsActions.setChatUi(val));
-
   return (
     <Container className="main-page">
       <Header handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
@@ -103,4 +105,4 @@ const TranslationPractice: React.FC<TranslationPracticeProps> = ({
   );
 };
 
-export default TranslationPractice;
+export default TranslationPracticeView;

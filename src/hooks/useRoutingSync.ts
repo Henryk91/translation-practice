@@ -186,6 +186,7 @@ export const useRoutingSync = (
     }
 
     const levelContent = levelSentences[levelToUse];
+
     if (typeof levelContent === "object" && Array.isArray(levelContent)) {
       handleLevelWithSubLevels(levelToUse, levelContent, subLevelToUse, urlLevel, urlSubLevel);
     } else if (typeof levelContent === "string") {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import GapFillInput from "./GapFillInput";
-import { TextInput } from "../helpers/style";
-import { Row } from "../types";
+import { TextInput } from "../../../helpers/style";
+import { Row } from "../../../types";
 interface InputSwitcherProps {
   userInput: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

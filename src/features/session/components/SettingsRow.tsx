@@ -18,20 +18,23 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NoticeModal from "./NoticeModal";
 import FeedbackModal from "./FeedbackModal";
-import Tooltip from "./Tooltip";
-import { getScoreColorRange } from "../helpers/utils";
-import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
+import Tooltip from "../../../components/design-system/Tooltip";
+import { getScoreColorRange } from "../../../helpers/utils";
+import { useSpeechRecognition } from "../../../hooks/useSpeechRecognition";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store";
-import { settingsActions } from "../store/settings-slice";
+import { RootState } from "../../../store";
+import { settingsActions } from "../../../store/settings-slice";
+import { uiActions } from "../../../store/ui-slice";
 import {
   VerticalCollapsibleWrapper,
   MenuButton,
+  LevelSelect,
+  SpeechContainer,
+  SubLevelOptionItem,
   SettingsButtonWrapper,
   NavWrapper,
-  SpeechContainer,
   TextInput,
-} from "../helpers/style";
+} from "../../../helpers/style";
 
 export const SettingsRow = () => {
   const dispatch = useDispatch();

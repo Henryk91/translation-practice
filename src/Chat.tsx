@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import "./App.css";
 import { MenuButton } from "./helpers/style";
 import Tooltip from "./components/Tooltip";
-import { Row } from "./helpers/types";
+import { Row } from "./types";
 import { RootState } from "./store";
 import { chatActions } from "./store/chat-slice";
 
@@ -20,7 +20,7 @@ interface ChatProps {
 const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, onCorrect }) => {
   const dispatch = useDispatch();
   const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
-  const messages = useSelector((state: RootState) => state.chat.mesages);
+  const messages = useSelector((state: RootState) => state.chat.messages);
   const currentSentence = useSelector((state: RootState) => state.chat.currentSentence);
   const [userInput, setUserInput] = useState<string>("");
   const [checkPunctuation] = useState<boolean>(false);
@@ -40,7 +40,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
             type: "info",
           },
           { text: `${firstUncompleted.sentence}`, type: "bot" },
-        ])
+        ]),
       );
       dispatch(chatActions.setCurrentSentence(firstUncompleted));
       return;
@@ -56,7 +56,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
         chatActions.addMessages([
           { text: `New Level selected!\n${selectedSubLevel}`, type: "info" },
           { text: `${firstUncompleted.sentence}`, type: "bot" },
-        ])
+        ]),
       );
     }
   }, [selectedSubLevel, initialSentences, messages.length, dispatch]);
@@ -66,7 +66,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
       chatActions.addMessages([
         { text: `Show Answer`, type: "user" },
         { text: `${currentSentence?.translation ?? ""}`, type: "bot" },
-      ])
+      ]),
     );
   };
 
@@ -120,7 +120,12 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
       const userWords = normalizedUserInput.split(" ");
       const correctWords = finalCorrectTranslation.split(" ");
       const feedbackWords = correctWords
-        .map((word: string, index: number) => (userWords[index] === word ? word : "___"))
+        .map((word: string, index: number) => {
+          // Normalize words for comparison by stripping punctuation if strict checking is off
+          const normalizeWord = (w: string) => (checkPunctuation ? w : w.replace(/[.,!?]/g, ""));
+          const uWord = userWords[index] || "";
+          return normalizeWord(uWord) === normalizeWord(word) ? word : "___";
+        })
         .join(" ");
 
       if (userInput.trim() === "") {
@@ -134,7 +139,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
         chatActions.addMessages([
           { text: `${userInput}`, type: "user" },
           { text: `${feedbackMessage}`, type: "bot" },
-        ])
+        ]),
       );
     }
   };

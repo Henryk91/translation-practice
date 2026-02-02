@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { MenuButton, TextArea, TextAreaButtonWrapper, TextAreaWrapper } from "../helpers/style";
 import Tooltip from "./Tooltip";
-import { Row } from "../helpers/types";
+import { Row } from "../types";
 import { faSyncAlt, faPaperPlane, faTrash, faLanguage } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { splitAndShuffle, splitSentences } from "../helpers/utils";

@@ -6,7 +6,7 @@ import {
   sendIncorrectSentences,
   setTranslationScore,
 } from "./requests";
-import { IncorrectRow, Row, TranslationScore } from "./types";
+import { IncorrectRow, Row, TranslationScore } from "../types";
 
 const initIncorrectSentences = () => {
   getIncorrectSentences().then((res) => {
@@ -76,7 +76,7 @@ const saveIncorrectList = (incorrectRows: IncorrectRow[], exerciseId: string) =>
 export const updateScore = (
   rows: Row[],
   selectedLevel: string | undefined,
-  selectedSubLevel: string | undefined
+  selectedSubLevel: string | undefined,
 ): void => {
   let totalCount = 0;
   let correctCount = 0;
@@ -139,7 +139,7 @@ export const updateRowFeedback = (
   mode: "easy" | "hard",
   row: Row,
   translated: string,
-  aiCorrect: boolean | undefined
+  aiCorrect: boolean | undefined,
 ): Row => {
   const normalize = (s: string) => s.replace(/[.,!?:;"-]/g, "").toLowerCase();
 
@@ -170,16 +170,43 @@ export const updateRowFeedback = (
   };
 };
 
-export const focusNextInput = (currentInput: HTMLInputElement | undefined, back: Boolean = false): void => {
-  const inputs = Array.from(document.querySelectorAll("input")).filter(
-    (el) => !el.disabled && el.offsetParent !== null
-  );
+export const focusNextInput = (
+  currentInput: HTMLInputElement | undefined,
+  refMap: Map<number, HTMLInputElement>,
+  currentIndex: number,
+  back: boolean = false,
+): void => {
+  if (!currentInput) {
+    // If no current input, try to focus the first available one
+    const firstInput = document.querySelector<HTMLInputElement>(".practice-input");
+    firstInput?.focus();
+    return;
+  }
 
-  const currentIndex = !currentInput ? -1 : inputs.indexOf(currentInput);
+  const allInputs = Array.from(document.querySelectorAll<HTMLInputElement>(".practice-input"));
+  const currentIdx = allInputs.indexOf(currentInput);
+
+  if (currentIdx !== -1) {
+    const nextIdx = back ? currentIdx - 1 : currentIdx + 1;
+    const nextInput = allInputs[nextIdx];
+
+    if (nextInput) {
+      nextInput.focus();
+      nextInput.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      return;
+    }
+  }
+
+  // Fallback to the old Map logic if DOM search fails for some reason
   const newIndex = back ? currentIndex - 1 : currentIndex + 1;
-  if (newIndex > -1 && (currentIndex < inputs.length - 1 || back)) {
-    inputs[newIndex].focus();
-    inputs[newIndex].scrollIntoView({
+  const fallbackInput = refMap.get(newIndex);
+
+  if (fallbackInput) {
+    fallbackInput.focus();
+    fallbackInput.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
@@ -194,18 +221,18 @@ export const splitSentences = (input: string): string[] => {
     .filter(Boolean);
 };
 
-export const splitAndShuffle = (input: string): string[] => {
-  const sentences = splitSentences(input);
-  return shuffleStrings(sentences);
-};
-
-const shuffleStrings = (input: string[]): string[] => {
+export const shuffleArray = <T,>(input: T[]): T[] => {
   const array = [...input];
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
+};
+
+export const splitAndShuffle = (input: string): string[] => {
+  const sentences = splitSentences(input);
+  return shuffleArray(sentences);
 };
 
 export const getLevelScoreAverage = (prefix: string, subItems: number): string | null => {
@@ -308,7 +335,7 @@ export const decodeLevelName = (name: string): string => {
 };
 
 export const parseUrlParams = (
-  location_pathname: string
+  location_pathname: string,
 ): { level: string | undefined; subLevel: string | undefined } => {
   const pathParts = location_pathname.split("/").filter(Boolean);
   if (pathParts.length === 0) return { level: undefined, subLevel: undefined };
@@ -321,7 +348,7 @@ export const parseUrlParams = (
 export const updateUrl = (
   level: string | undefined,
   subLevel: string | undefined,
-  navigate: (to: To, options?: NavigateOptions | undefined) => void
+  navigate: (to: To, options?: NavigateOptions | undefined) => void,
 ) => {
   let to = "/";
   if (level) to += encodeLevelName(level);

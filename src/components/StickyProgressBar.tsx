@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Row } from "../helpers/types";
+import { Row } from "../types";
 
 const StickyWrapper = styled.div`
   position: sticky;
@@ -56,8 +56,8 @@ const Block = styled.div<{ $status: "correct" | "incorrect" | "empty" }>`
     $status === "correct"
       ? "rgba(49, 196, 141, 1)"
       : $status === "incorrect"
-      ? "rgba(236, 80, 80, 1)"
-      : "rgb(32, 34, 44)"};
+        ? "rgba(236, 80, 80, 1)"
+        : "rgb(32, 34, 44)"};
   border-radius: 4px;
   transition: background-color 0.3s ease-in-out;
 `;

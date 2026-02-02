@@ -39,3 +39,9 @@ export interface IncorrectSentences {
   translation: string;
   corrected?: boolean;
 }
+
+export interface Notification {
+  message: any;
+  type: any;
+  open: any;
+}

@@ -1,7 +1,8 @@
-import { IncorrectSentences, KeyValue, NextFn } from "./types";
+import { IncorrectSentences, KeyValue, NextFn } from "../types";
 import { clearLocalScores } from "./utils";
 
 const BACKEND_URL = "https://api.lingodrill.com";
+// const BACKEND_URL = "http://localhost:8080";
 
 const cache = new Map();
 

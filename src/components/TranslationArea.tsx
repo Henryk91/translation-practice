@@ -2,7 +2,7 @@ import { faSpinner, faPaperPlane, faBrain } from "@fortawesome/free-solid-svg-ic
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { TableCell, InputWrapper, FeedBackTableCell, FeedbackSpan, Button } from "../helpers/style";
-import { Row } from "../helpers/types";
+import { Row } from "../types";
 import { focusNextInput } from "../helpers/utils";
 import Tooltip from "./Tooltip";
 import InputSwitcher from "./InputSwitcher";
@@ -10,33 +10,66 @@ import InputSwitcher from "./InputSwitcher";
 interface TranslationAreaProps {
   idx: number;
   row: Row;
-  inputRef: HTMLInputElement | null;
-  handleTranslate: (index: number, event: HTMLInputElement | undefined) => Promise<void>;
+  // New: Pass the map to allow self-lookup
+  inputRefs: React.MutableRefObject<Map<number, HTMLInputElement>>;
+  handleTranslate: (index: number, event: HTMLInputElement | undefined, value: string) => Promise<void>;
   handleAiCheck: (index: number, event: HTMLInputElement | undefined) => Promise<void>;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, index: number) => void;
+  // New: Only update parent when necessary
+  updateRowInput: (index: number, value: string) => void;
   useGapFill: boolean;
   shiftButtonDown: boolean;
 }
 const TranslationArea: React.FC<TranslationAreaProps> = ({
   idx,
   row,
-  inputRef,
+  inputRefs,
   handleTranslate,
   handleAiCheck,
-  handleInputChange,
+  updateRowInput,
   useGapFill,
   shiftButtonDown,
 }) => {
   const blurTimeout = useRef<NodeJS.Timeout | null>(null);
   const [hasFocus, setHasFocus] = useState<boolean>(false);
+
+  // LOCAL STATE - Fixes performance
+  const [localInput, setLocalInput] = useState(row.userInput || "");
   const [lastEdited, setLastEdited] = useState<HTMLInputElement | undefined>();
+
+  // Sync local state if parent changes (e.g. from retry or reset)
+  useEffect(() => {
+    setLocalInput(row.userInput);
+  }, [row.userInput]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalInput(e.target.value);
+  };
+
+  const handleBlur = () => {
+    // Commit to parent on blur if changed
+    if (localInput !== row.userInput) {
+      updateRowInput(idx, localInput);
+    }
+
+    // Delay before setting hasFocus to false
+    blurTimeout.current = setTimeout(() => {
+      setHasFocus(false);
+    }, 10); // adjust delay as needed
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
     setLastEdited(e.target as HTMLInputElement);
     if (e.key === "Enter") {
       e.preventDefault();
-      handleTranslate(index, e.target as HTMLInputElement);
+      // Ensure parent has latest value before translating
+      updateRowInput(idx, localInput);
+      handleTranslate(index, e.target as HTMLInputElement, localInput);
     }
+  };
+
+  // Trigger focus next using the Ref Map
+  const triggerNextWrapper = (currentInput: HTMLInputElement | undefined, back: boolean = false) => {
+    focusNextInput(currentInput, inputRefs.current, idx, back);
   };
 
   const shouldShowCheck = (row: Row) => {
@@ -51,27 +84,30 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
     setHasFocus(true);
   };
 
-  const handleBlur = () => {
-    // Delay before setting hasFocus to false
-    blurTimeout.current = setTimeout(() => {
-      setHasFocus(false);
-    }, 10); // adjust delay as needed
-  };
-
   const getTimerDuration = useCallback((sentence: string) => {
     const words = sentence.trim().split(/\s+/).filter(Boolean).length;
     return 2 + 0.5 * words;
   }, []);
 
   useEffect(() => {
-    if (idx === 0) inputRef?.focus();
-  }, [idx, row.sentence, inputRef]);
+    // Focus first input on mount if it exists
+    if (idx === 0) {
+      const el = inputRefs.current.get(0);
+      el?.focus();
+    }
+  }, [idx, row.sentence, inputRefs]);
 
   useEffect(() => {
     if (hasFocus === true && row.isLoading) {
       setHasFocus(false);
     }
   }, [row.isLoading, hasFocus, setHasFocus]);
+
+  // Callback ref to register with the Map
+  const setRef = (el: HTMLInputElement | null) => {
+    if (el) inputRefs.current.set(idx, el);
+    else inputRefs.current.delete(idx);
+  };
 
   return (
     <div className="translation-area" onFocus={handleFocus} onBlur={handleBlur}>
@@ -84,13 +120,13 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
           <InputSwitcher
             useGapFill={useGapFill}
             row={row}
-            userInput={row.userInput}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange(e, idx)}
+            userInput={localInput}
+            onChange={handleChange}
             onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => handleKeyPress(e, idx)}
-            triggerNext={focusNextInput}
+            triggerNext={triggerNextWrapper}
             setLastEdited={setLastEdited}
             shiftButtonDown={shiftButtonDown}
-            inputRef={(el: HTMLInputElement | null) => (inputRef = el)}
+            inputRef={setRef}
           />
         </InputWrapper>
       </TableCell>
@@ -109,13 +145,16 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
           {shouldShowCheck(row) ? (
             <Tooltip text="Submit your answer and check for errors">
               <Button
-                onClick={() => handleTranslate(idx, lastEdited)}
-                disabled={row.isLoading || !row.userInput}
+                onClick={() => {
+                  updateRowInput(idx, localInput);
+                  handleTranslate(idx, lastEdited, localInput);
+                }}
+                disabled={row.isLoading || !localInput}
                 className={hasFocus && !row.isCorrect ? "timer-btn animate" : ""}
                 style={{ "--duration": `${getTimerDuration(row.sentence)}s` } as React.CSSProperties}
               >
                 <FontAwesomeIcon
-                  className={row.isLoading || !row.userInput ? "checkButtonDisabled" : "checkButtonEnabled"}
+                  className={row.isLoading || !localInput ? "checkButtonDisabled" : "checkButtonEnabled"}
                   icon={row.isLoading ? faSpinner : faPaperPlane}
                   spin={row.isLoading}
                 />
@@ -126,7 +165,7 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
               <Button
                 className={hasFocus ? "timer-btn animate" : ""}
                 onClick={() => handleAiCheck(idx, lastEdited)}
-                disabled={row.isLoading || row.isCorrect === undefined || !row.userInput}
+                disabled={row.isLoading || row.isCorrect === undefined || !localInput}
                 style={
                   {
                     color: row.aiCorrect === false ? "rgba(236, 80, 80, 1)" : "gray",

@@ -19,7 +19,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NoticeModal from "./NoticeModal";
 import FeedbackModal from "./FeedbackModal";
 import Tooltip from "./Tooltip";
-import { focusNextInput, getScoreColorRange } from "../helpers/utils";
+import { getScoreColorRange } from "../helpers/utils";
 import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
@@ -90,7 +90,6 @@ export const SettingsRow = () => {
     if (useMic) {
       recognition?.current?.stop();
     } else {
-      focusNextInput(undefined);
       recognition?.current?.start();
     }
     setUseMic(!useMic);

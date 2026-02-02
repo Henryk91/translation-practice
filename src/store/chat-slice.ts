@@ -1,16 +1,16 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Row } from "../helpers/types";
+import { Row } from "../types";
 
 type Message = { text: string; type: "bot" | "user" | "info" };
 
 interface ChatState {
-  mesages: Message[];
+  messages: Message[];
   seenSentence: string[];
   currentSentence?: Row;
 }
 
 const initialState: ChatState = {
-  mesages: [],
+  messages: [],
   seenSentence: [],
   currentSentence: undefined,
 };
@@ -23,16 +23,16 @@ const chatSlice = createSlice({
       state.seenSentence.push(action.payload);
     },
     addMessage: (state, action: PayloadAction<Message>) => {
-      state.mesages.push(action.payload);
+      state.messages.push(action.payload);
     },
     addMessages: (state, action: PayloadAction<Message[]>) => {
-      state.mesages.push(...action.payload);
+      state.messages.push(...action.payload);
     },
     setCurrentSentence: (state, action: PayloadAction<Row>) => {
       state.currentSentence = action.payload;
     },
     clearMessages: (state) => {
-      state.mesages = [];
+      state.messages = [];
     },
   },
 });

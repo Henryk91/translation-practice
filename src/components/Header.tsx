@@ -21,8 +21,8 @@ const Header: React.FC<HeaderProps> = ({ handleLevelChange, handleSubLevelChange
   const subLevels = useSelector((state: RootState) => state.ui.subLevels);
   const levels = useSelector((state: RootState) => state.ui.levels);
 
-  const setMode = (mode: string) => {
-    dispatch(settingsActions.setMode(JSON.parse(mode)));
+  const setMode = (mode: "easy" | "hard") => {
+    dispatch(settingsActions.setMode(mode));
   };
 
   const eventHandleSubLevelChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {

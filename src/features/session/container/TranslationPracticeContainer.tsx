@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { settingsActions } from "../../../store/settings-slice";
@@ -19,33 +19,25 @@ interface TranslationPracticeContainerProps {
   useGapFill: boolean;
   shiftButtonDown: boolean;
   clickSentenceAgain: (rows: Row[]) => void;
+  // Session Data passed from parent
+  allRows: Row[];
+  currentBatchIndex: number;
+  rows: Row[];
+  setAllRows: (rows: Row[]) => void;
+  setCurrentBatchIndex: (index: number) => void;
 }
 
 const TranslationPracticeContainer: React.FC<TranslationPracticeContainerProps> = (props) => {
   const dispatch = useDispatch();
 
   // Redux Selectors
-  const { allRows, currentBatchIndex } = useSelector((state: RootState) => state.session);
+  // Session data is now passed via props from AppRoutes -> useTranslationSession
   const { chatUi } = useSelector((state: RootState) => state.settings.settings);
-
-  // Derived State
-  const rows = useMemo(() => {
-    return allRows.filter((r) => r.batchId === currentBatchIndex);
-  }, [allRows, currentBatchIndex]);
 
   // Actions
   const setChatUi = (val: boolean) => dispatch(settingsActions.setChatUi(val));
 
-  return (
-    <TranslationPracticeView
-      {...props}
-      allRows={allRows}
-      currentBatchIndex={currentBatchIndex}
-      rows={rows}
-      chatUi={chatUi}
-      setChatUi={setChatUi}
-    />
-  );
+  return <TranslationPracticeView {...props} chatUi={chatUi} setChatUi={setChatUi} />;
 };
 
 export default TranslationPracticeContainer;

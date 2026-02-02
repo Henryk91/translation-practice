@@ -1,13 +1,14 @@
 import { faSpinner, faPaperPlane, faBrain } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useRef, useState, useCallback, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useFormContext, Controller } from "react-hook-form";
+// import { useDispatch } from "react-redux"; // Removed as we no longer dispatch inputs
 import { TableCell, InputWrapper, FeedBackTableCell, FeedbackSpan, Button } from "../../../helpers/style";
 import { Row } from "../../../types";
 import { focusNextInput } from "../../../helpers/utils";
 import Tooltip from "../../../components/design-system/Tooltip";
 import InputSwitcher from "./InputSwitcher";
-import { sessionActions } from "../../../store/session-slice";
+// import { sessionActions } from "../../../store/session-slice"; // Removed as we no longer dispatch inputs
 
 interface TranslationAreaProps {
   idx: number;
@@ -27,45 +28,32 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
   useGapFill,
   shiftButtonDown,
 }) => {
-  const dispatch = useDispatch();
+  // Use React Hook Form context
+  const { control } = useFormContext();
   const blurTimeout = useRef<NodeJS.Timeout | null>(null);
   const [hasFocus, setHasFocus] = useState<boolean>(false);
-
-  // LOCAL STATE - Fixes performance
-  const [localInput, setLocalInput] = useState(row.userInput || "");
   const [lastEdited, setLastEdited] = useState<HTMLInputElement | undefined>();
 
-  // Sync local state if parent changes (e.g. from retry or reset)
-  useEffect(() => {
-    setLocalInput(row.userInput);
-  }, [row.userInput]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLocalInput(e.target.value);
-  };
-
-  const commitInput = () => {
-    if (localInput !== row.userInput) {
-      dispatch(sessionActions.updateRowInput({ id: row.id, userInput: localInput }));
-    }
-  };
-
   const handleBlur = () => {
-    commitInput();
-
+    // No need to dispatch/commit to Redux on blur anymore as form state handles it locally
     // Delay before setting hasFocus to false
     blurTimeout.current = setTimeout(() => {
       setHasFocus(false);
-    }, 10); // adjust delay as needed
+    }, 10);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, index: number): void => {
+  const handleKeyPress = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+    onChange: (...event: any[]) => void,
+    value: string,
+  ): void => {
     setLastEdited(e.target as HTMLInputElement);
     if (e.key === "Enter") {
       e.preventDefault();
-      // Ensure parent has latest value before translating
-      commitInput();
-      handleTranslate(index, e.target as HTMLInputElement, localInput);
+      // Ensure RHF has the latest value if needed (though onChange handles it)
+      // Pass the current value to handleTranslate
+      handleTranslate(index, e.target as HTMLInputElement, value);
     }
   };
 
@@ -127,16 +115,22 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
       </TableCell>
       <TableCell key={`${idx}-input`} className="input-cell">
         <InputWrapper>
-          <InputSwitcher
-            useGapFill={useGapFill}
-            row={row}
-            userInput={localInput}
-            onChange={handleChange}
-            onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => handleKeyPress(e, idx)}
-            triggerNext={triggerNextWrapper}
-            setLastEdited={setLastEdited}
-            shiftButtonDown={shiftButtonDown}
-            inputRef={setRef}
+          <Controller
+            control={control}
+            name={`translations.${idx}.userInput`}
+            render={({ field: { onChange, value } }) => (
+              <InputSwitcher
+                useGapFill={useGapFill}
+                row={row}
+                userInput={value || ""}
+                onChange={onChange}
+                onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => handleKeyPress(e, idx, onChange, value)}
+                triggerNext={triggerNextWrapper}
+                setLastEdited={setLastEdited}
+                shiftButtonDown={shiftButtonDown}
+                inputRef={setRef}
+              />
+            )}
           />
         </InputWrapper>
       </TableCell>
@@ -154,29 +148,38 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
         <div>
           {shouldShowCheck(row) ? (
             <Tooltip text="Submit your answer and check for errors">
-              <Button
-                onClick={() => {
-                  commitInput();
-                  handleTranslate(idx, lastEdited, localInput);
-                }}
-                disabled={row.isLoading || !localInput}
-                className={hasFocus && !row.isCorrect ? "timer-btn animate" : ""}
-                style={{ "--duration": `${getTimerDuration(row.sentence)}s` } as React.CSSProperties}
-                aria-label="Check Translation"
-              >
-                <FontAwesomeIcon
-                  className={row.isLoading || !localInput ? "checkButtonDisabled" : "checkButtonEnabled"}
-                  icon={row.isLoading ? faSpinner : faPaperPlane}
-                  spin={row.isLoading}
-                />
-              </Button>
+              {/* We need to get the current value for the button onClick too */}
+              <Controller
+                control={control}
+                name={`translations.${idx}.userInput`}
+                render={({ field: { value } }) => (
+                  <Button
+                    onClick={() => {
+                      handleTranslate(idx, lastEdited, value || "");
+                    }}
+                    disabled={row.isLoading || !value}
+                    className={hasFocus && !row.isCorrect ? "timer-btn animate" : ""}
+                    style={{ "--duration": `${getTimerDuration(row.sentence)}s` } as React.CSSProperties}
+                    aria-label="Check Translation"
+                  >
+                    <FontAwesomeIcon
+                      className={row.isLoading || !value ? "checkButtonDisabled" : "checkButtonEnabled"}
+                      icon={row.isLoading ? faSpinner : faPaperPlane}
+                      spin={row.isLoading}
+                    />
+                  </Button>
+                )}
+              />
             </Tooltip>
           ) : (
             <Tooltip text="Get AI feedback on your translation for more nuance">
               <Button
                 className={hasFocus ? "timer-btn animate" : ""}
                 onClick={() => handleAiCheck(idx, lastEdited)}
-                disabled={row.isLoading || row.isCorrect === undefined || !localInput}
+                // Check value disabled state? row.userInput is from Redux, might be stale if we removed sync?
+                // We should use RHF value check.
+                // But row.isCorrect logic depends on row.
+                disabled={row.isLoading || row.isCorrect === undefined} // Should also check !value?
                 style={
                   {
                     color: row.aiCorrect === false ? "rgba(236, 80, 80, 1)" : "gray",

@@ -1,4 +1,4 @@
-import { Row, KeyValue, TranslationScore, IncorrectSentences } from "../types";
+import { Row, KeyValue, TranslationScore, IncorrectSentences, ScorePayload } from "../types";
 
 export interface ITranslationService {
   getLevels(): Promise<KeyValue | undefined>;
@@ -6,7 +6,7 @@ export interface ITranslationService {
   translateSentence(sentence: string): Promise<string>;
   confirmTranslationCheck(english: string, german: string): Promise<boolean>;
   getTranslationScores(): Promise<TranslationScore[]>;
-  setTranslationScore(payload: Record<string, unknown>): Promise<any>;
+  setTranslationScore(payload: ScorePayload): Promise<any>;
   sendIncorrectSentences(sentences: IncorrectSentences[]): Promise<KeyValue | undefined>;
   getIncorrectSentences(): Promise<KeyValue | undefined>;
   logoutUser(): Promise<KeyValue | undefined>;

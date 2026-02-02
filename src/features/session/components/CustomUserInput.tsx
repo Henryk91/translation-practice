@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { MenuButton, TextArea, TextAreaButtonWrapper, TextAreaWrapper } from "../../../helpers/style";
 import Tooltip from "../../../components/design-system/Tooltip";
 import { Row } from "../../../types";
@@ -8,23 +8,27 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { splitAndShuffle, splitSentences } from "../../../helpers/utils";
 import { translateSentence } from "../../../helpers/requests";
 import { RootState } from "../../../store";
-import { sessionActions } from "../../../store/session-slice";
 
 interface CustomUserInputProps {
   setText: (text: string) => void;
   text: string;
+  // Session State Props
+  allRows: Row[];
+  setAllRows: (rows: Row[]) => void;
+  setCurrentBatchIndex: (index: number) => void;
 }
 
-const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text }) => {
-  const dispatch = useDispatch();
+const CustomUserInput: React.FC<CustomUserInputProps> = ({
+  setText,
+  text,
+  allRows,
+  setAllRows,
+  setCurrentBatchIndex,
+}) => {
   const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
   const levelSentences = useSelector((state: RootState) => state.ui.levelSentences);
-  const { allRows } = useSelector((state: RootState) => state.session);
 
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
-
-  const setAllRows = (rows: Row[]) => dispatch(sessionActions.setAllRows(rows));
-  const setCurrentBatchIndex = (index: number) => dispatch(sessionActions.setCurrentBatchIndex(index));
 
   const generateSentences = () => {
     let textToSplit = text;

@@ -1,12 +1,13 @@
-import { useCallback, useMemo, useEffect } from "react";
+import { useCallback, useMemo, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Row } from "../types";
 import { RootState } from "../store";
 import { settingsActions } from "../store/settings-slice";
 import { sessionActions } from "../store/session-slice";
 import { shuffleArray } from "../helpers/utils";
-import { getSentenceWithTranslation } from "../helpers/requests";
 import { incorrectSentenceCount, noSubLevel } from "../data/levelSentences";
+import { useTranslationQuery } from "./useTranslationQuery";
+import { useSessionMachine } from "./useSessionMachine";
 
 export const useTranslationSession = (
   selectedLevel: string | undefined,
@@ -17,45 +18,77 @@ export const useTranslationSession = (
   const settings = useSelector((state: RootState) => state.settings.settings);
   const { shuffleSentences, redoErrors } = settings;
 
-  const { allRows, currentBatchIndex } = useSelector((state: RootState) => state.session);
+  // Local State replacing Redux for Session Data
+  const [allRows, setAllRowsLocal] = useState<Row[]>([]);
+
+  // Finite State Machine
+  const { state: machineState, dispatch: machineDispatch } = useSessionMachine();
+  const { batchIndex } = machineState;
+
+  // Data Fetching via TanStack Query
+  const {
+    data: queryRows,
+    isLoading: isQueryLoading,
+    error: queryError,
+  } = useTranslationQuery(selectedLevel ?? "", selectedSubLevel ?? "");
 
   const rows = useMemo(() => {
     if (allRows.length > 0) {
-      return allRows.filter((r) => r.batchId === currentBatchIndex);
+      return allRows.filter((r) => r.batchId === batchIndex);
     }
     return [];
-  }, [allRows, currentBatchIndex]);
+  }, [allRows, batchIndex]);
 
-  const setAllRows = useCallback(
-    (newRows: Row[]) => {
-      dispatch(sessionActions.setAllRows(newRows));
-    },
-    [dispatch],
-  );
+  const setAllRows = useCallback((newRows: Row[]) => {
+    setAllRowsLocal(newRows);
+  }, []);
 
-  const updateRow = useCallback(
-    (id: string, changes: Partial<Row>) => {
-      dispatch(sessionActions.updateRow({ id, changes }));
-    },
-    [dispatch],
-  );
+  const updateRow = useCallback((id: string, changes: Partial<Row>) => {
+    setAllRowsLocal((prev) => {
+      const index = prev.findIndex((r) => r.id === id);
+      if (index === -1) return prev;
+      const newRows = [...prev];
+      newRows[index] = { ...newRows[index], ...changes };
+      return newRows;
+    });
+  }, []);
 
+  // Deprecated: prefer using machineDispatch directly in new code, but keeping signature for now.
+  // We infer intent based on the index value.
   const setCurrentBatchIndex = useCallback(
     (index: number) => {
-      dispatch(sessionActions.setCurrentBatchIndex(index));
+      /* Deprecated Redux Sync removed, handled purely by FSM now */
+      // dispatch(sessionActions.setCurrentBatchIndex(index));
+
+      if (index === 0) {
+        // Often used as reset
+        machineDispatch({ type: "RESET" });
+        machineDispatch({ type: "LOAD_SUCCESS" }); // Go to practicing
+      } else if (index > batchIndex) {
+        const totalBatches = allRows.length > 0 ? Math.max(...allRows.map((r) => r.batchId || 0)) : 0;
+        machineDispatch({ type: "NEXT_BATCH", totalBatches });
+      } else {
+        machineDispatch({ type: "PREV_BATCH" });
+      }
     },
-    [dispatch],
+    [batchIndex, allRows, machineDispatch],
   );
 
   const updateRowInput = useCallback(
     (index: number, value: string) => {
-      // index is the index within 'rows' (current batch)
+      // index is relative to current batch 'rows'
       if (!rows[index] || rows[index].userInput === value) return;
 
       const rowId = rows[index].id;
-      dispatch(sessionActions.updateRowInput({ id: rowId, userInput: value }));
+      setAllRowsLocal((prev) => {
+        const globalIndex = prev.findIndex((r) => r.id === rowId);
+        if (globalIndex === -1) return prev;
+        const newRows = [...prev];
+        newRows[globalIndex] = { ...newRows[globalIndex], userInput: value };
+        return newRows;
+      });
     },
-    [dispatch, rows],
+    [rows],
   );
 
   const shuffleRow = (rowsToShuffle: Row[]): Row[] => {
@@ -81,13 +114,15 @@ export const useTranslationSession = (
           isLoading: undefined,
         };
       });
-      dispatch(sessionActions.setAllRows(newRows));
-      dispatch(sessionActions.setCurrentBatchIndex(0));
+      setAllRowsLocal(newRows);
+      machineDispatch({ type: "RESET" });
+      machineDispatch({ type: "LOAD_SUCCESS" });
     } else {
-      dispatch(sessionActions.setAllRows([]));
-      dispatch(sessionActions.setCurrentBatchIndex(0));
+      setAllRowsLocal([]);
+      machineDispatch({ type: "RESET" });
+      machineDispatch({ type: "LOAD_SUCCESS" });
     }
-  }, [shuffleSentences, BATCH_SIZE, dispatch]);
+  }, [shuffleSentences, BATCH_SIZE, machineDispatch]);
 
   const redoSentences = (rowsToRedo: Row[]) => {
     const filteredRows = allRows.filter((row: Row) => !row.isRetry);
@@ -105,24 +140,26 @@ export const useTranslationSession = (
       };
     });
     const sentences = shuffleSentences ? shuffleRow(cleanRows) : cleanRows;
-    dispatch(sessionActions.setAllRows(sentences));
-    dispatch(sessionActions.setCurrentBatchIndex(0));
+    setAllRowsLocal(sentences);
+    machineDispatch({ type: "RESET" });
+    machineDispatch({ type: "LOAD_SUCCESS" });
   };
 
   const setRetryRows = (newRows: Row[], wasFalse: boolean, index: number, row: Row, updatedRow: Row) => {
     if (redoErrors && !row.isRetry) {
+      // Logic from old hook: identify global index
       const globalIndex = allRows.findIndex((r) => r.id === row.id);
       if (globalIndex === -1) return;
 
       const updatedAllRows = [...allRows];
 
-      // Update the main row first (as usually done in handleTranslate)
+      // Update the main row
       updatedAllRows[globalIndex] = updatedRow;
 
       if (wasFalse && (updatedRow.isCorrect || row.aiCorrect) && rows?.[index + 1]?.isRetry) {
         // Remove retry rows
         updatedAllRows.splice(globalIndex + 1, 3);
-        dispatch(sessionActions.setAllRows(updatedAllRows));
+        setAllRowsLocal(updatedAllRows);
       } else if (!row.isRetry && updatedRow.isCorrect === false && !rows?.[index + 1]?.isRetry) {
         // Add retry rows
         const { aiCorrect, isCorrect, ...cleanRow } = updatedRow;
@@ -135,7 +172,10 @@ export const useTranslationSession = (
         ];
 
         updatedAllRows.splice(globalIndex + 1, 0, ...retryRows);
-        dispatch(sessionActions.setAllRows(updatedAllRows));
+        setAllRowsLocal(updatedAllRows);
+      } else {
+        // Just the main row update
+        setAllRowsLocal(updatedAllRows);
       }
     }
   };
@@ -143,7 +183,9 @@ export const useTranslationSession = (
   const clickSentenceAgain = (currentRows: Row[]) => {
     dispatch(settingsActions.setRedoErrors(false));
     dispatch(settingsActions.setIsComplete(false));
-    dispatch(sessionActions.setCurrentBatchIndex(0));
+    machineDispatch({ type: "RESET" });
+    machineDispatch({ type: "LOAD_SUCCESS" });
+
     if (noSubLevel.includes(selectedLevel as string)) {
       loadIncorrectSentences();
       return;
@@ -153,47 +195,74 @@ export const useTranslationSession = (
     }
   };
 
+  // Sync Query Data to Local State and FSM status
   useEffect(() => {
     if (!selectedLevel || !selectedSubLevel) return;
     if (noSubLevel.includes(selectedLevel)) return;
 
-    // Check if we already have rows for this selection to avoid infinite loops or re-fetching
-    // But since this hook is used in a component that might mount/unmount, we probably want to fetch.
-    // However, useRoutingSync clears rows on change, so allRows should be empty when we switch.
+    // Set loading state in Redux (Global UI Only - as allowed by plan)
+    dispatch(sessionActions.setLoading(isQueryLoading));
 
-    getSentenceWithTranslation(selectedLevel, selectedSubLevel).then((data) => {
-      if (data) {
-        const hasGapFill = data[0].translation.includes("{") && data[0].translation.includes("}");
-        const processedRows = data.map((row, idx) => {
-          if (hasGapFill) {
-            row.gapTranslation = row.translation;
-            row.translation = row.translation.replaceAll("{", "").replaceAll("}", "");
-          }
-          return {
-            ...row,
-            userInput: "",
-            feedback: null,
-            batchId: Math.floor(idx / BATCH_SIZE),
-            id: `${selectedLevel}-${selectedSubLevel}-${idx}`, // Ensure unique IDs
-            isRetry: false,
-          };
-        });
+    if (isQueryLoading) {
+      machineDispatch({ type: "START" });
+    }
 
-        // If shuffle is enabled, shuffle them
-        const finalRows = shuffleSentences ? shuffleRow(processedRows) : processedRows;
+    if (queryError) {
+      dispatch(sessionActions.setError("Failed to load translations"));
+      machineDispatch({ type: "LOAD_ERROR", message: "Failed to load" });
+    }
 
-        dispatch(sessionActions.setAllRows(finalRows));
-        dispatch(sessionActions.setCurrentBatchIndex(0));
-      }
-    });
-  }, [selectedLevel, selectedSubLevel, dispatch, BATCH_SIZE, shuffleSentences]);
+    if (queryRows) {
+      const hasGapFill = queryRows[0].translation.includes("{") && queryRows[0].translation.includes("}");
+      const processedRows = queryRows.map((row, idx) => {
+        // Clone row to avoid mutating query cache directly if we make changes before deep clone
+        const newRow = { ...row };
+        if (hasGapFill) {
+          newRow.gapTranslation = newRow.translation;
+          newRow.translation = newRow.translation.replaceAll("{", "").replaceAll("}", "");
+        }
+        return {
+          ...newRow,
+          userInput: "",
+          feedback: null,
+          batchId: Math.floor(idx / BATCH_SIZE),
+          id: `${selectedLevel}-${selectedSubLevel}-${idx}`, // Ensure unique IDs
+          isRetry: false,
+        };
+      });
+
+      // If shuffle is enabled, shuffle them
+      const finalRows = shuffleSentences ? shuffleRow(processedRows) : processedRows;
+
+      setAllRowsLocal(finalRows);
+      machineDispatch({ type: "LOAD_SUCCESS" });
+    }
+  }, [
+    queryRows,
+    isQueryLoading,
+    queryError,
+    selectedLevel,
+    selectedSubLevel,
+    dispatch, // Still needed for global UI loading state
+    BATCH_SIZE,
+    shuffleSentences,
+    machineDispatch,
+  ]);
+
+  // Sync FSM batchIndex to Redux (Only if strictly needed for other components? AppRoutes?
+  // AppRoutes gets batchIndex from useTranslationSession now.
+  // TranslationPracticeContainer gets it from props.
+  // So we probably don't need to sync batchIndex to Redux anymore!)
+  // useEffect(() => {
+  //   dispatch(sessionActions.setCurrentBatchIndex(batchIndex));
+  // }, [batchIndex, dispatch]);
 
   return {
     allRows,
     setAllRows,
     rows,
     updateRow,
-    currentBatchIndex,
+    currentBatchIndex: batchIndex,
     setCurrentBatchIndex,
     updateRowInput,
     loadIncorrectSentences,

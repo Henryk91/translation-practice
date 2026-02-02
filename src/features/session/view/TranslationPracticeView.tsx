@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useForm, FormProvider } from "react-hook-form";
 import { Container, Table, TableRow } from "../../../helpers/style";
 import Header from "../../navigation/Header";
 import StickyProgressBar from "../components/StickyProgressBar";
@@ -26,6 +27,8 @@ interface TranslationPracticeViewProps {
   currentBatchIndex: number;
   rows: Row[];
   chatUi: boolean;
+  setAllRows: (rows: Row[]) => void;
+  setCurrentBatchIndex: (index: number) => void;
 
   // Actions
   handleChatCorrect: (row: Row, userInput: string) => void;
@@ -58,12 +61,43 @@ const TranslationPracticeView: React.FC<TranslationPracticeViewProps> = ({
   rows,
   chatUi,
   setChatUi,
+  setAllRows,
+  setCurrentBatchIndex,
 }) => {
+  const methods = useForm({
+    defaultValues: {
+      translations: rows,
+    },
+    mode: "onChange",
+  });
+
+  const { reset, getValues } = methods;
+
+  // Reset form when rows change (e.g. new batch), but check if IDs differ to avoid
+  // wiping interactions if only feedback changed (though usually feedback includes userInput so it should be fine)
+  useEffect(() => {
+    const currentValues = getValues("translations");
+    const currentIds = currentValues?.map((r: any) => r.id).join(",");
+    const newIds = rows.map((r) => r.id).join(",");
+
+    // Compare IDs to see if it's a new batch/set
+    // Also if rows length changes
+    if (currentIds !== newIds || rows.length !== currentValues?.length) {
+      reset({ translations: rows });
+    }
+  }, [rows, reset, getValues]);
+
   return (
     <Container className="main-page">
       <Header handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
       <StickyProgressBar rows={allRows} subLevel={selectedSubLevel} />
-      <CustomUserInput setText={setText} text={text} />
+      <CustomUserInput
+        setText={setText}
+        text={text}
+        allRows={allRows}
+        setAllRows={setAllRows}
+        setCurrentBatchIndex={setCurrentBatchIndex}
+      />
       {chatUi ? (
         <Chat
           initialSentences={rows}
@@ -72,34 +106,36 @@ const TranslationPracticeView: React.FC<TranslationPracticeViewProps> = ({
           onCorrect={handleChatCorrect}
         />
       ) : (
-        <>
-          <Table>
-            <PageHeader sentenceCount={rows.length} />
-            {rows.map((row, idx) => (
-              <TableRow key={row.id}>
-                <TranslationArea
-                  idx={idx}
-                  row={row}
-                  inputRefs={inputRefs}
-                  handleTranslate={handleTranslate}
-                  handleAiCheck={handleAiCheck}
-                  useGapFill={useGapFill}
-                  shiftButtonDown={shiftButtonDown}
-                />
-              </TableRow>
-            ))}
-            <br />
-          </Table>
-          <SettingsRow />
-          <QuickLevelChange
-            nextExercise={handleNextBatch}
-            clickSentenceAgain={() => clickSentenceAgain(rows)}
-            hasMoreBatches={
-              currentBatchIndex < (allRows.length > 0 ? Math.max(...allRows.map((r: Row) => r.batchId || 0)) : 0)
-            }
-            anySentencesAttempted={allRows.some((r) => r.feedback)}
-          />
-        </>
+        <FormProvider {...methods}>
+          <>
+            <Table>
+              <PageHeader sentenceCount={rows.length} />
+              {rows.map((row, idx) => (
+                <TableRow key={row.id}>
+                  <TranslationArea
+                    idx={idx}
+                    row={row}
+                    inputRefs={inputRefs}
+                    handleTranslate={handleTranslate}
+                    handleAiCheck={handleAiCheck}
+                    useGapFill={useGapFill}
+                    shiftButtonDown={shiftButtonDown}
+                  />
+                </TableRow>
+              ))}
+              <br />
+            </Table>
+            <SettingsRow />
+            <QuickLevelChange
+              nextExercise={handleNextBatch}
+              clickSentenceAgain={() => clickSentenceAgain(rows)}
+              hasMoreBatches={
+                currentBatchIndex < (allRows.length > 0 ? Math.max(...allRows.map((r: Row) => r.batchId || 0)) : 0)
+              }
+              anySentencesAttempted={allRows.some((r) => r.feedback)}
+            />
+          </>
+        </FormProvider>
       )}
     </Container>
   );

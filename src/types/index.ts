@@ -45,3 +45,10 @@ export interface Notification {
   type: "success" | "error" | "info" | "warning";
   open: boolean;
 }
+
+export interface ScorePayload {
+  exerciseId: string;
+  score: number;
+  attempts: number;
+  updatedAt: string;
+}

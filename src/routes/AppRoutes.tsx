@@ -28,8 +28,15 @@ const AppRoutes: React.FC = () => {
   // Session Hook
   const BATCH_SIZE = 10;
   const session = useTranslationSession(selectedLevel, selectedSubLevel, BATCH_SIZE);
-  const { allRows, setAllRows, setCurrentBatchIndex, currentBatchIndex, loadIncorrectSentences, clickSentenceAgain } =
-    session;
+  const {
+    allRows,
+    setAllRows,
+    setCurrentBatchIndex,
+    currentBatchIndex,
+    loadIncorrectSentences,
+    clickSentenceAgain,
+    rows,
+  } = session;
 
   // Routing Hook
   const { handleLevelChange, handleSubLevelChange, nextExercise } = useRoutingSync(
@@ -95,6 +102,11 @@ const AppRoutes: React.FC = () => {
               useGapFill={useGapFill}
               shiftButtonDown={shiftButtonDown}
               clickSentenceAgain={clickSentenceAgain}
+              allRows={allRows}
+              currentBatchIndex={currentBatchIndex}
+              rows={rows}
+              setAllRows={setAllRows}
+              setCurrentBatchIndex={setCurrentBatchIndex}
             />
           }
         />
@@ -115,6 +127,11 @@ const AppRoutes: React.FC = () => {
               useGapFill={useGapFill}
               shiftButtonDown={shiftButtonDown}
               clickSentenceAgain={clickSentenceAgain}
+              allRows={allRows}
+              currentBatchIndex={currentBatchIndex}
+              rows={rows}
+              setAllRows={setAllRows}
+              setCurrentBatchIndex={setCurrentBatchIndex}
             />
           }
         />
@@ -135,6 +152,11 @@ const AppRoutes: React.FC = () => {
               useGapFill={useGapFill}
               shiftButtonDown={shiftButtonDown}
               clickSentenceAgain={clickSentenceAgain}
+              allRows={allRows}
+              currentBatchIndex={currentBatchIndex}
+              rows={rows}
+              setAllRows={setAllRows}
+              setCurrentBatchIndex={setCurrentBatchIndex}
             />
           }
         />

@@ -4,6 +4,7 @@ import { settingsActions } from "../store/settings-slice";
 import { confirmTranslationCheck, translateSentence } from "../helpers/requests";
 import { focusNextInput, updateRowFeedback, updateScore } from "../helpers/utils";
 import { Row } from "../types";
+import { useSubmitTranslationMutation } from "./useSubmitTranslationMutation";
 
 export const useTranslationActions = (
   session: any,
@@ -17,6 +18,8 @@ export const useTranslationActions = (
   const dispatch = useDispatch();
   const { mode, shouldSave } = settings;
   const { rows, updateRow, allRows, setRetryRows } = session;
+
+  const submitMutation = useSubmitTranslationMutation();
 
   const handleAiCheck = async (index: number, lastInput: HTMLInputElement | undefined): Promise<void> => {
     const userId = localStorage.getItem("userId");
@@ -57,7 +60,7 @@ export const useTranslationActions = (
 
     if (shouldSave) {
       const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
-      updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
+      updateScore(updatedAllRows, selectedLevel, selectedSubLevel, (payload: any) => submitMutation.mutate(payload));
     }
 
     if (isTranslationCorrect) {
@@ -97,7 +100,7 @@ export const useTranslationActions = (
 
     if (shouldSave) {
       const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
-      updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
+      updateScore(updatedAllRows, selectedLevel, selectedSubLevel, (payload: any) => submitMutation.mutate(payload));
     }
 
     // Check completion
@@ -114,7 +117,7 @@ export const useTranslationActions = (
 
       if (shouldSave) {
         const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
-        updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
+        updateScore(updatedAllRows, selectedLevel, selectedSubLevel, (payload: any) => submitMutation.mutate(payload));
       }
 
       // Check completion
@@ -122,7 +125,7 @@ export const useTranslationActions = (
       const currentBatchComplete = newRows.every((r: Row) => r.feedback);
       dispatch(settingsActions.setIsComplete(currentBatchComplete));
     },
-    [mode, allRows, updateRow, shouldSave, selectedLevel, selectedSubLevel, rows, dispatch],
+    [mode, allRows, updateRow, shouldSave, selectedLevel, selectedSubLevel, rows, dispatch, submitMutation],
   );
 
   return { handleAiCheck, handleTranslate, handleChatCorrect };

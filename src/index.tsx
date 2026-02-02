@@ -11,16 +11,22 @@ import { BrowserRouter } from "react-router-dom";
 
 import { ServiceProvider } from "./providers/ServiceProvider";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <ServiceProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </ServiceProvider>
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        <ServiceProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </ServiceProvider>
+      </Provider>
+    </QueryClientProvider>
   </React.StrictMode>,
 );
 

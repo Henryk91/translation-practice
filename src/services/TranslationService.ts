@@ -1,6 +1,6 @@
 import { ITranslationService } from "./ITranslationService";
 import * as api from "../helpers/requests";
-import { Row, KeyValue, TranslationScore, IncorrectSentences } from "../types";
+import { Row, KeyValue, TranslationScore, IncorrectSentences, ScorePayload } from "../types";
 
 export class TranslationService implements ITranslationService {
   async getLevels(): Promise<KeyValue | undefined> {
@@ -28,7 +28,7 @@ export class TranslationService implements ITranslationService {
     });
   }
 
-  async setTranslationScore(payload: Record<string, unknown>): Promise<any> {
+  async setTranslationScore(payload: ScorePayload): Promise<any> {
     return new Promise((resolve, reject) => {
       api.setTranslationScore(payload, (res: any) => {
         if (res?.error) reject(res.error);

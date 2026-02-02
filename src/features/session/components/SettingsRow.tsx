@@ -24,13 +24,11 @@ import { useSpeechRecognition } from "../../../hooks/useSpeechRecognition";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { settingsActions } from "../../../store/settings-slice";
-import { uiActions } from "../../../store/ui-slice";
+// import { uiActions } from "../../../store/ui-slice"; // Unused
 import {
   VerticalCollapsibleWrapper,
   MenuButton,
-  LevelSelect,
   SpeechContainer,
-  SubLevelOptionItem,
   SettingsButtonWrapper,
   NavWrapper,
   TextInput,

@@ -1,11 +1,12 @@
 import { IncorrectRow, Row } from "../types";
-import { setTranslationScore } from "./requests";
+
 import { saveIncorrectList, saveUserIncorrectList } from "./storage";
 
 export const updateScore = (
   rows: Row[],
   selectedLevel: string | undefined,
   selectedSubLevel: string | undefined,
+  onSave?: (payload: any) => void,
 ): void => {
   let totalCount = 0;
   let correctCount = 0;
@@ -55,9 +56,9 @@ export const updateScore = (
     }
 
     if (!exerciseId.includes("Incorrect Sentences")) {
-      setTranslationScore(toSave, (res: any) => {
-        console.log("Saved:", res?.exerciseId);
-      });
+      if (onSave) {
+        onSave(toSave);
+      }
     }
     if (localStorage.getItem("userId")) {
       saveUserIncorrectList(rows as IncorrectRow[], exerciseId);

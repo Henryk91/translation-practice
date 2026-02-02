@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Container, Table, TableRow } from "../helpers/style";
 import Header from "./Header";
 import StickyProgressBar from "./StickyProgressBar";
@@ -8,23 +9,17 @@ import PageHeader from "./PageHeader";
 import TranslationArea from "./TranslationArea";
 import SettingsRow, { QuickLevelChange } from "./SettingsRow";
 import { Row } from "../types";
+import { RootState } from "../store";
+import { settingsActions } from "../store/settings-slice";
 
 interface TranslationPracticeProps {
   handleLevelChange: (level: string) => void;
   handleSubLevelChange: (subLevel: string) => void;
-  allRows: Row[];
-  rows: Row[];
   selectedSubLevel: string | undefined;
   setText: (text: string) => void;
   text: string;
-  setAllRows: (rows: any) => void;
-  setCurrentBatchIndex: (index: number) => void;
-  currentBatchIndex: number;
-  chatUi: boolean;
-  setChatUi: (val: boolean) => void;
   handleChatCorrect: (row: Row, userInput: string) => void;
   handleNextBatch: (previous?: boolean) => void;
-  updateRowInput: (index: number, value: string) => void;
   inputRefs: React.MutableRefObject<Map<number, HTMLInputElement>>;
   handleTranslate: (index: number, event: HTMLInputElement | undefined, value?: string) => Promise<void>;
   handleAiCheck: (index: number, lastInput: HTMLInputElement | undefined) => Promise<void>;
@@ -36,19 +31,11 @@ interface TranslationPracticeProps {
 const TranslationPractice: React.FC<TranslationPracticeProps> = ({
   handleLevelChange,
   handleSubLevelChange,
-  allRows,
-  rows,
   selectedSubLevel,
   setText,
   text,
-  setAllRows,
-  setCurrentBatchIndex,
-  currentBatchIndex,
-  chatUi,
-  setChatUi,
   handleChatCorrect,
   handleNextBatch,
-  updateRowInput,
   inputRefs,
   handleTranslate,
   handleAiCheck,
@@ -56,17 +43,25 @@ const TranslationPractice: React.FC<TranslationPracticeProps> = ({
   shiftButtonDown,
   clickSentenceAgain,
 }) => {
+  const dispatch = useDispatch();
+
+  // Redux Selectors
+  const { allRows, currentBatchIndex } = useSelector((state: RootState) => state.session);
+  const { chatUi } = useSelector((state: RootState) => state.settings.settings);
+
+  // Derived State
+  const rows = useMemo(() => {
+    return allRows.filter((r) => r.batchId === currentBatchIndex);
+  }, [allRows, currentBatchIndex]);
+
+  // Actions
+  const setChatUi = (val: boolean) => dispatch(settingsActions.setChatUi(val));
+
   return (
     <Container className="main-page">
       <Header handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
       <StickyProgressBar rows={allRows} subLevel={selectedSubLevel} />
-      <CustomUserInput
-        setText={setText}
-        text={text}
-        setAllRows={setAllRows}
-        rows={rows}
-        setCurrentBatchIndex={setCurrentBatchIndex}
-      />
+      <CustomUserInput setText={setText} text={text} />
       {chatUi ? (
         <Chat
           initialSentences={rows}
@@ -83,7 +78,6 @@ const TranslationPractice: React.FC<TranslationPracticeProps> = ({
                 <TranslationArea
                   idx={idx}
                   row={row}
-                  updateRowInput={updateRowInput}
                   inputRefs={inputRefs}
                   handleTranslate={handleTranslate}
                   handleAiCheck={handleAiCheck}

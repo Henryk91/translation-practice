@@ -161,6 +161,7 @@ const InputSwitcher: React.FC<InputSwitcherProps> = ({
         value={value}
         onChange={onChange}
         onKeyUp={(e) => keyPressWrapper(e)}
+        aria-label="Translate sentence"
       />
     );
   }

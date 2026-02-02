@@ -49,14 +49,15 @@ export const useTranslationActions = (
     const newRows = rows.map((r: Row, i: number) => (i === index ? updatedRow : r));
 
     // Update allRows with the main change first
-    setAllRows((current: Row[]) => current.map((r) => (r.id === row.id ? updatedRow : r)));
+    const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
+    setAllRows(updatedAllRows);
 
     // Then handle retry rows
     setRetryRows(newRows, wasFalse, index, row, updatedRow);
 
     setRows(newRows);
 
-    if (shouldSave) updateScore(allRows, selectedLevel, selectedSubLevel);
+    if (shouldSave) updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
     if (isTranslationCorrect) {
       focusNextInput(lastInput, inputRefs.current, index);
     } else {
@@ -88,12 +89,13 @@ export const useTranslationActions = (
     const newRows = rows.map((r: Row, i: number) => (i === index ? updatedRow : r));
 
     // Update allRows with the main change first
-    setAllRows((current: Row[]) => current.map((r) => (r.id === row.id ? updatedRow : r)));
+    const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
+    setAllRows(updatedAllRows);
 
     // Then handle retry rows
     setRetryRows(newRows, wasFalse, index, row, updatedRow);
 
-    if (shouldSave) updateScore(allRows, selectedLevel, selectedSubLevel);
+    if (shouldSave) updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
     setRows(newRows);
 
     const currentBatchComplete = newRows.every((row: Row) => row.feedback);
@@ -104,11 +106,10 @@ export const useTranslationActions = (
     (row: Row, userInput: string) => {
       const updatedRow = updateRowFeedback(mode, { ...row, userInput }, row.translation, true);
 
-      setAllRows((current: Row[]) => {
-        const next = current.map((r) => (r.id === row.id ? updatedRow : r));
-        if (shouldSave) updateScore(next, selectedLevel, selectedSubLevel);
-        return next;
-      });
+      const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
+      setAllRows(updatedAllRows);
+
+      if (shouldSave) updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
 
       const newRows = rows.map((r: Row) => (r.id === row.id ? updatedRow : r));
       setRows(newRows);
@@ -116,7 +117,7 @@ export const useTranslationActions = (
       const currentBatchComplete = newRows.every((r: Row) => r.feedback);
       dispatch(settingsActions.setIsComplete(currentBatchComplete));
     },
-    [mode, shouldSave, selectedLevel, selectedSubLevel, dispatch, setAllRows, setRows, rows],
+    [mode, allRows, setAllRows, shouldSave, selectedLevel, selectedSubLevel, rows, setRows, dispatch],
   );
 
   return { handleAiCheck, handleTranslate, handleChatCorrect };

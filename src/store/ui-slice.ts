@@ -1,11 +1,10 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { Dict } from "styled-components/dist/types";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { initialLevelDict } from "../data/levelSentences";
 
-interface Notification {
-  message: any;
-  type: any;
-  open: any;
+export interface Notification {
+  message: string;
+  type: "success" | "error" | "info" | "warning";
+  open: boolean;
 }
 
 interface UiState {
@@ -14,7 +13,7 @@ interface UiState {
   subLevelSelected?: string;
   levels: string[];
   subLevels?: string[];
-  levelSentences: Dict;
+  levelSentences: Record<string, any>; // TODO: refine specific shape
 }
 
 const initialState: UiState = {
@@ -29,27 +28,23 @@ const uiSlice = createSlice({
   name: "ui",
   initialState,
   reducers: {
-    showNotification(state, action) {
-      state.notification = {
-        message: action.payload.message,
-        type: action.payload.type,
-        open: action.payload.open,
-      };
+    showNotification(state, action: PayloadAction<Notification>) {
+      state.notification = action.payload;
     },
-    setSubLevel(state, actions) {
-      state.subLevelSelected = actions.payload.subLevel;
+    setSubLevel(state, action: PayloadAction<{ subLevel: string | undefined }>) {
+      state.subLevelSelected = action.payload.subLevel;
     },
-    setLevel(state, actions) {
-      state.levelSelected = actions.payload.level;
+    setLevel(state, action: PayloadAction<{ level: string | undefined }>) {
+      state.levelSelected = action.payload.level;
     },
-    setSubLevels(state, actions) {
-      state.subLevels = actions.payload;
+    setSubLevels(state, action: PayloadAction<string[] | undefined>) {
+      state.subLevels = action.payload;
     },
-    setLevels(state, actions) {
-      state.levels = actions.payload;
+    setLevels(state, action: PayloadAction<string[]>) {
+      state.levels = action.payload;
     },
-    setLevelSentences(state, actions) {
-      state.levelSentences = actions.payload;
+    setLevelSentences(state, action: PayloadAction<Record<string, any>>) {
+      state.levelSentences = action.payload;
     },
   },
 });

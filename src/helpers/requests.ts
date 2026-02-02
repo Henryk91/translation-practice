@@ -1,5 +1,5 @@
-import { IncorrectSentences, KeyValue, NextFn } from "../types";
-import { clearLocalScores } from "./utils";
+import { IncorrectSentences, KeyValue, NextFn, Row, TranslationScore } from "../types";
+import { clearLocalScores } from "./storage";
 
 const BACKEND_URL = "https://api.lingodrill.com";
 // const BACKEND_URL = "http://localhost:8080";
@@ -134,7 +134,7 @@ export function logUse(): void {
     });
 }
 
-export function getTranslationScores(next: NextFn): void {
+export function getTranslationScores(next: NextFn<TranslationScore[]>): void {
   apiFetch("/api/translation-scores")
     .then((res: Response) => res.json())
     .then((data) => {
@@ -202,9 +202,9 @@ export const getLevels = async (): Promise<KeyValue | undefined> => {
 };
 
 export const getSentenceWithTranslation = async (
-  selectedLevel: String,
-  selectedSubLevel: String,
-): Promise<KeyValue | undefined> => {
+  selectedLevel: string,
+  selectedSubLevel: string,
+): Promise<Row[] | undefined> => {
   const encodedSelectedLevel = encodeURIComponent(`${selectedLevel}`);
   const encodedSelectedSubLevel = encodeURIComponent(`${selectedSubLevel}`);
 

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { MenuButton, TextArea, TextAreaButtonWrapper, TextAreaWrapper } from "../helpers/style";
 import Tooltip from "./Tooltip";
 import { Row } from "../types";
@@ -6,21 +7,24 @@ import { faSyncAlt, faPaperPlane, faTrash, faLanguage } from "@fortawesome/free-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { splitAndShuffle, splitSentences } from "../helpers/utils";
 import { translateSentence } from "../helpers/requests";
-import { useSelector } from "react-redux";
 import { RootState } from "../store";
+import { sessionActions } from "../store/session-slice";
 
 interface CustomUserInputProps {
   setText: (text: string) => void;
   text: string;
-  setAllRows: (value: React.SetStateAction<Row[]>) => void;
-  rows: Row[];
-  setCurrentBatchIndex: (index: number) => void;
 }
 
-const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text, setAllRows, rows, setCurrentBatchIndex }) => {
+const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text }) => {
+  const dispatch = useDispatch();
   const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
   const levelSentences = useSelector((state: RootState) => state.ui.levelSentences);
+  const { allRows } = useSelector((state: RootState) => state.session);
+
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
+
+  const setAllRows = (rows: Row[]) => dispatch(sessionActions.setAllRows(rows));
+  const setCurrentBatchIndex = (index: number) => dispatch(sessionActions.setCurrentBatchIndex(index));
 
   const generateSentences = () => {
     let textToSplit = text;
@@ -47,7 +51,8 @@ const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text, setAll
 
   const initTranslatedSentences = async () => {
     setLoadingTranslation(true);
-    const sentences = !rows?.length ? generateSentences() : rows;
+    // Use allRows if available, otherwise generate
+    const sentences = !allRows?.length ? generateSentences() : allRows;
     const originalSentences = sentences.map((row) => row.sentence).join(" ");
     const response = await translateSentence(originalSentences);
     const translatedSentences = splitSentences(response);
@@ -68,8 +73,9 @@ const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text, setAll
   if (selectedLevel !== "Own Sentences") return <></>;
   return (
     <TextAreaWrapper>
-      {selectedLevel === "Own Sentences" && !rows.length && (
+      {selectedLevel === "Own Sentences" && !allRows.length && (
         <TextArea
+          aria-label="Enter your own sentences"
           placeholder="Enter English sentences here (make sure they end on a full stop or question mark) then click the paper plane to create the translation rows."
           value={text}
           onChange={(e: any) => setText(e.target.value)}
@@ -79,22 +85,26 @@ const CustomUserInput: React.FC<CustomUserInputProps> = ({ setText, text, setAll
       <TextAreaButtonWrapper>
         {selectedLevel === "Own Sentences" && (
           <>
-            {rows.length ? (
+            {allRows.length ? (
               <Tooltip text="Clear your current sentences and start over">
-                <MenuButton onClick={handleTextClear}>
+                <MenuButton onClick={handleTextClear} aria-label="Clear sentences">
                   <FontAwesomeIcon icon={faTrash} />
                 </MenuButton>
               </Tooltip>
             ) : (
               <Tooltip text="Process these sentences and start the exercise">
-                <MenuButton onClick={handleTextSubmit}>
+                <MenuButton onClick={handleTextSubmit} aria-label="Submit sentences">
                   <FontAwesomeIcon icon={faPaperPlane} />
                 </MenuButton>
               </Tooltip>
             )}
 
             <Tooltip text="Automatically translate these sentences into German using AI">
-              <MenuButton onClick={initTranslatedSentences} disabled={loadingTranslation || text === ""}>
+              <MenuButton
+                onClick={initTranslatedSentences}
+                disabled={loadingTranslation || text === ""}
+                aria-label="Auto-translate sentences"
+              >
                 <FontAwesomeIcon icon={faLanguage} style={{ marginRight: "5px" }} />
                 <FontAwesomeIcon icon={faSyncAlt} spin={loadingTranslation} />
               </MenuButton>

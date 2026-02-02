@@ -26,11 +26,11 @@ export interface TranslationScore {
   score: Number;
 }
 
-export type KeyValue<T = any> = {
+export type KeyValue<T = unknown> = {
   [key: string]: T;
 };
 
-export type NextFn<T = any> = (data: T) => void;
+export type NextFn<T = unknown> = (data: T) => void;
 
 export interface IncorrectSentences {
   exerciseId: string;
@@ -41,7 +41,7 @@ export interface IncorrectSentences {
 }
 
 export interface Notification {
-  message: any;
-  type: any;
-  open: any;
+  message: string;
+  type: "success" | "error" | "info" | "warning";
+  open: boolean;
 }

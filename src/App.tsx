@@ -26,7 +26,7 @@ const App: React.FC = () => {
   const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
   const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
   const settings = useSelector((state: RootState) => state.settings.settings);
-  const { shuffleSentences, useGapFill, chatUi } = settings;
+  const { shuffleSentences, useGapFill } = settings;
 
   // Local State
   const [text, setText] = useState<string>("");
@@ -36,16 +36,8 @@ const App: React.FC = () => {
   // Session Hook
   const BATCH_SIZE = 10;
   const session = useTranslationSession(selectedLevel, selectedSubLevel, BATCH_SIZE);
-  const {
-    allRows,
-    setAllRows,
-    rows,
-    setCurrentBatchIndex,
-    currentBatchIndex,
-    updateRowInput,
-    loadIncorrectSentences,
-    clickSentenceAgain,
-  } = session;
+  const { allRows, setAllRows, setCurrentBatchIndex, currentBatchIndex, loadIncorrectSentences, clickSentenceAgain } =
+    session;
 
   // Routing Hook
   const { handleLevelChange, handleSubLevelChange, nextExercise } = useRoutingSync(
@@ -67,10 +59,6 @@ const App: React.FC = () => {
     selectedLevel,
     selectedSubLevel,
   );
-
-  const setChatUi = (val: boolean) => {
-    dispatch(settingsActions.setChatUi(val));
-  };
 
   // Helper Logic (could be moved to hooks later if complex)
   const setSentenceWithTranslation = useCallback(
@@ -174,19 +162,11 @@ const App: React.FC = () => {
         <TranslationPractice
           handleLevelChange={handleLevelChange}
           handleSubLevelChange={handleSubLevelChange}
-          allRows={allRows}
-          rows={rows}
           selectedSubLevel={selectedSubLevel}
           setText={setText}
           text={text}
-          setAllRows={setAllRows}
-          setCurrentBatchIndex={setCurrentBatchIndex}
-          currentBatchIndex={currentBatchIndex}
-          chatUi={chatUi}
-          setChatUi={setChatUi}
           handleChatCorrect={handleChatCorrect}
           handleNextBatch={handleNextBatch}
-          updateRowInput={updateRowInput}
           inputRefs={inputRefs}
           handleTranslate={handleTranslate}
           handleAiCheck={handleAiCheck}

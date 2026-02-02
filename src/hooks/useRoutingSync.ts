@@ -9,7 +9,6 @@ import { parseUrlParams, updateUrl, splitAndShuffle } from "../helpers/utils";
 export const useRoutingSync = (
   setText: (text: string) => void,
   setAllRows: (rows: any[]) => void,
-  setRows: (rows: any[]) => void,
   setCurrentBatchIndex: (index: number) => void,
   loadIncorrectSentences: () => void,
   BATCH_SIZE: number,

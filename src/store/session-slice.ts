@@ -39,6 +39,13 @@ const sessionSlice = createSlice({
         state.allRows[index] = row;
       }
     },
+    updateRow(state, action: PayloadAction<{ id: string; changes: Partial<Row> }>) {
+      const { id, changes } = action.payload;
+      const index = state.allRows.findIndex((r) => r.id === id);
+      if (index !== -1) {
+        state.allRows[index] = { ...state.allRows[index], ...changes };
+      }
+    },
     setLoading(state, action: PayloadAction<boolean>) {
       state.isLoading = action.payload;
     },

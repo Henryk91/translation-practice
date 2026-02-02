@@ -32,26 +32,11 @@ export const useTranslationSession = (
     [dispatch],
   );
 
-  const setRows = useCallback(
-    (newRows: Row[] | ((current: Row[]) => Row[])) => {
-      let updatedBatchAndMaybeMore: Row[];
-      if (typeof newRows === "function") {
-        updatedBatchAndMaybeMore = newRows(rows);
-      } else {
-        updatedBatchAndMaybeMore = newRows;
-      }
-
-      // Merge updated batch back into allRows
-      const newAllRows = [...allRows];
-      updatedBatchAndMaybeMore.forEach((updatedRow) => {
-        const idx = newAllRows.findIndex((r) => r.id === updatedRow.id);
-        if (idx !== -1) {
-          newAllRows[idx] = updatedRow;
-        }
-      });
-      dispatch(sessionActions.setAllRows(newAllRows));
+  const updateRow = useCallback(
+    (id: string, changes: Partial<Row>) => {
+      dispatch(sessionActions.updateRow({ id, changes }));
     },
-    [dispatch, allRows, rows],
+    [dispatch],
   );
 
   const setCurrentBatchIndex = useCallback(
@@ -171,7 +156,7 @@ export const useTranslationSession = (
     allRows,
     setAllRows,
     rows,
-    setRows,
+    updateRow,
     currentBatchIndex,
     setCurrentBatchIndex,
     updateRowInput,

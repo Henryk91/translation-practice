@@ -43,7 +43,6 @@ const App: React.FC = () => {
   const { handleLevelChange, handleSubLevelChange, nextExercise } = useRoutingSync(
     setText,
     setAllRows,
-    session.setRows,
     setCurrentBatchIndex,
     loadIncorrectSentences,
     BATCH_SIZE,

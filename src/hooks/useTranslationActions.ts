@@ -6,7 +6,7 @@ import { focusNextInput, updateRowFeedback, updateScore } from "../helpers/utils
 import { Row } from "../types";
 
 export const useTranslationActions = (
-  session: any, // Typed correctly in usage or we import type for session
+  session: any,
   settings: any,
   inputRefs: React.MutableRefObject<Map<number, HTMLInputElement>>,
   altButtonDown: boolean,
@@ -16,7 +16,7 @@ export const useTranslationActions = (
 ) => {
   const dispatch = useDispatch();
   const { mode, shouldSave } = settings;
-  const { rows, setRows, allRows, setAllRows, setRetryRows } = session;
+  const { rows, updateRow, allRows, setRetryRows } = session;
 
   const handleAiCheck = async (index: number, lastInput: HTMLInputElement | undefined): Promise<void> => {
     const userId = localStorage.getItem("userId");
@@ -25,12 +25,12 @@ export const useTranslationActions = (
       return;
     }
 
-    setRows((current: Row[]) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
-
     const row = rows[index];
+    updateRow(row.id, { isLoading: true });
+
     const isCorrect = row.isCorrect;
     if (!row.userInput || (isCorrect === undefined && !altButtonDown) || isCorrect === true) {
-      setRows((current: Row[]) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
+      updateRow(row.id, { isLoading: false });
       return;
     }
 
@@ -46,18 +46,20 @@ export const useTranslationActions = (
       isTranslationCorrect ? row.userInput : row.translation,
       isTranslationCorrect,
     );
-    const newRows = rows.map((r: Row, i: number) => (i === index ? updatedRow : r));
 
-    // Update allRows with the main change first
-    const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
-    setAllRows(updatedAllRows);
+    // Update the row in global state
+    updateRow(row.id, updatedRow);
+
+    const newRows = rows.map((r: Row, i: number) => (i === index ? updatedRow : r));
 
     // Then handle retry rows
     setRetryRows(newRows, wasFalse, index, row, updatedRow);
 
-    setRows(newRows);
+    if (shouldSave) {
+      const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
+      updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
+    }
 
-    if (shouldSave) updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
     if (isTranslationCorrect) {
       focusNextInput(lastInput, inputRefs.current, index);
     } else {
@@ -70,12 +72,12 @@ export const useTranslationActions = (
       await handleAiCheck(index, event);
       return;
     }
-    setRows((current: Row[]) => current.map((r, i) => (i === index ? { ...r, isLoading: true } : r)));
+    const row = rows[index];
+    updateRow(row.id, { isLoading: true });
 
     const userInput = value !== undefined ? value : rows[index].userInput;
-    const row = rows[index];
     if (!userInput) {
-      setRows((current: Row[]) => current.map((r, i) => (i === index ? { ...r, isLoading: false } : r)));
+      updateRow(row.id, { isLoading: false });
       return;
     }
 
@@ -86,18 +88,19 @@ export const useTranslationActions = (
     const rowWithInput = { ...row, userInput };
     const updatedRow = updateRowFeedback(mode, rowWithInput, translated, row.aiCorrect);
 
-    const newRows = rows.map((r: Row, i: number) => (i === index ? updatedRow : r));
+    updateRow(row.id, updatedRow);
 
-    // Update allRows with the main change first
-    const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
-    setAllRows(updatedAllRows);
+    const newRows = rows.map((r: Row, i: number) => (i === index ? updatedRow : r));
 
     // Then handle retry rows
     setRetryRows(newRows, wasFalse, index, row, updatedRow);
 
-    if (shouldSave) updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
-    setRows(newRows);
+    if (shouldSave) {
+      const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
+      updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
+    }
 
+    // Check completion
     const currentBatchComplete = newRows.every((row: Row) => row.feedback);
     dispatch(settingsActions.setIsComplete(currentBatchComplete));
   };
@@ -106,18 +109,20 @@ export const useTranslationActions = (
     (row: Row, userInput: string) => {
       const updatedRow = updateRowFeedback(mode, { ...row, userInput }, row.translation, true);
 
-      const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
-      setAllRows(updatedAllRows);
+      // Update row
+      updateRow(row.id, updatedRow);
 
-      if (shouldSave) updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
+      if (shouldSave) {
+        const updatedAllRows = allRows.map((r: Row) => (r.id === row.id ? updatedRow : r));
+        updateScore(updatedAllRows, selectedLevel, selectedSubLevel);
+      }
 
+      // Check completion
       const newRows = rows.map((r: Row) => (r.id === row.id ? updatedRow : r));
-      setRows(newRows);
-
       const currentBatchComplete = newRows.every((r: Row) => r.feedback);
       dispatch(settingsActions.setIsComplete(currentBatchComplete));
     },
-    [mode, allRows, setAllRows, shouldSave, selectedLevel, selectedSubLevel, rows, setRows, dispatch],
+    [mode, allRows, updateRow, shouldSave, selectedLevel, selectedSubLevel, rows, dispatch],
   );
 
   return { handleAiCheck, handleTranslate, handleChatCorrect };

@@ -1,0 +1,110 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Session Components Snapshots PageHeader renders correctly when no level selected 1`] = `
+<DocumentFragment>
+  <div
+    class="sc-fbQrwq jhUVmf"
+  >
+    <div
+      class="sc-jytpVa fxEINg"
+    >
+      <p>
+        Please select a Level and Sub Level from the menu to start
+      </p>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Session Components Snapshots PageHeader renders correctly with selected Level and SubLevel 1`] = `
+<DocumentFragment>
+  <div
+    class="sc-fbQrwq jhUVmf"
+  >
+    <div
+      class="sc-jytpVa fxEINg"
+    >
+      <div>
+        Level: 
+        <span
+          style="font-weight: bold;"
+        >
+          A1
+        </span>
+      </div>
+      <div
+        style="margin: 10px 0px 0px;"
+      >
+        Sub Level: 
+        <span
+          style="font-weight: bold;"
+        >
+          Unit 1
+        </span>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Session Components Snapshots PageHeader renders success message if Incorrect Sentences and count 0 1`] = `
+<DocumentFragment>
+  <div
+    class="sc-fbQrwq jhUVmf"
+  >
+    <div
+      class="sc-jytpVa fxEINg"
+    >
+      <div>
+        Level: 
+        <span
+          style="font-weight: bold;"
+        >
+          Incorrect Sentences
+        </span>
+      </div>
+      <h3
+        style="margin: 10px 0px 0px;"
+      >
+        Well Done! You have no incorrect sentences!
+      </h3>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`Session Components Snapshots StickyProgressBar renders correctly with mixed progress 1`] = `
+<DocumentFragment>
+  <div
+    class="sc-bRKDuR gTjgNp"
+  >
+    <div
+      class="sc-hvigdm kUbsOt"
+    >
+      Unit Test
+    </div>
+    <div
+      class="sc-fhHczv wDAGY"
+    >
+      <div
+        class="sc-ggWZvA iqCbdH"
+      >
+        <div
+          class="sc-dTvVRJ bvToa-D"
+        />
+        <div
+          class="sc-dTvVRJ UirWD"
+        />
+        <div
+          class="sc-dTvVRJ jWJPhK"
+        />
+      </div>
+      <span
+        class="sc-jwTyAe glSsnY"
+      >
+        67%
+      </span>
+    </div>
+  </div>
+</DocumentFragment>
+`;

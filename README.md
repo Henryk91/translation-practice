@@ -37,39 +37,103 @@ Check out the live application here: [Translation Practice Live](https://henryk.
 
    The app will be available at `http://localhost:3000`.
 
+## Available Scripts
+
+### `npm start`
+
+Runs the app in development mode. Open [http://localhost:3000](http://localhost:3000) to view it in the browser. The app will connect to your real backend API.
+
+### `npm test`
+
+Launches the test runner in interactive watch mode.
+
+### `npm run test:ci`
+
+Runs all tests with coverage reporting. This is used in CI/CD pipelines and enforces coverage thresholds (80% global, 100% for helpers).
+
+### `npx playwright test`
+
+Runs end-to-end tests using Playwright across Chromium, Firefox, and WebKit browsers. MSW (Mock Service Worker) is automatically enabled for E2E tests.
+
+### `npm run build`
+
+Builds the app for production to the `build` folder.
+
+## Testing
+
+This project has comprehensive test coverage across multiple levels:
+
+### Unit Tests
+
+- **Helpers**: Core logic in `src/helpers/` (score-logic, feedback-logic, etc.)
+- **Hooks**: Custom React hooks with behavior-focused tests
+- **Components**: Individual component testing with React Testing Library
+
+### Integration Tests
+
+- Full feature flows testing multiple components together
+- MSW for API mocking
+- Redux state management testing
+
+### End-to-End Tests (Playwright)
+
+- Cross-browser testing (Chromium, Firefox, WebKit)
+- User journey validation
+- Mobile responsiveness testing
+
+**Current Status**: 58/60 Jest tests passing, 9/9 Playwright tests passing
+
+### Mock Service Worker (MSW)
+
+MSW is used to mock API calls during testing:
+
+- **Development**: Disabled by default (uses real backend)
+- **E2E Tests**: Automatically enabled via `REACT_APP_USE_MSW=true`
+- **Jest Tests**: Always enabled via `setupTests.ts`
+
+To enable MSW in development (for testing without backend):
+
+```bash
+REACT_APP_USE_MSW=true npm start
+```
+
+### Coverage Thresholds
+
+The project enforces code coverage thresholds:
+
+- **Global**: 80% (branches, functions, lines, statements)
+- **Helpers**: 100% for all files in `src/helpers/`
+
+Run `npm run test:ci` to check coverage against these thresholds.
+
+## Technologies Used
+
+- **React**: Frontend framework
+- **TypeScript**: Type-safe JavaScript
+- **Redux Toolkit**: State management
+- **React Router**: Client-side routing
+- **TanStack Query**: Server state management and data fetching
+- **Styled Components**: CSS-in-JS for styling
+- **FontAwesome**: Icons for buttons and UI elements
+- **MSW**: API mocking for tests
+- **Playwright**: End-to-end testing
+- **Jest & React Testing Library**: Unit and integration testing
+
+## API Integration
+
+The app uses an API endpoint (`https://note.henryk.co.za/api/`) for:
+
+- Fetching translation levels and sentences
+- Validating translations
+- Storing user progress (when authenticated)
+
+Ensure the API is accessible for the app to function correctly.
+
 ## Deployment
 
 To deploy the app to GitHub Pages:
 
-- Update the ./github/workflows/deploy.yml
-
-## Scripts
-
-- `npm start`: Start the development server.
-- `npm run build`: Build the app for production.
-- `npm test`: Run tests.
-- `npm run eject`: Eject the Create React App configuration.
-- `npm run deploy:github`: Build and deploy the app to GitHub Pages.
-
-## Technologies Used
-
-- **React**: Frontend framework.
-- **TypeScript**: Type-safe JavaScript.
-- **Styled Components**: CSS-in-JS for styling.
-- **FontAwesome**: Icons for buttons and UI elements.
-- **Web Vitals**: Performance monitoring.
-
-## API Integration
-
-The app uses an API endpoint (`https://note.henryk.co.za/api/translate`) to translate sentences. Ensure the API is accessible for the app to function correctly.
-
-## Testing
-
-The project uses Jest and React Testing Library for testing. To run tests:
-
-```bash
-npm test
-```
+- Update the `.github/workflows/deploy.yml`
 
 ## License
 
@@ -77,9 +141,11 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 ## Acknowledgments
 
-- [Create React App](https://create-react-app.dev/) for the project setup.
-- [FontAwesome](https://fontawesome.com/) for icons.
-- [Styled Components](https://styled-components.com/) for styling.
+- [Create React App](https://create-react-app.dev/) for the project setup
+- [FontAwesome](https://fontawesome.com/) for icons
+- [Styled Components](https://styled-components.com/) for styling
+- [MSW](https://mswjs.io/) for API mocking
+- [Playwright](https://playwright.dev/) for E2E testing
 
 ## Contributing
 

@@ -16,19 +16,37 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 const queryClient = new QueryClient();
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
-root.render(
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <Provider store={store}>
-        <ServiceProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </ServiceProvider>
-      </Provider>
-    </QueryClientProvider>
-  </React.StrictMode>,
-);
+
+async function enableMocking() {
+  // Only use MSW during E2E tests, not in normal development
+  // E2E tests can be detected by checking if we're in a Playwright context
+  // For now, we disable MSW in development to allow real API calls
+  // If you need MSW for development, set REACT_APP_USE_MSW=true in your .env
+  if (process.env.REACT_APP_USE_MSW === "true") {
+    const { worker } = await import("./mocks/browser");
+    console.log("[MSW] Starting service worker...");
+    await worker.start({
+      onUnhandledRequest: "bypass",
+    });
+    console.log("[MSW] Service worker started successfully");
+  }
+}
+
+enableMocking().then(() => {
+  root.render(
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <Provider store={store}>
+          <ServiceProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </ServiceProvider>
+        </Provider>
+      </QueryClientProvider>
+    </React.StrictMode>,
+  );
+});
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

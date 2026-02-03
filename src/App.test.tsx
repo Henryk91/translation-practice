@@ -1,18 +1,13 @@
 import React from "react";
-import { render } from "@testing-library/react";
-import { Provider } from "react-redux";
-import { MemoryRouter } from "react-router-dom";
+import { render, screen, waitFor } from "./test-utils";
 import App from "./App";
-import store from "./store";
 
-test("renders app without crashing", () => {
-  render(
-    <Provider store={store}>
-      <MemoryRouter>
-        <App />
-      </MemoryRouter>
-    </Provider>,
-  );
-  // Check for Header or side bar element
+test("renders app without crashing", async () => {
+  render(<App />);
+
+  // Wait for async initialization to complete
+  await waitFor(() => {
+    expect(screen.getByText("Select Your Level")).toBeInTheDocument();
+  });
   // const linkElement = screen.getByText(/Translation Practice/i); // Header might not have text
 });

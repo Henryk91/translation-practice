@@ -15,10 +15,7 @@ export const updateScore = (
   const exerciseId = `${selectedLevel}-${selectedSubLevel}`;
 
   rows.forEach((row) => {
-    if (
-      Object.prototype.hasOwnProperty.call(row, "isCorrect") &&
-      !Object.prototype.hasOwnProperty.call(row, "isRetry")
-    ) {
+    if (Object.prototype.hasOwnProperty.call(row, "isCorrect") && !row.isRetry) {
       totalCount++;
       if (row.isCorrect) {
         correctCount++;

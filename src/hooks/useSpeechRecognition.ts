@@ -42,8 +42,6 @@ export function useSpeechRecognition(lang = "de-DE", start: boolean) {
   } | null>(null);
 
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    if (userId !== "68988da2b947c4d46023d679") return;
     if (!start) return;
     const Ctor = getSpeechRecognitionCtor();
     if (!Ctor) return;
@@ -56,7 +54,7 @@ export function useSpeechRecognition(lang = "de-DE", start: boolean) {
     const restoreOriginalAndInsert = (
       input: HTMLInputElement | HTMLTextAreaElement,
       textToInsert: string,
-      isFinal: boolean
+      isFinal: boolean,
     ) => {
       let state = originalInputStateRef.current;
       const currentSelectionStart = input.selectionStart ?? input.value.length;

@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 // import { useDispatch } from "react-redux"; // Removed as we no longer dispatch inputs
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
 import { TableCell, InputWrapper, FeedBackTableCell, FeedbackSpan, Button } from "../../../helpers/style";
 import { Row } from "../../../types";
 import { focusNextInput } from "../../../helpers/utils";
@@ -33,6 +35,7 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
   const blurTimeout = useRef<NodeJS.Timeout | null>(null);
   const [hasFocus, setHasFocus] = useState<boolean>(false);
   const [lastEdited, setLastEdited] = useState<HTMLInputElement | undefined>();
+  const timerSpeed = useSelector((state: RootState) => state.settings.settings.timerSpeed ?? 1);
 
   const handleBlur = () => {
     // No need to dispatch/commit to Redux on blur anymore as form state handles it locally
@@ -74,10 +77,14 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
     setHasFocus(true);
   };
 
-  const getTimerDuration = useCallback((sentence: string) => {
-    const words = sentence.trim().split(/\s+/).filter(Boolean).length;
-    return 2 + 0.5 * words;
-  }, []);
+  const getTimerDuration = useCallback(
+    (sentence: string) => {
+      const words = sentence.trim().split(/\s+/).filter(Boolean).length;
+      let baseDuration = 2 + 0.5 * words;
+      return timerSpeed > 0 ? baseDuration / timerSpeed : baseDuration;
+    },
+    [timerSpeed],
+  );
 
   useEffect(() => {
     // Focus first input on mount if it exists
@@ -158,7 +165,7 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
                       handleTranslate(idx, lastEdited, value || "");
                     }}
                     disabled={row.isLoading || !value}
-                    className={hasFocus && !row.isCorrect ? "timer-btn animate" : ""}
+                    className={hasFocus && !row.isCorrect && timerSpeed > 0 ? "timer-btn animate" : ""}
                     style={{ "--duration": `${getTimerDuration(row.sentence)}s` } as React.CSSProperties}
                     aria-label="Check Translation"
                   >
@@ -174,7 +181,7 @@ const TranslationArea: React.FC<TranslationAreaProps> = ({
           ) : (
             <Tooltip text="Get AI feedback on your translation for more nuance">
               <Button
-                className={hasFocus ? "timer-btn animate" : ""}
+                className={hasFocus && timerSpeed > 0 ? "timer-btn animate" : ""}
                 onClick={() => handleAiCheck(idx, lastEdited)}
                 // Check value disabled state? row.userInput is from Redux, might be stale if we removed sync?
                 // We should use RHF value check.

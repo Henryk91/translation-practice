@@ -14,6 +14,9 @@ import {
   faCompass,
   faTimes,
   faCommentDots,
+  faTachometerAlt,
+  faHourglassHalf,
+  faBan,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NoticeModal from "./NoticeModal";
@@ -40,11 +43,30 @@ export const SettingsRow = () => {
   const [showMicNotice, setShowMicNotice] = React.useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = React.useState(false);
   const settings = useSelector((state: RootState) => state.settings.settings);
-  const { shouldSave, shuffleSentences, useMic, useGapFill, hasGapFill, redoErrors, chatUi, showNav } = settings;
+  const {
+    shouldSave,
+    shuffleSentences,
+    useMic,
+    useGapFill,
+    hasGapFill,
+    redoErrors,
+    chatUi,
+    showNav,
+    timerSpeed = 1,
+  } = settings;
 
   const setRedoErrors = (redoErrors: boolean) => {
     dispatch(settingsActions.setRedoErrors(redoErrors));
     localStorage.setItem("redoErrors", JSON.stringify(redoErrors));
+  };
+
+  const handleTimerSpeedToggle = () => {
+    let nextSpeed = 1;
+    if (timerSpeed === 1) nextSpeed = 0.5;
+    else if (timerSpeed === 0.5) nextSpeed = 0;
+
+    dispatch(settingsActions.setTimerSpeed(nextSpeed));
+    localStorage.setItem("timerSpeed", JSON.stringify(nextSpeed));
   };
 
   const configUseGapFill = () => {
@@ -76,6 +98,7 @@ export const SettingsRow = () => {
     save: "Automatically save your progress and score to your profile",
     gapFill: "Practice by filling in specific missing words instead of whole sentences",
     errorRetry: "Incorrectly answered sentences will be repeated 3 times to reinforce learning",
+    timerSpeed: "Controls timer speed. Click to toggle between Normal, Slow, and Disabled",
     chat: "Switch to an interactive chat interface for your practice",
     mic: "Use voice-to-text to answer questions verbally",
     feedback: "Report a bug or suggest an improvement",
@@ -189,6 +212,23 @@ export const SettingsRow = () => {
             >
               <RedoThreeIcon count={redoErrors ? 3 : 1} />
               <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Error Retry</div>
+            </MenuButton>
+          </Tooltip>
+
+          <Tooltip text={tooltips.timerSpeed}>
+            <MenuButton
+              onClick={handleTimerSpeedToggle}
+              style={{
+                color:
+                  timerSpeed === 1 ? "rgba(49, 196, 141, 1)" : timerSpeed === 0.5 ? "white" : "rgba(236, 80, 80, 1)",
+              }}
+            >
+              <FontAwesomeIcon
+                icon={timerSpeed === 1 ? faTachometerAlt : timerSpeed === 0.5 ? faHourglassHalf : faBan}
+              />
+              <div style={{ fontSize: "12px", color: "white" }}>
+                {timerSpeed === 1 ? "Speed" : timerSpeed === 0.5 ? "Slow" : "Off"}
+              </div>
             </MenuButton>
           </Tooltip>
         </div>

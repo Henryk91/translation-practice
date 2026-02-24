@@ -36,6 +36,11 @@ export const useRoutingSync = (
     if (useGapFill !== null) {
       dispatch(settingsActions.setUseGapFill(JSON.parse(useGapFill)));
     }
+
+    const timerSpeed = localStorage.getItem("timerSpeed");
+    if (timerSpeed !== null) {
+      dispatch(settingsActions.setTimerSpeed(JSON.parse(timerSpeed)));
+    }
   }, [dispatch]);
 
   const handleSubLevelChange = (subLevel: string): void => {

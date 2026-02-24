@@ -12,6 +12,7 @@ interface SettingsState {
   chatUi: boolean;
   mode: "easy" | "hard";
   showNav: boolean;
+  timerSpeed: number;
 }
 
 const settings: SettingsState = {
@@ -26,6 +27,7 @@ const settings: SettingsState = {
   chatUi: false,
   mode: "easy",
   showNav: false,
+  timerSpeed: 1,
 };
 const initialState: { settings: SettingsState } = {
   settings,
@@ -67,6 +69,9 @@ const settingsSlice = createSlice({
     },
     setNav(state, actions) {
       state.settings.showNav = actions.payload;
+    },
+    setTimerSpeed(state, actions) {
+      state.settings.timerSpeed = actions.payload;
     },
   },
 });

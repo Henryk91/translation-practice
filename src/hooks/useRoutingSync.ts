@@ -58,6 +58,7 @@ export const useRoutingSync = (
       dispatch(uiActions.setSubLevel({ subLevel: undefined }));
       localStorage.removeItem("selectedSubLevel");
       updateUrl(level, undefined, navigate);
+      loadIncorrectSentences();
       return;
     }
 
@@ -120,8 +121,9 @@ export const useRoutingSync = (
       dispatch(uiActions.setSubLevel({ subLevel: undefined }));
       localStorage.removeItem("selectedSubLevel");
       if (!urlLevel || urlSubLevel) updateUrl(level, undefined, navigate);
+      loadIncorrectSentences();
     },
-    [dispatch, navigate],
+    [dispatch, navigate, loadIncorrectSentences],
   );
 
   const handleLevelWithSubLevels = useCallback(

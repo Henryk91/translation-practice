@@ -90,9 +90,10 @@
 
 .chat-button-container {
   display: flex;
-  @media (max-width: 600px) {
-    justify-content: center;
-  }
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  margin-top: 10px;
 }
 
 .messages {
@@ -135,16 +136,14 @@
 
 .translation-input {
   display: flex;
+  flex-direction: column;
   align-items: center;
   padding: 10px;
   /* background-color: #3a3a3c; */
   background-color: rgba(20, 23, 34, 0.5);
 
   border: 1px solid rgb(255 255 255 / 0.1);
-  @media (max-width: 600px) {
-    flex-direction: column;
-    align-items: stretch;
-  }
+  border-radius: 12px;
 }
 
 .chat-textarea {
@@ -152,7 +151,6 @@
   border-radius: 12px;
   border: none;
   padding: 10px;
-  margin-right: 10px;
   @media (max-width: 600px) {
     margin-right: 0;
     margin-bottom: 10px;
@@ -168,8 +166,8 @@
   color: #e0e0e0;
   width: -webkit-fill-available;
   outline: 1px solid rgb(255 255 255 / 0.1);
-  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-    "Noto Color Emoji";
+  font-family:
+    ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 .chat-button {

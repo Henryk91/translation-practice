@@ -184,7 +184,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
             />
             <div className="chat-button-container">
               <Tooltip text="Show the correct translation for this sentence">
-                <MenuButton onClick={() => showAnswer()} style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}>
+                <MenuButton onClick={() => showAnswer()} style={{ color: "rgba(49, 196, 141, 1)" }}>
                   <FontAwesomeIcon icon={faLightbulb} />
                   <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Hint</div>
                 </MenuButton>
@@ -193,14 +193,14 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
                 <MenuButton
                   onClick={() => checkTranslation()}
                   disabled={!userInput.trim() && messages.length > 0}
-                  style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}
+                  style={{ color: "rgba(49, 196, 141, 1)" }}
                 >
                   <FontAwesomeIcon icon={faPaperPlane} />
                   <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Send</div>
                 </MenuButton>
               </Tooltip>
               <Tooltip text="Leave chat mode and return to the main exercise view">
-                <MenuButton onClick={() => hideChat()} style={{ color: "rgba(49, 196, 141, 1)", padding: "5px" }}>
+                <MenuButton onClick={() => hideChat()} style={{ color: "rgba(49, 196, 141, 1)" }}>
                   <FontAwesomeIcon icon={faCommentSlash} />
                   <div style={{ fontSize: "12px", color: "white", zIndex: "10" }}>Hide Chat</div>
                 </MenuButton>

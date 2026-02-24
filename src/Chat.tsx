@@ -1,13 +1,22 @@
-import { faCommentSlash, faLightbulb, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCommentSlash,
+  faLightbulb,
+  faPaperPlane,
+  faMicrophone,
+  faMicrophoneSlash,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./App.css";
-import { MenuButton } from "./helpers/style";
+import { MenuButton, SpeechContainer, TextInput } from "./helpers/style";
 import Tooltip from "./components/design-system/Tooltip";
 import { Row } from "./types";
 import { RootState } from "./store";
 import { chatActions } from "./store/chat-slice";
+import { settingsActions } from "./store/settings-slice";
+import NoticeModal from "./features/session/components/NoticeModal";
+import { useSpeechRecognition } from "./hooks/useSpeechRecognition";
 
 interface ChatProps {
   level?: string;
@@ -23,10 +32,35 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
   const messages = useSelector((state: RootState) => state.chat.messages);
   const currentSentence = useSelector((state: RootState) => state.chat.currentSentence);
   const [userInput, setUserInput] = useState<string>("");
+  const [previousInput, setPreviousInput] = useState<string>("");
   const [checkPunctuation] = useState<boolean>(false);
   const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
   const sentInitMessage = useRef(false);
   const subLevelRef = useRef(selectedSubLevel);
+  const userInputRef = useRef<HTMLTextAreaElement>(null);
+  const useMic = useSelector((state: RootState) => state.settings.settings.useMic);
+  const recognition = useSpeechRecognition("de-DE", useMic);
+  const [showMicNotice, setShowMicNotice] = useState(false);
+
+  const handleMicClick = () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      setShowMicNotice(true);
+      return;
+    }
+
+    if (useMic) {
+      recognition?.current?.stop();
+    } else {
+      recognition?.current?.start();
+
+      setTimeout(() => {
+        userInputRef.current?.focus();
+        endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 10);
+    }
+    dispatch(settingsActions.setUseMic(!useMic));
+  };
 
   useEffect(() => {
     // Only run welcome message/first sentence if messages are empty
@@ -68,6 +102,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
         { text: `${currentSentence?.translation ?? ""}`, type: "bot" },
       ]),
     );
+    userInputRef.current?.focus();
   };
 
   const checkTranslation = () => {
@@ -116,6 +151,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
         }
       }
       setUserInput("");
+      setPreviousInput(userInput);
     } else {
       const userWords = normalizedUserInput.split(" ");
       const correctWords = finalCorrectTranslation.split(" ");
@@ -154,6 +190,13 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (userInput !== "" && previousInput !== "" && userInput === previousInput) {
+      setUserInput("");
+    }
+  }, [userInput, previousInput]);
+
   return (
     <div className="chat-component-wrapper">
       <div className="chat-container">
@@ -176,13 +219,28 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
         {messages.length > 0 && (
           <div className="translation-input">
             <textarea
+              ref={userInputRef}
               className="chat-textarea"
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               placeholder="Type your translation here..."
               onKeyDown={handleKeyDown}
             />
+            {useMic && (
+              <SpeechContainer>
+                <TextInput id="interim-text" />
+              </SpeechContainer>
+            )}
             <div className="chat-button-container">
+              <Tooltip text="Use voice-to-text to answer questions verbally">
+                <MenuButton
+                  onClick={handleMicClick}
+                  style={{ color: useMic ? "rgba(49, 196, 141, 1)" : "rgba(236, 80, 80, 1)", padding: "1px" }}
+                >
+                  <FontAwesomeIcon icon={useMic ? faMicrophoneSlash : faMicrophone} />
+                  <div style={{ fontSize: "12px", color: "white" }}>Use Mic</div>
+                </MenuButton>
+              </Tooltip>
               <Tooltip text="Show the correct translation for this sentence">
                 <MenuButton onClick={() => showAnswer()} style={{ color: "rgba(49, 196, 141, 1)" }}>
                   <FontAwesomeIcon icon={faLightbulb} />
@@ -209,6 +267,12 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
           </div>
         )}
       </div>
+      <NoticeModal
+        isOpen={showMicNotice}
+        onClose={() => setShowMicNotice(false)}
+        title="Microphone Feature Restricted"
+        message="Voice-to-text functionality is currently only available for authenticated users. Please log in to your account to enable microphone support for your translation sessions."
+      />
     </div>
   );
 };

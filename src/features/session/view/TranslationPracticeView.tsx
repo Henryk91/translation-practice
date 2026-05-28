@@ -9,6 +9,7 @@ import PageHeader from "../components/PageHeader";
 import TranslationArea from "../components/TranslationArea";
 import SettingsRow, { QuickLevelChange } from "../components/SettingsRow";
 import { Row } from "../../../types";
+import EnterHintToast from "../../../components/design-system/EnterHintToast";
 
 interface TranslationPracticeViewProps {
   // Navigation/Configuration
@@ -89,6 +90,7 @@ const TranslationPracticeView: React.FC<TranslationPracticeViewProps> = ({
 
   return (
     <Container className="main-page">
+      <EnterHintToast />
       <Header handleLevelChange={handleLevelChange} handleSubLevelChange={handleSubLevelChange} />
       <StickyProgressBar rows={allRows} subLevel={selectedSubLevel} />
       <CustomUserInput

@@ -16,6 +16,7 @@ import { PostHogProvider, PostHogErrorBoundary } from "@posthog/react";
 posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
   api_host: process.env.REACT_APP_PUBLIC_POSTHOG_HOST,
   defaults: "2026-01-30",
+  persistence: "localStorage",
 });
 
 const queryClient = new QueryClient();

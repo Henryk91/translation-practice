@@ -25,6 +25,7 @@ import Tooltip from "../../../components/design-system/Tooltip";
 import { getScoreColorRange } from "../../../helpers/utils";
 import { useSpeechRecognition } from "../../../hooks/useSpeechRecognition";
 import { useDispatch, useSelector } from "react-redux";
+import { usePostHog } from "@posthog/react";
 import { RootState } from "../../../store";
 import { settingsActions } from "../../../store/settings-slice";
 // import { uiActions } from "../../../store/ui-slice"; // Unused
@@ -39,6 +40,7 @@ import {
 
 export const SettingsRow = () => {
   const dispatch = useDispatch();
+  const posthog = usePostHog();
   const [showAdvanced, setShowAdvanced] = React.useState(false);
   const [showMicNotice, setShowMicNotice] = React.useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = React.useState(false);
@@ -78,6 +80,7 @@ export const SettingsRow = () => {
     dispatch(settingsActions.setUseMic(val));
   };
   const setChatUi = (val: boolean) => {
+    if (val) posthog?.capture("chat_mode_enabled");
     dispatch(settingsActions.setChatUi(val));
   };
 

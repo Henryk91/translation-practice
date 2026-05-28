@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
+import { usePostHog } from "@posthog/react";
 import Tooltip from "../../../components/design-system/Tooltip";
 
 const ModalOverlay = styled.div<{ $isOpen: boolean }>`
@@ -151,6 +152,7 @@ interface FeedbackModalProps {
 }
 
 const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
+  const posthog = usePostHog();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -186,6 +188,7 @@ const FeedbackModal: React.FC<FeedbackModalProps> = ({ isOpen, onClose }) => {
       });
 
       if (res.ok) {
+        posthog?.capture("feedback_submitted");
         setSuccess(true);
         setName("");
         setEmail("");

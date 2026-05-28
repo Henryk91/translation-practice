@@ -10,6 +10,7 @@ import { settingsActions } from "../../store/settings-slice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store";
 import { clearLocalScores } from "../../helpers/storage";
+import { usePostHog } from "@posthog/react";
 
 interface SideBarProps {
   handleLevelChange: (level: string) => void;
@@ -18,6 +19,7 @@ interface SideBarProps {
 
 const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChange }) => {
   const dispatch = useDispatch();
+  const posthog = usePostHog();
   const selectedLevel = useSelector((state: RootState) => state.ui.levelSelected);
   const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
   const subLevels = useSelector((state: RootState) => state.ui.subLevels);
@@ -70,6 +72,8 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
     if (loggedIn) {
       logoutUser().then((res) => {
         if (res?.ok) {
+          posthog?.capture("user_logged_out");
+          posthog?.reset();
           localStorage.removeItem("userId");
           clearLocalScores();
           window.location.reload();
@@ -81,12 +85,18 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
   };
 
   const handleMenuLevelClick = (name: string) => {
+    posthog?.capture("level_selected", { level: name });
     handleLevelChange(name as any);
     if (noSubLevel.includes(name)) {
       document.getElementById("toggle")?.click();
       return;
     }
     setShowLevels(false);
+  };
+
+  const handleSubLevelClick = (lvl: string) => {
+    posthog?.capture("sub_level_selected", { level: selectedLevel, sub_level: lvl });
+    handleSubLevelChange(lvl as any);
   };
 
   return (
@@ -246,7 +256,7 @@ const SideBar: React.FC<SideBarProps> = ({ handleLevelChange, handleSubLevelChan
             {subLevels.map((lvl) => (
               <label key={lvl} htmlFor="toggle" style={{ textAlign: "left" }}>
                 <SubLevelOptionItem
-                  onClick={() => handleSubLevelChange(lvl as any)}
+                  onClick={() => handleSubLevelClick(lvl)}
                   $active={selectedSubLevel === lvl}
                   style={{
                     color: selectedSubLevel === lvl ? "rgba(49, 196, 141, 1)" : "",

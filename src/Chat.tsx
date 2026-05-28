@@ -8,6 +8,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { usePostHog } from "@posthog/react";
 import "./App.css";
 import { MenuButton, SpeechContainer, TextInput } from "./helpers/style";
 import Tooltip from "./components/design-system/Tooltip";
@@ -28,6 +29,7 @@ interface ChatProps {
 
 const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, onCorrect }) => {
   const dispatch = useDispatch();
+  const posthog = usePostHog();
   const selectedSubLevel = useSelector((state: RootState) => state.ui.subLevelSelected);
   const messages = useSelector((state: RootState) => state.chat.messages);
   const currentSentence = useSelector((state: RootState) => state.chat.currentSentence);
@@ -96,6 +98,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
   }, [selectedSubLevel, initialSentences, messages.length, dispatch]);
 
   const showAnswer = () => {
+    posthog?.capture("chat_hint_used");
     dispatch(
       chatActions.addMessages([
         { text: `Show Answer`, type: "user" },
@@ -123,6 +126,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
     // Check if user input matches correct translation (ignoring spaces)
     let feedbackMessage: string;
     if (finalUserInput === finalCorrectTranslation) {
+      posthog?.capture("chat_translation_submitted", { is_correct: true });
       onCorrect(currentSentence, userInput);
 
       // Find the next uncompleted sentence in the current batch, excluding the one we just finished
@@ -164,6 +168,7 @@ const Chat: React.FC<ChatProps> = ({ initialSentences, hideChat, goToNextLevel, 
         })
         .join(" ");
 
+      posthog?.capture("chat_translation_submitted", { is_correct: false });
       if (userInput.trim() === "") {
         feedbackMessage = "You didn't enter any translation. Try again.";
       } else {

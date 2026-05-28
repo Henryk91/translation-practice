@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
+import { usePostHog } from "@posthog/react";
 import { settingsActions } from "../store/settings-slice";
 import { confirmTranslationCheck, translateSentence } from "../helpers/requests";
 import { focusNextInput, updateRowFeedback, updateScore } from "../helpers/utils";
@@ -16,6 +17,7 @@ export const useTranslationActions = (
   selectedSubLevel: string | undefined,
 ) => {
   const dispatch = useDispatch();
+  const posthog = usePostHog();
   const { mode, shouldSave } = settings;
   const { rows, updateRow, allRows, setRetryRows } = session;
 
@@ -42,6 +44,13 @@ export const useTranslationActions = (
     checkSentence = mode === "easy" ? checkSentence.toLowerCase() : checkSentence;
     const isTranslationCorrect = await confirmTranslationCheck(promptWords, checkSentence);
     const wasFalse = row.isCorrect === false || row.aiCorrect === false;
+
+    posthog?.capture("ai_check_requested", {
+      level: selectedLevel,
+      sub_level: selectedSubLevel,
+      is_correct: isTranslationCorrect,
+      mode,
+    });
 
     const updatedRow = updateRowFeedback(
       mode,
@@ -91,6 +100,13 @@ export const useTranslationActions = (
     const rowWithInput = { ...row, userInput };
     const updatedRow = updateRowFeedback(mode, rowWithInput, translated, row.aiCorrect);
 
+    posthog?.capture("translation_submitted", {
+      level: selectedLevel,
+      sub_level: selectedSubLevel,
+      is_correct: updatedRow.isCorrect,
+      mode,
+    });
+
     updateRow(row.id, updatedRow);
 
     const newRows = rows.map((r: Row, i: number) => (i === index ? updatedRow : r));
@@ -105,6 +121,13 @@ export const useTranslationActions = (
 
     // Check completion
     const currentBatchComplete = newRows.every((row: Row) => row.feedback);
+    if (currentBatchComplete) {
+      posthog?.capture("exercise_completed", {
+        level: selectedLevel,
+        sub_level: selectedSubLevel,
+        mode,
+      });
+    }
     dispatch(settingsActions.setIsComplete(currentBatchComplete));
   };
 

@@ -1,3 +1,4 @@
+import posthog from "posthog-js";
 import { IncorrectRow, TranslationScore } from "../types";
 import { getIncorrectSentences, getTranslationScores, refreshToken, sendIncorrectSentences } from "./requests";
 
@@ -71,13 +72,15 @@ export const checkLogin = () => {
   if (!userId) {
     console.log("Not Logged in");
     const url = new URL(window.location.href);
-    const userId = url.searchParams.get("userId");
-    if (userId) {
-      localStorage.setItem("userId", userId);
+    const freshUserId = url.searchParams.get("userId");
+    if (freshUserId) {
+      localStorage.setItem("userId", freshUserId);
+      posthog.identify(freshUserId);
       url.searchParams.delete("userId");
       window.history.replaceState({}, "", url);
     }
   } else {
+    posthog.identify(userId);
     refreshToken().then((res) => {
       console.log("Token checked");
     });

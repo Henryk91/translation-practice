@@ -32,6 +32,9 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          REACT_APP_PUBLIC_POSTHOG_KEY: ${{ secrets.REACT_APP_PUBLIC_POSTHOG_KEY }}
+          REACT_APP_PUBLIC_POSTHOG_HOST: ${{ secrets.REACT_APP_PUBLIC_POSTHOG_HOST }}
 
       # React SPA deep-link fallback
       - name: SPA 404 fallback

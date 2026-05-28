@@ -8,10 +8,15 @@ import "@fontsource/roboto/700.css";
 import { Provider } from "react-redux";
 import store from "./store";
 import { BrowserRouter } from "react-router-dom";
-
 import { ServiceProvider } from "./providers/ServiceProvider";
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import posthog from "posthog-js";
+import { PostHogProvider, PostHogErrorBoundary } from "@posthog/react";
+
+posthog.init(process.env.REACT_APP_PUBLIC_POSTHOG_KEY as string, {
+  api_host: process.env.REACT_APP_PUBLIC_POSTHOG_HOST,
+  defaults: "2026-01-30",
+});
 
 const queryClient = new QueryClient();
 
@@ -35,15 +40,19 @@ async function enableMocking() {
 enableMocking().then(() => {
   root.render(
     <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <Provider store={store}>
-          <ServiceProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </ServiceProvider>
-        </Provider>
-      </QueryClientProvider>
+      <PostHogProvider client={posthog}>
+        <PostHogErrorBoundary>
+          <QueryClientProvider client={queryClient}>
+            <Provider store={store}>
+              <ServiceProvider>
+                <BrowserRouter>
+                  <App />
+                </BrowserRouter>
+              </ServiceProvider>
+            </Provider>
+          </QueryClientProvider>
+        </PostHogErrorBoundary>
+      </PostHogProvider>
     </React.StrictMode>,
   );
 });
